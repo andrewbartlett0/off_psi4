@@ -9,13 +9,13 @@
 import openeye.oechem as oechem
 
 
-def GetSDList(Mol, prop, Package='Psi4', Method=None, Basisset=None):
+def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
     """
-    Get list of specified SD tag for all confs in Mol.
+    Get list of specified SD tag for all confs in mol.
 
     Parameters
     ----------
-    Mol:        OEChem molecule with all of its conformers
+    mol:        OEChem molecule with all of its conformers
     prop:       string description of property of interest
         options implemented: "QM opt energy" "MM opt energy"
     Package:    software package used for QM calculation. Psi4 or Turbomole.
@@ -50,7 +50,7 @@ def GetSDList(Mol, prop, Package='Psi4', Method=None, Basisset=None):
 
 
     SDList = []
-    for j, conf in enumerate( Mol.GetConfs() ):
+    for j, conf in enumerate( mol.GetConfs() ):
         for x in oechem.OEGetSDDataPairs(conf):
             #dir(x) yields ['GetTag', 'GetValue', 'SetTag', 'SetValue', '__class__', '__del__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__swig_destroy__', '__weakref__', '_itr', 'this', 'thisown']
 
@@ -64,7 +64,7 @@ def GetSDList(Mol, prop, Package='Psi4', Method=None, Basisset=None):
             elif taglabel.lower() in x.GetTag().lower():
                 SDList.append(x.GetValue())
                 break
-    #for j, conf in enumerate( Mol.GetConfs() ):
+    #for j, conf in enumerate( mol.GetConfs() ):
     #    if "DID NOT FINISH" not in oechem.OEGetSDData(conf, "Note on opt.")\
 # or prop =="original index":
     #        SDList.append((oechem.OEGetSDData(conf, taglabel)))
@@ -72,10 +72,12 @@ def GetSDList(Mol, prop, Package='Psi4', Method=None, Basisset=None):
     #        SDList.append('nan')
     return SDList
 
-    
+
 def SetOptSDTags(Conf, Props, spe=False):
     """
-    WORDS WORDS WORDS
+    For one particular conformers, set all availble SD tags based on data
+        in Props dictionary.
+    TODO: what happens if the tag already exists? Is it bypassed? Overwritten?
 
     Parameters
     ----------
@@ -87,12 +89,11 @@ def SetOptSDTags(Conf, Props, spe=False):
 
     """
 
-
     # get level of theory for setting SD tags
     method = Props['method']
     basisset = Props['basis']
     pkg = Props['package']
-    
+
     # check that finalEnergy is there. if not, opt probably did not finish
     # make a note of that in SD tag
     if not 'finalEnergy' in Props:
@@ -127,3 +128,17 @@ def SetOptSDTags(Conf, Props, spe=False):
     # Set new SD tag for conformer's initial energy
     taglabel = "QM %s Initial Opt. Energy (Har) %s/%s" % (pkg, method, basisset)
     oechem.OEAddSDData(Conf, taglabel, str(Props['initEnergy']))
+
+
+def DeleteTag(mol,tag):
+    """
+    Delete specified SD tag from all conformers of mol.
+
+    Parameters
+    ----------
+    mol:        OEChem molecule with all of its conformers
+    tag:        exact string label of the data to delete
+
+    """
+    for j, conf in enumerate( mol.GetConfs() ):
+        oechem.OEDeleteSDData(conf, tag)

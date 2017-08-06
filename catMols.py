@@ -54,7 +54,8 @@ Interface = """
 !PARAMETER -title
   !ALIAS -t
   !TYPE string
-  !BRIEF Mol title or comma-separated list of titles to exclude from parent file
+  !LIST true
+  !BRIEF Single or space-separated list of titles to exclude from parent file
 !END
 !PARAMETER -list
   !ALIAS -l
@@ -78,7 +79,7 @@ def main(argv=[__name__]):
             name = name.strip()
             nameset.add(name)
     elif itf.HasString("-title"):
-        nameset.add(itf.GetString("-title").split(','))
+        nameset.add(itf.GetStringList("-title"))
 
     CatMols(itf.GetStringList("-i"), itf.GetString("-o"), nameset)
 

@@ -23,7 +23,7 @@ def convertSDFfile(reffile, filtfile, writeout):
 
     ### Open outstream file.
     if os.path.exists(writeout):
-        print("File already exists: %s. Skip getting results.\n" % (finsdf))
+        print("File already exists: %s. Skip getting results.\n" % (writeout))
         return
     if not ofs.open(writeout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % writeout)

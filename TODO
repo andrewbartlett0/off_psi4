@@ -1,5 +1,5 @@
 
-for 221 spe, why do you have so many separate sdf files?! this should be able to go into a single one since all same coordinates
+- detectCollapse.py
 
  script modifications
   1. timeAvg
@@ -22,10 +22,4 @@ for 221 spe, why do you have so many separate sdf files?! this should be able to
   4. warning can't open file --> include return line after
   5. Length of python lines for purple stop signal
 
- write some kind of fucking instructions manual
-  - actually, update docstrings and description for each script
-  - then combine these into one document, 'documentation.md' or something
-
  figure out why slurm skips jobs?
- is numConfs supposed to stay constant before and after SPE calcns?
- how much of the ancillary SDF files should we keep? delete the *1* files?

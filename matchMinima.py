@@ -49,7 +49,6 @@ def compare2Mols(rmol, qmol):
         rsublist = []
         for Qconf in qmol.GetConfs():
             rms = oechem.OERMSD(Rconf,Qconf,automorph,heavyOnly,overlay)
-            print rms
             rsublist.append(rms)
 
         # for this Rconf, get qmol conformer index for minimum RMSD
@@ -160,7 +159,7 @@ def plotAvgTimes(molName, avgTimes, sdTimes, xticklabels):
 #    plt.show()
     plt.clf()
 
-def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fprefix='rmse'):
+def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fprefix='rmse', colors='jet'):
     plttitle="%s\n%s" % (ptitle,molName)
     figname = "%s_%s.png" % (fprefix, molName)
     x = range(len(rmsArray))
@@ -169,7 +168,7 @@ def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fpr
     plt.figure(figsize=(20,10))
 
     ### Tranpose and plot data - imshow swaps x and y
-    plt.imshow(np.asarray(rmsArray).T, cmap='jet', origin='lower')
+    plt.imshow(np.asarray(rmsArray).T, cmap=colors, origin='lower')
     plt.colorbar()
 
     ### Label figure. Label xticks before plot for better spacing.
@@ -185,10 +184,10 @@ def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fpr
     plt.clf()
 
 def plotET(molName, eneArray, timeArray, ticklabels,fprefix='scatter'):
-    plttitle="RMS error vs. ratio of wall time\n%s" % molName
+    plttitle="RMS error vs. log ratio of wall time\n%s" % molName
     figname = "%s_%s.png" % (fprefix, molName)
     colors = mpl.cm.rainbow(np.linspace(0, 1, len(eneArray)))
-    markers = ["x","^","8","d","o","s","*","p","v","<","D","+",">","."]
+    markers = ["x","^","8","d","o","s","*","p","v","<","D","+",">","."]*10
 
     # use plt.plot instead of scatter to label each point
     for i, (x,y) in enumerate(zip(eneArray,timeArray)):
@@ -200,7 +199,7 @@ def plotET(molName, eneArray, timeArray, ticklabels,fprefix='scatter'):
     #plt.xticks(x,ticklabels,fontsize=12,rotation=-20, ha='left')
     #plt.yticks(y,ticklabels,fontsize=12)
     plt.xlabel("RMS error (kcal/mol)",fontsize=14)
-    plt.ylabel("ratio of wall time",fontsize=14)
+    plt.ylabel("log ratio of wall time",fontsize=14)
 
     ### Edit legend colors. All is one color since each sublist
     # colored by spectrum.
@@ -210,6 +209,7 @@ def plotET(molName, eneArray, timeArray, ticklabels,fprefix='scatter'):
         leg.legendHandles[i].set_color(colors[i])
 
     ### Save/show plot.
+    plt.gcf().set_size_inches(8,6)
     plt.savefig(figname,bbox_inches='tight')
 #    plt.show()
     plt.clf()
@@ -225,7 +225,7 @@ def shiftArray(rmsArray):
 
     """
     for i, sublist in enumerate(rmsArray):
-            sublist.insert(i,sublist.pop(0))
+        sublist.insert(i,sublist.pop(0))
     return rmsArray
 
 def matchMinima(sdfList, thryList):
@@ -573,7 +573,7 @@ def reorganizeSublists(theArray,allMolIndices):
     Goes to this:
        [[[file1 mol1] [file2 mol1]] ... [[file1 molN] [file2 molN]]]
 
-    Also does checking on if minima is matched. If not, the
+    This function checks if minima is matched, using allMolIndices. If not, the
        value in theArray is NOT used, and nan is used instead.
 
     """
@@ -596,15 +596,6 @@ def reorganizeSublists(theArray,allMolIndices):
         minimaE.append(molE)
     return minimaE
 
-def debugging():
-    molNames = ['AlkEthOH_c1178','GBI']
-    refNumConfs = [19, 1]
-
-
-    allIndices = [[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [-1], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, None, None, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 13, 14, 16, 17], [0], [0, 1, None, None, 4, 5, 6, 7, 8, None, None, 11, None, None, 14, 15, 17, 18], [0], [0, 1, None, None, 4, 5, 6, 7, 8, None, None, 11, None, None, 14, 15, 17, 18], [-2], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [-2], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0], [0, 1, 2, None, 4, 5, 6, 7, 8, 9, 10, 11, 12, None, 14, 15, 17, 18], [0]]
-
-    elists = [[-466.368905867, -466.36166286, -466.36349184, -466.36890724, -466.361663336, -466.361343924, -466.361344179, -466.365459408, -466.365235601, -466.363492507, -466.363195706, -466.365234831, -466.363197808, -466.361712013, -466.362098679, -466.361233835, -466.361712871, -466.362098677], [-584.717525166], [-466.180009722, -466.172137847, -466.174850662, -466.179946306, -466.172137681, -466.171684535, -466.171684698, -466.176202258, -466.175902684, -466.174850915, -466.174531697, -466.175902536, -466.174531213, -466.170415105, -466.173161792, -466.172005389, -466.179946932, -466.172677388, -466.173161702], [-584.475472907], [-465.775852253, -465.767299276, -465.770397597, -465.775652321, -465.767299753, -465.766984408, -465.76698532, -465.771940824, -465.771624392, -465.770397747, -465.769994256, -465.771628939, -465.769995123, -465.765614329, -465.768324775, -465.767058876, -465.775651356, -465.767838591, -465.76832289], [-584.013764935], [-466.195879067, -466.187978295, -466.190236868, -466.195855903, -466.187978247, -466.187365132, -466.187364931, -466.191723715, -466.191352006, -466.190237875, -466.189778842, -466.191351227, -466.189778879, -466.18598519, -466.188525019, -466.187530284, -466.195856345, -466.187942835, -466.188525035], [-584.502636745], [-465.791707241, -465.783118897, -465.785756848, -465.791562828, -465.783118227, -465.782632116, -465.782631568, -465.787431513, -465.787070752, -465.785756326, -465.785206558, -465.787071089, -465.785206994, -465.781148061, -465.783673313, -465.782575558, -465.791562833, -465.783090902, -465.78367229], [-584.040976371], [-466.204086643, -466.196172064, -466.198447456, -466.204064978, -466.196170257, -466.195575449, -466.195576595, -466.199912062, -466.199546661, -466.198447962, -466.1980118, -466.199542838, -466.198011861, -466.194150847, -466.196723667, -466.195727638, -466.204064749, -466.196159661, -466.196723726], [-584.512754158], [-466.377174577, -466.369915603, -466.371754075, -466.377148457, -466.369915597, -466.369616637, -466.36961476, -466.373708663, -466.373493021, -466.371754017, -466.371484874, -466.373491247, -466.371483481, -466.370352433, -466.369498083, -466.377147549, -466.369985869, -466.370352421], [-584.727674216], [-465.841143924, -465.833399338, -465.836198659, -465.841245956, -465.833399412, -465.833444201, -465.833444304, -465.83713488, -465.837184081, -465.836198279, -465.836263997, -465.837184139, -465.836264175, -465.832028455, -465.834381356, -465.833675455, -465.841246069, -465.834371886, -465.83438063], [-584.04531727], [-465.448164343, -465.439695447, -465.442836375, -465.448139062, -465.439695787, -465.439912519, -465.439913231, -465.444035941, -465.444126024, -465.442839778, -465.442864286, -465.444126379, -465.442863522, -465.438450484, -465.440619704, -465.439862978, -465.44814093, -465.440667701, -465.44061973], [nan], [-465.908210615, -465.90096434, -465.902602227, -465.908268604, -465.900964432, -465.900285379, -465.900284043, -465.90434806, -465.904020438, -465.902604392, -465.901900762, -465.904019637, -465.901900902, -465.898634551, -465.900967863, -465.899927061, -465.908269692, -465.900331575, -465.900967255], [-584.253752662], [-464.585265841, -464.576858317, -464.579484516, -464.585262897, -464.576857427, -464.575858466, -464.575857754, -464.580997246, -464.580466517, -464.579485523, -464.578834058, -464.580464838, -464.578834094, -464.574577198, -464.577505552, -464.575599878, -464.585262926, -464.576744295, -464.577505546], [nan], [-464.143600837, -464.134933843, -464.137334008, -464.143307447, -464.134933393, -464.134208304, -464.134207723, -464.139488586, -464.138893717, -464.137333936, -464.136607973, -464.138891561, -464.136607923, -464.131612428, -464.13509096, -464.133472079, -464.143307973, -464.134320256, -464.135091096], [-582.156839405], [-465.156073144, -465.148867482, -465.150473978, -465.155928616, -465.14886819, -465.148286217, -465.148286913, -465.15257771, -465.152203301, -465.150474003, -465.150122914, -465.152203917, -465.150122881, -465.145824728, -465.148938464, -465.147650798, -465.155928209, -465.148451922, -465.148938085], [-583.288493862], [-465.242466445, -465.235484775, -465.237129307, -465.242372664, -465.235482458, -465.2348854, -465.234885471, -465.239092284, -465.238772779, -465.237129261, -465.236817934, -465.238771756, -465.236816927, -465.232787961, -465.235675149, -465.234471301, -465.242372793, -465.235221173, -465.235672725], [-583.35286959]]
-    return molNames, refNumConfs, allIndices, elists
 
 
 ### ------------------- Parser -------------------
@@ -676,6 +667,63 @@ if __name__ == "__main__":
             thryList.append(dataline[0])
             sdfList.append(dataline[1])
 
+    # =========================================================================
+    if opt['eheatplot'] is not None:
+        rmsArray = []
+        for infile in sdfList:
+            with open(infile) as f:
+                for line in f:
+                    if "RMS error" in line:
+                        rmse = itertools.islice(f,1).next()
+                        rmse = [float(s) for s in rmse.split()[1:]]
+                        rmsArray.append(rmse)
+                        break
+        rmsArray = shiftArray(rmsArray)
+        plotHeatRMSE(opt['eheatplot'],rmsArray,thryList)
+
+    if opt['theatplot'] is not None:
+        rmsArray = []
+        for infile in sdfList:
+            with open(infile) as f:
+                for line in f:
+                    if "avg time" in line:
+                        ravgs = itertools.islice(f,3) # ratio line via iterator
+                        for j in ravgs:            # get last item of iterator
+                            pass
+                        ravgs = [float(s) for s in j.split()[1:]]
+                        rmsArray.append(ravgs)
+                        break
+        rmsArray = shiftArray(rmsArray)
+#        rmsArray = [item[:-1] for item in rmsArray] # ================== * REMOVE last element from all
+        plotHeatRMSE(opt['theatplot'],np.log10(rmsArray),thryList, ptitle='Log ratio of wall times',fprefix='times',colors='seismic')
+#        plotHeatRMSE(opt['theatplot'],rmsArray,thryList, ptitle='ratio of wall times',fprefix='times')
+
+    if opt['etscatter'] is not None:
+        eArray = []
+        tArray = []
+        for infile in sdfList:
+            with open(infile) as f:
+                for line in f:
+                    if "RMS error" in line:
+                        rmse = itertools.islice(f,1).next()
+                        rmse = [float(s) for s in rmse.split()[1:]]
+                        eArray.append(rmse)
+                    if "avg time" in line:
+                        ravgs = itertools.islice(f,3) # ratio line via iterator
+                        for j in ravgs:            # get last item of iterator
+                            pass
+                        ravgs = [float(s) for s in j.split()[1:]]
+                        tArray.append(ravgs)
+                        break
+        eArray = shiftArray(eArray)
+        tArray = shiftArray(tArray)
+#        eArray = [item[:-1] for item in eArray] # ================== * REMOVE last element from all
+#        tArray = [item[:-1] for item in tArray] # ================== * REMOVE last element from all
+        for i in range(len(sdfList)):
+#            if i<13: continue
+            plotET(opt['etscatter'],eArray[i],np.log10(tArray[i]),thryList,fprefix='scatter'+str(i+1))
+    print 'quit'
+    quit() # VTL temp workaround
 
     # =========================================================================
     if not opt['readpickle']:
@@ -686,13 +734,12 @@ if __name__ == "__main__":
         #molNames, refNumConfs, allIndices, elists = debugging()
     # =========================================================================
 
-    # Reorder indices and energies lists by molecules instead of by files.
-    #   [[[file1 mol1] [file2 mol1]] ... [[file1 molN] [file2 molN]]]
-    #   also now the molecules are separated by sublist
-    # could be done in matchMinima function but need elists for plotting
     numMols = len(refNumConfs)
+    # Separate molecules by sublist, 2D --> 3D
     allMolIndices = [allIndices[i::numMols] for i in range(numMols)]
     elists = [elists[i::numMols] for i in range(numMols)]
+    # Reorder indices and energies lists by molecules instead of by files.
+    #   [[[file1 mol1] [file2 mol1]] ... [[file1 molN] [file2 molN]]]
     minimaE = reorganizeSublists(elists, allMolIndices)
 
     # =========================================================================
@@ -712,45 +759,60 @@ if __name__ == "__main__":
 
     if opt['tplot']:
 #        allMolTimes = getAllTimes(sdfList, thryList) # ordered by file, mol, conf
-        allMolTimes = tlists
+#        allMolTimes = tlists
 
-        # match conformer times using indices from matchMinima then get stats
-        allFileTimes = [[] for i in range(numMols)]
-        allFileStds = [[] for i in range(numMols)]
-        for i in range(len(sdfList)*numMols):
-            timeSuc = 0     # running sum of successfully matched minima times
-            numSuc = 0      # running number of successful minima
-            numconfs = refNumConfs[i%numMols]  # i%numMols gets some mol
-            fileTimes = []  # collect successful times for stdevs
-            for k in range(numconfs):
-                thisIndex = allIndices[i][k]
-                if thisIndex == -1:
-                    timeSuc += allMolTimes[i][k]
-                    numSuc += 1
-                    fileTimes.append(allMolTimes[i][k])
-                elif thisIndex > -1:
-                    timeSuc += allMolTimes[i][thisIndex]
-                    numSuc += 1
-                    fileTimes.append(allMolTimes[i][thisIndex])
-            try:
-                fTimeAvg = float(timeSuc)/numSuc
-            except ZeroDivisionError:
-                fTimeAvg = nan
-            allFileTimes[i%numMols].append(fTimeAvg)
-            allFileStds[i%numMols].append(np.std(np.array(fileTimes)))
-            #print 'average ',fTimeAvg,' over ',numSuc," samples"
+#        # match conformer times using indices from matchMinima then get stats
+#        allFileTimes = [[] for i in range(numMols)]
+#        allFileStds = [[] for i in range(numMols)]
+#        for i in range(len(sdfList)*numMols):
+#            timeSuc = 0     # running sum of successfully matched minima times
+#            numSuc = 0      # running number of successful minima
+#            numconfs = refNumConfs[i%numMols]  # i%numMols gets some mol
+#            fileTimes = []  # collect successful times for stdevs
+#            for k in range(numconfs):
+#                thisIndex = allIndices[i][k]
+#                if thisIndex == -1:
+#                    timeSuc += allMolTimes[i][k]
+#                    numSuc += 1
+#                    fileTimes.append(allMolTimes[i][k])
+#                elif thisIndex > -1:
+#                    timeSuc += allMolTimes[i][thisIndex]
+#                    numSuc += 1
+#                    fileTimes.append(allMolTimes[i][thisIndex])
+#            try:
+#                fTimeAvg = float(timeSuc)/numSuc
+#            except ZeroDivisionError:
+#                fTimeAvg = nan
+#            allFileTimes[i%numMols].append(fTimeAvg)
+#            allFileStds[i%numMols].append(np.std(np.array(fileTimes)))
+#            #print 'average ',fTimeAvg,' over ',numSuc," samples"
 
         # separately, go from allMolTimes and calculate relative speeds
-        allMolTimes = [allMolTimes[i::numMols] for i in range(numMols)]
+        #   [[[file1 mol1] [file2 mol1]] ... [[file1 molN] [file2 molN]]]
+        allMolTimes = [tlists[i::numMols] for i in range(numMols)]
         timesByMol = reorganizeSublists(allMolTimes, allMolIndices)
         relTimes, sdTimes = getRatioTimes(timesByMol, zeroes)
 
+        allFileTimes = [[] for i in range(numMols)]
+        allFileStds = [[] for i in range(numMols)]
+            
+        print len(timesByMol), len(timesByMol[0])
+        for i, molTimes in enumerate(timesByMol):
+            # loop by each file to remove nans
+            for j, molFileList in enumerate(molTimes):
+                shortmf = np.asarray(molFileList)
+                shortmf = shortmf[~np.isnan(shortmf)]
+                allFileTimes[i].append(np.mean(shortmf))
+                allFileStds[i].append(np.std(shortmf))
+        print allFileTimes
+
         # bar plot of average times with stdevs
         for name, fileTimes, stdevs in zip(molNames, allFileTimes, allFileStds):
-            print name, 'times ',fileTimes
-            print name, 'stdevs ',stdevs
-            plotAvgTimes(name, fileTimes, stdevs, thryList)
-#            plotAvgTimes(name, fileTimes[1:], stdevs[1:], thryList[1:]) # ================== * REMOVE last element from all
+            to_exclude = {} # declare empty set if want to use all levels of thry
+            fileTimes_i = [element for i, element in enumerate(fileTimes) if i not in to_exclude]
+            stdevs_i = [element for i, element in enumerate(stdevs) if i not in to_exclude]
+            thryList_i = [element for i, element in enumerate(thryList) if i not in to_exclude]
+            plotAvgTimes(name, fileTimes_i, stdevs_i, thryList_i)
 
         if opt['verbose']: # append time to relative energies file
             for i, name in enumerate(molNames):
@@ -779,59 +841,3 @@ if __name__ == "__main__":
             plotMolMinima(name, minE, thryList)
             #plotMolMinima(name, minE, thryList, selected=[0,7,12]) # zero based index
 
-    if opt['eheatplot'] is not None:
-        rmsArray = []
-        for infile in sdfList:
-            with open(infile) as f:
-                for line in f:
-                    if "RMS error" in line:
-                        rmse = itertools.islice(f,1).next()
-                        rmse = [float(s) for s in rmse.split()[1:]]
-                        rmsArray.append(rmse)
-                        break
-        rmsArray = shiftArray(rmsArray)
-        for t in rmsArray:
-            print t
-        plotHeatRMSE(opt['eheatplot'],rmsArray,thryList)
-
-    if opt['theatplot'] is not None:
-        rmsArray = []
-        for infile in sdfList:
-            with open(infile) as f:
-                for line in f:
-                    if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # get line via iterator
-                        for j in ravgs:            # get last item of iterator
-                            pass
-                        ravgs = [float(s) for s in j.split()[1:]]
-                        rmsArray.append(ravgs)
-                        break
-        rmsArray = shiftArray(rmsArray)
-#        rmsArray = [item[:-1] for item in rmsArray] # ================== * REMOVE last element from all
-        plotHeatRMSE(opt['theatplot'],rmsArray,thryList, ptitle='Ratio of wall times',fprefix='times')
-
-    if opt['etscatter'] is not None:
-        eArray = []
-        tArray = []
-        for infile in sdfList:
-            with open(infile) as f:
-                for line in f:
-                    if "RMS error" in line:
-                        rmse = itertools.islice(f,1).next()
-                        rmse = [float(s) for s in rmse.split()[1:]]
-                        eArray.append(rmse)
-                    if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # get line via iterator
-                        for j in ravgs:            # get last item of iterator
-                            pass
-                        ravgs = [float(s) for s in j.split()[1:]]
-                        tArray.append(ravgs)
-                        break
-        eArray = shiftArray(eArray)
-        tArray = shiftArray(tArray)
-        eArray = [item[:-1] for item in eArray] # ================== * REMOVE last element from all
-        tArray = [item[:-1] for item in tArray] # ================== * REMOVE last element from all
-        print len(eArray)
-        for i in range(len(sdfList)):
-#            if i<13: continue
-            plotET(opt['etscatter'],eArray[i],tArray[i],thryList,fprefix='scatter'+str(i+1))
