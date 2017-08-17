@@ -1,10 +1,9 @@
 
 # Overview
 
-This repository contains a pipeline for generating large sets of QM-optimized molecules using Psi4/Turbomole.
-For each molecule, conformers are [1] generated, [2] MM-optimized, [3] geometry optimized at MP2/def2-SV(P)
-in Psi4, and [5] geometry optimized at TPSSH-D3BJ/def2-TZVP in implicit solvent using the COSMO Solvation Model
-in Turbomole.
+This repository contains a pipeline for generating large sets of QM-optimized molecules using Psi4/Turbomole.  
+For each molecule, conformers are [1] generated, [2] MM-optimized, and [3] geometry optimized at MP2/def2-SV(P)
+in Psi4.
 
 Following this stage, a series of single point energy calculations are performed at the following levels:
 * B3LYP-D3MBJ/def2-TZVP
@@ -31,15 +30,15 @@ Following this stage, a series of single point energy calculations are performed
  SDF files are numbered with the following code system.
  Here, x is used as a placeholder for either 0, 1, or 2.
 
- * 000 original file
- * 1xx MM opt but no filter
- * 2xx MM opt and filter
- * x1x QM opt but no filter
- * x2x QM opt and filter
- * xx1 either QM second opt or SPE and no filter
- * xx2 either QM second opt or SPE and filter
+ * no suffix = original file with all omega conformers
+ * 1xx = MM opt but no filter
+ * 2xx = MM opt and filter
+ * x1x = QM opt but no filter
+ * x2x = QM opt and filter
+ * xx1 = either QM second opt or SPE and no filter
+ * xx2 = either QM second opt or SPE and filter
 
-The starting code is `basename-000.sdf` and the max code is `basename-222.sdf`.
+The starting filename is `basename.sdf` and the final filename code is `basename-222.sdf`.
 The `-221` files can be used to compare relative energies of single pt energy calcns,
 without energy filtering to remove conformers deemed to be alike.
 
@@ -53,7 +52,7 @@ Before starting, you need an input file with a list of SMILES strings and corres
 See section on "Naming molecules in the input SMILES file" and "File name limitations".
 
  1. Generate conformers, quick MM optimization, Psi4 input files.
-     * python executor.py -f /include/full/path/to/file.smi --setup -m 'mp2' -b 'def2-sv(p)'
+     * python executor.py -f file.smi --setup -m 'mp2' -b 'def2-sv(p)'
 
  2. Run Psi4 jobs.
 

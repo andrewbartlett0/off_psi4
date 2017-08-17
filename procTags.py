@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
+## By: Victoria T. Lim
 
-
-## Description:
-## Usage: import procTags as pt, then call pt.SetOptSDTags(args)
-
+## This script parses output of Psi4 calculations and writes data in SD tags.
 
 import openeye.oechem as oechem
 
@@ -119,7 +117,10 @@ def SetOptSDTags(Conf, Props, spe=False):
     # !! Opt2 files should ALREADY have this !! Opt2 index is NOT orig index!
     taglabel = "Original omega conformer number"
     if not oechem.OEHasSDData(Conf, taglabel): # only add tag if not existing
-        oechem.OEAddSDData(Conf, taglabel, str(Conf.GetIdx()+1))
+        try:
+            oechem.OEAddSDData(Conf, taglabel, str(Conf.GetIdx()+1))
+        except AttributeError as err:
+            pass  # if not working with confs, will have no GetIdx
 
     # Set new SD tag for numSteps of geom. opt.
     taglabel = "QM %s Opt. Steps %s/%s" % (pkg, method, basisset)
