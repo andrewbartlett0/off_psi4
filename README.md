@@ -11,7 +11,7 @@ Following this stage, a series of single point energy calculations are performed
 * PBE0/6-311G\*\*
 
 
-# Pipeline Components
+## Pipeline Components
 
   * executor.py
      * smi2confs.py
@@ -24,8 +24,16 @@ Following this stage, a series of single point energy calculations are performed
   * stitchSpe.py
   * viewer.ipynb
   * writeOneConf.py
- 
-# Output files throughout the pipeline
+
+## Python Dependencies
+
+  * (OEChem Python Toolkit)[https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html]
+  * (Psi4 QM software package)[http://www.psicode.org/]
+     * (Conda install)[http://www.psicode.org/psi4manual/master/conda.html] of Psi4 recommended
+     * (Conda install of dftd3)[http://www.psicode.org/psi4manual/master/dftd3.html]
+
+
+## Output files throughout the pipeline
 
  SDF files are numbered with the following code system.
  Here, x is used as a placeholder for either 0, 1, or 2.
@@ -46,7 +54,7 @@ An `-f` prefix means filtered but no MM. For example, `basename-f020.sdf` means
 filtered from orig, no MM opt/filter, QM opt/filter, and no second QM stage.
 
 
-# Instructions .... update me!
+## Instructions .... update me!
 Execute these commands in the directory that you want input/output files to be generated.
 Before starting, you need an input file with a list of SMILES strings and corresponding molecule titles.
 See section on "Naming molecules in the input SMILES file" and "File name limitations".
@@ -78,13 +86,13 @@ See section on "Naming molecules in the input SMILES file" and "File name limita
      * mpython /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/avgTimeEne.py --relene -f /path/&/file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'
 
 
-## File name limitations
+### File name limitations
 
 Base names (e.g. basename.smi, basename.sdf) can contain underscores but NO dashes or dots.
   * Dash is used for SDF numbering code (see below).
   * Dot is used for splitting based on file extension.
 
-## Naming molecules in the input SMILES file
+### Naming molecules in the input SMILES file
 
 Smiles file should contain, in each line: "SMILESSTRING title" and be named in format of filename.smi.
   * Molecule title should have no dashes, as Psi4 will raise an error.
@@ -96,7 +104,7 @@ Examples:
   * CCOC(C)(C)C(C)(C)O AlkEthOH\_c1178
 
 
-## Creating input file for `stitchSpe.py`
+### Creating input file for `stitchSpe.py`
 
  * This should be a text file directing the script to process a particular quantity.
  * The first uncommented line should be the keyword of the specific quantity (e.g., energy) found in the SD tag label.
@@ -120,7 +128,7 @@ Examples:
  /path/and/setofMols-221-spe3.sdf, True , pbe0, 6-311g\*\*
 
 
-# Some terms
+## Some terms
 
  * Pertaining to method
    * MP2 - second order Moller-Plesset perturbation theory (adds electron corr effects upon Hartree-Fock)
@@ -135,11 +143,11 @@ Examples:
    * SV(P) - double zeta valence with polarization on all non-hydrogen atoms
    * TZVP - triple zeta valence with polarization on all atoms
 
-# Potential errors and how to get around them
+## Potential errors and how to get around them
  * `KeyError` from processing results. Did you specify spe for single point calculations?
  * Segmentation fault from ....
 
-# References
+## References
  * [Psi4]()
  * [Turbomole]()
  * DFT-D3 dispersion: [A consistent and accurate ab initio parametrization of density functional dispersion correction (DFT-D) for the 94 elements H-Pu](http://aip.scitation.org/doi/full/10.1063/1.3382344)
