@@ -27,10 +27,10 @@ Following this stage, a series of single point energy calculations are performed
 
 ## Python Dependencies
 
-  * (OEChem Python Toolkit)[https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html]
-  * (Psi4 QM software package)[http://www.psicode.org/]
-     * (Conda install)[http://www.psicode.org/psi4manual/master/conda.html] of Psi4 recommended
-     * (Conda install of dftd3)[http://www.psicode.org/psi4manual/master/dftd3.html]
+  * [OEChem Python Toolkit](https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html)
+  * [Psi4 QM software package](http://www.psicode.org/)
+     * [Conda install](http://www.psicode.org/psi4manual/master/conda.html) of Psi4 recommended
+     * [Conda install of dftd3](http://www.psicode.org/psi4manual/master/dftd3.html)
 
 
 ## Output files throughout the pipeline
