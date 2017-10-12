@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# By: Victoria T. Lim
+
 import os
 import sys
 import openeye.oechem as oechem
@@ -11,9 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import procTags as pt           # for GetSDList
 
-# Notes:
-#  - if you get IndexError on line `timeSuc += `..., make sure you are
-#    using the correct match.in file if you are also using debugging()
 
 ### ------------------- Functions -------------------
 
@@ -98,7 +97,7 @@ def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
 
     # LETTER LABELS
     letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ' # label x-axis by letter
-    rpt = (len(minimaE[0])/26)+1
+    rpt = int((len(minimaE[0])/26)+1)
     xlabs =[''.join(i) for i in itertools.product(letters, repeat=rpt)][:refNumConfs]
     # OR, NUMBER LABELS
     #xlabs = range(len(minimaE[0]))
@@ -112,7 +111,7 @@ def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
     plt.title(plttitle,fontsize=16)
     plt.ylabel(ylabel,fontsize=14)
     plt.xlabel("conformer minimum",fontsize=14)
-    plt.xticks(range(refNumConfs),xlabs,fontsize=12)
+    plt.xticks(list(range(refNumConfs)),xlabs,fontsize=12)
     plt.yticks(fontsize=12)
 
     ### Plot the data.
@@ -122,7 +121,7 @@ def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
     for i, FileE in enumerate(minimaE):
         if selected is not None and i not in selected:
             continue
-        xi = range(refNumConfs)
+        xi = list(range(refNumConfs))
         #yi = [item[i] for item in minimaE]
         yi = FileE
         plt.plot(xi,yi,color=colors[i],label=xticklabels[i],\
@@ -144,7 +143,7 @@ def plotAvgTimes(molName, avgTimes, sdTimes, xticklabels):
     plttitle+="\nGeometry Optimization in Psi4"
     ylabel="time (s)"
     figname = "timebars_%s.png" % molName
-    x = range(len(avgTimes))
+    x = list(range(len(avgTimes)))
 
     ### Label figure. Label xticks before plot for better spacing.
     plt.title(plttitle,fontsize=20)
@@ -159,74 +158,7 @@ def plotAvgTimes(molName, avgTimes, sdTimes, xticklabels):
 #    plt.show()
     plt.clf()
 
-def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fprefix='rmse', colors='jet'):
-    plttitle="%s\n%s" % (ptitle,molName)
-    figname = "%s_%s.png" % (fprefix, molName)
-    x = range(len(rmsArray))
-    y = range(len(rmsArray))
 
-    plt.figure(figsize=(20,10))
-
-    ### Tranpose and plot data - imshow swaps x and y
-    plt.imshow(np.asarray(rmsArray).T, cmap=colors, origin='lower')
-    plt.colorbar()
-
-    ### Label figure. Label xticks before plot for better spacing.
-    plt.title(plttitle,fontsize=20)
-    plt.xticks(x,ticklabels,fontsize=12,rotation=-20, ha='left')
-    plt.yticks(y,ticklabels,fontsize=12)
-    plt.xlabel("reference",fontsize=14)
-    plt.ylabel("compared",fontsize=14)
-
-    ### Save/show plot.
-    plt.savefig(figname,bbox_inches='tight')
-#    plt.show()
-    plt.clf()
-
-def plotET(molName, eneArray, timeArray, ticklabels,fprefix='scatter'):
-    plttitle="RMS error vs. log ratio of wall time\n%s" % molName
-    figname = "%s_%s.png" % (fprefix, molName)
-    colors = mpl.cm.rainbow(np.linspace(0, 1, len(eneArray)))
-    markers = ["x","^","8","d","o","s","*","p","v","<","D","+",">","."]*10
-
-    # use plt.plot instead of scatter to label each point
-    for i, (x,y) in enumerate(zip(eneArray,timeArray)):
-        plt.scatter(x,y,c=colors[i],marker=markers[i],label=ticklabels[i])
-
-    ### Label figure. Label xticks before plot for better spacing.
-    plt.title(plttitle,fontsize=20)
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2)
-    #plt.xticks(x,ticklabels,fontsize=12,rotation=-20, ha='left')
-    #plt.yticks(y,ticklabels,fontsize=12)
-    plt.xlabel("RMS error (kcal/mol)",fontsize=14)
-    plt.ylabel("log ratio of wall time",fontsize=14)
-
-    ### Edit legend colors. All is one color since each sublist
-    # colored by spectrum.
-    ax = plt.gca()
-    leg = ax.get_legend()
-    for i in range(len(eneArray)):
-        leg.legendHandles[i].set_color(colors[i])
-
-    ### Save/show plot.
-    plt.gcf().set_size_inches(8,6)
-    plt.savefig(figname,bbox_inches='tight')
-#    plt.show()
-    plt.clf()
-
-def shiftArray(rmsArray):
-    """
-    Place the first element of array in diagonal spot.
-    Order of everything before and everything after is retained.
-    Example,
-      0 4 6                0 4 6
-      0 2 7  --becomes-->  2 0 7
-      0 1 3                1 3 0
-
-    """
-    for i, sublist in enumerate(rmsArray):
-        sublist.insert(i,sublist.pop(0))
-    return rmsArray
 
 def matchMinima(sdfList, thryList):
     """
@@ -300,8 +232,8 @@ def matchMinima(sdfList, thryList):
                 continue
 
             # get energies for plotting relative energies
-            elists.append(map(float, pt.GetSDList(qmol, "QM opt energy",'Psi4', qmethod, qbasis))) # adapt for SPE? === *
-            tlists.append(map(float, pt.GetSDList(qmol, "opt runtime",'Psi4', qmethod, qbasis)))
+            elists.append(list(map(float, pt.GetSDList(qmol, "QM opt energy",'Psi4', qmethod, qbasis)))) # adapt for SPE? === *
+            tlists.append(list(map(float, pt.GetSDList(qmol, "opt runtime",'Psi4', qmethod, qbasis))))
 
 
             # Skip minmatch if this query file is same as reference file;
@@ -319,10 +251,10 @@ def matchMinima(sdfList, thryList):
 
     numMols = len(refNumConfs)
     molNames = molNames[:numMols]
-    print "\nmolNames\n",molNames
-    print "\nrefNumConfs\n",refNumConfs
-    print "\nallIndices\n",allIndices
-    print "\nelists\n",elists
+    print("\nmolNames\n",molNames)
+    print("\nrefNumConfs\n",refNumConfs)
+    print("\nallIndices\n",allIndices)
+    print("\nelists\n",elists)
 
     return molNames, refNumConfs, allIndices, elists, tlists
 
@@ -368,7 +300,7 @@ def getAllTimes(sdfList, thryList):
 
         for rmol in molsRef:
             try:
-                qmol = molsQuery.next()
+                qmol = next(molsQuery)
                 timelists.append(map(float, pt.GetSDList(qmol, "opt runtime",'Psi4', qmethod, qbasis))) # for opt, not spe
             except StopIteration:
                 print("No %s molecule found in %s" % (rmol.GetTitle(), sdfQuery))
@@ -473,40 +405,28 @@ def calcRelEne(minimaE):
 
     zeroes = []
     mols2del = []
-    for i, molist in enumerate(minimaE):
+    for i, molist in enumerate(minimaE): # loop over ith molecule
+        refCount = len(molist[0]) # number of confs in ref file
 
         # find first conformer with least nan's.
         nanCnt = []
-        for j in range(len((molist[i]))):
+        for j in range(refCount): # loop over confs of ref file
             nanCnt.append(sum(np.isnan([item[j] for item in molist])))
-        print i, nanCnt
-        zeroes.append(nanCnt.index(min(nanCnt)))
+        print("mol {} nanCnt: {}".format(i,nanCnt))
 
-#        zero = 0  # initial guess for this molecule's reference among all files
-#        zpass = False  # the zero is valid if all files have it and not nan
-#
-#        while not zpass:
-#            try: # get enes at index zero
-#                print molist # infinite loop?!??!
-#                zeroths = [item[zero] if sum(np.isnan(item)) < len(molist[0]) else '' for item in molist]
-#            except IndexError: # error if zero index is too far
-#                pass
-#            if len(molist[0]) == 1: # no rel. ene for just one conf
-#                mols2del.append(i)
-#                print "ONLY ONE CONF FOUND FOR MOL ",i
-#                break
-##            elif zero >= len(molist[0]): # all values are nan
-##                mols2del.append(i)
-##                print "ALL NANS FOR 1+ FILE OF MOL ",i
-##                zero = 0
-##                break
-#            elif nan in zeroths: # missing ref for 1+ file(s)
-#                zero = zero + 1
-#                continue
-#            else: # found successful conf in all files
-#                zeroes.append(zero)
-#                zpass = True
-#
+        # get indices of confs with least nan's. no argmin bc want all idx
+        where0 = np.empty(0)
+        counter = 0
+        while where0.size == 0 and counter < refCount:
+            where0 = np.where(np.asarray(nanCnt) == counter)[0]
+            counter += 1
+        if where0.size > 0: # if there ARE confs with 0 nan's, find min E
+            leastNanEs = np.take(molist[0],where0) # energies of the where0s
+            winningconfIdx = where0[np.argmin(leastNanEs)] # idx of lowest E
+            zeroes.append(winningconfIdx)
+        else:
+            zeroes.append(nanCnt.index(min(nanCnt)))
+
 #    # delete cases with just one conformer
 #    print("ATTN: these (zero-indexed) mols were removed from analysis due to "
 #         +"single conformer or no conformer matches in at least one file: ",
@@ -566,6 +486,10 @@ def writeRelEne(molName, rmse, relEnes, zero, thryList, prefix='relene'):
 
 def reorganizeSublists(theArray,allMolIndices):
     """
+    theArray should be a three-dimensional list, in which theArray[i][j][k]
+        represents the ith molecule, jth opt file, kth conformer.
+    allMolIndices should be the exact same shape.
+
     Instead of grouping by files then by molecule,
         reorder to group by molecules then by file.
     Something like this:
@@ -577,20 +501,35 @@ def reorganizeSublists(theArray,allMolIndices):
        value in theArray is NOT used, and nan is used instead.
 
     """
+    # get list lengths for debugging
+#    for i in range(len(theArray)):
+#        for l in range(len(theArray[0])):
+#            print(len(allMolIndices), len(allMolIndices[i]), len(allMolIndices[i][l]))
+#            print(len(theArray), len(theArray[i]), len(theArray[i][l]))
+
     minimaE = []
     for i, molIndices in enumerate(allMolIndices):
         molE = [] # all conf energies from ith mol in all files
         for j, fileIndices in enumerate(molIndices):
             fileE = []  # all conf energies from ith mol in jth file
             for k, confNum in enumerate(fileIndices):
-                # None: means no conf in qmol within 0.5 Angs of rmol's conf
-                # -2: means that the conformer doesn't exist (if filtered
-                #   out from job not finishing, etc.)
-                if confNum == None or confNum==-2:
+                if confNum == None:
+                    print("No matching conformer within 0.5 A RMSD for {}th\
+ conf of {}th mol in {}th file.".format(k, i, j))
+                    fileE.append(nan)
+                elif confNum==-2:
+                    # only print this warning message once per mol
+                    if k==0: print("!!!! The entire {}th mol is not found in {}th\
+ file. !!!!".format(i, j))
+                    fileE.append(nan)
+                elif len(theArray[i][j])==0:
+                    print("!!!! Mol {} was found and confs were matched by RMSD but\
+ there are no energies of {}th method. !!!!".format(i, j))
                     fileE.append(nan)
                 elif confNum == -1:   # -1 signifies reference theory
                     fileE.append(float(theArray[i][j][k]))
                 else:
+                    #print(theArray[i][j])
                     fileE.append(float(theArray[i][j][confNum]))
             molE.append(fileE)
         minimaE.append(molE)
@@ -627,26 +566,6 @@ if __name__ == "__main__":
         help="Generate bar plots of conformer-averaged time per each \
               optimization. One plot generated per molecule.")
 
-    parser.add_argument("--eheatplot", default=None,
-        help="Specify molecule title and generate heat map of RMS errors. \
-              Input file should be analogous to input file for minima matching\
-               except the files should point to the relative energies .dat file\
-               generated as result of minimaMatching. RMS error line is pulled\
-              from each for plotting.")
-
-    parser.add_argument("--theatplot", default=None,
-        help="Specify molecule title and generate heat map of relative opt times.\
-              Input file should be analogous to input file for minima matching\
-               except the files should point to the relative energies .dat file\
-               generated as result of minimaMatching. Data with relative times \
-               are pulled from each file for plotting.")
-
-    parser.add_argument("--etscatter", default=None,
-        help="Specify molecule title and generate heat map of relative opt times.\
-              Input file should be analogous to input file for minima matching\
-               except the files should point to the relative energies .dat file\
-               generated as result of minimaMatching.")
-
     args = parser.parse_args()
     opt = vars(args)
     if not os.path.exists(opt['input']):
@@ -667,63 +586,17 @@ if __name__ == "__main__":
             thryList.append(dataline[0])
             sdfList.append(dataline[1])
 
-    # =========================================================================
-    if opt['eheatplot'] is not None:
-        rmsArray = []
-        for infile in sdfList:
-            with open(infile) as f:
-                for line in f:
-                    if "RMS error" in line:
-                        rmse = itertools.islice(f,1).next()
-                        rmse = [float(s) for s in rmse.split()[1:]]
-                        rmsArray.append(rmse)
-                        break
-        rmsArray = shiftArray(rmsArray)
-        plotHeatRMSE(opt['eheatplot'],rmsArray,thryList)
-
-    if opt['theatplot'] is not None:
-        rmsArray = []
-        for infile in sdfList:
-            with open(infile) as f:
-                for line in f:
-                    if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # ratio line via iterator
-                        for j in ravgs:            # get last item of iterator
-                            pass
-                        ravgs = [float(s) for s in j.split()[1:]]
-                        rmsArray.append(ravgs)
-                        break
-        rmsArray = shiftArray(rmsArray)
-#        rmsArray = [item[:-1] for item in rmsArray] # ================== * REMOVE last element from all
-        plotHeatRMSE(opt['theatplot'],np.log10(rmsArray),thryList, ptitle='Log ratio of wall times',fprefix='times',colors='seismic')
-#        plotHeatRMSE(opt['theatplot'],rmsArray,thryList, ptitle='ratio of wall times',fprefix='times')
-
-    if opt['etscatter'] is not None:
-        eArray = []
-        tArray = []
-        for infile in sdfList:
-            with open(infile) as f:
-                for line in f:
-                    if "RMS error" in line:
-                        rmse = itertools.islice(f,1).next()
-                        rmse = [float(s) for s in rmse.split()[1:]]
-                        eArray.append(rmse)
-                    if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # ratio line via iterator
-                        for j in ravgs:            # get last item of iterator
-                            pass
-                        ravgs = [float(s) for s in j.split()[1:]]
-                        tArray.append(ravgs)
-                        break
-        eArray = shiftArray(eArray)
-        tArray = shiftArray(tArray)
-#        eArray = [item[:-1] for item in eArray] # ================== * REMOVE last element from all
-#        tArray = [item[:-1] for item in tArray] # ================== * REMOVE last element from all
-        for i in range(len(sdfList)):
-#            if i<13: continue
-            plotET(opt['etscatter'],eArray[i],np.log10(tArray[i]),thryList,fprefix='scatter'+str(i+1))
-    print 'quit'
-    quit() # VTL temp workaround
+    # Check that each file exists before starting -_-
+    while True:
+        list1 = []
+        for f in sdfList:
+            list1.append(os.path.isfile(f))
+    
+        if all(list1):
+            # All elements are True. Therefore all the files exist. Run %run commands
+            break
+        else:
+            raise parser.error("One or more input files are missing!!")
 
     # =========================================================================
     if not opt['readpickle']:
@@ -731,7 +604,6 @@ if __name__ == "__main__":
         pickle.dump([molNames, refNumConfs,allIndices,elists,tlists], open('match.pickle', 'wb'))
     else:
         molNames, refNumConfs, allIndices, elists, tlists = pickle.load(open('match.pickle', 'rb'))
-        #molNames, refNumConfs, allIndices, elists = debugging()
     # =========================================================================
 
     numMols = len(refNumConfs)
@@ -796,7 +668,6 @@ if __name__ == "__main__":
         allFileTimes = [[] for i in range(numMols)]
         allFileStds = [[] for i in range(numMols)]
             
-        print len(timesByMol), len(timesByMol[0])
         for i, molTimes in enumerate(timesByMol):
             # loop by each file to remove nans
             for j, molFileList in enumerate(molTimes):
@@ -804,7 +675,6 @@ if __name__ == "__main__":
                 shortmf = shortmf[~np.isnan(shortmf)]
                 allFileTimes[i].append(np.mean(shortmf))
                 allFileStds[i].append(np.std(shortmf))
-        print allFileTimes
 
         # bar plot of average times with stdevs
         for name, fileTimes, stdevs in zip(molNames, allFileTimes, allFileStds):
