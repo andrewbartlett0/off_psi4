@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
+## By: Victoria T. Lim
 
 ## This script writes out a single conformer of some mol from
-## an SDF file having multiple molecules, and multiple conformers
-## of each molecule. This can be used, for example, to isolate
-## specific conformers that lead to a high RMSD energy value 
-## for a particular molecule.
+## an SDF file having many multi-conformer molecules.
+## This can be used, for example, to isolate specific conformers
+## that lead to a high RMSD energy value for a particular molecule.
 
 ## Usage: python writeOneConf.py -f inputfile.sdf -t molName -s sdtag -v tagvalue -x filesuffix
 
