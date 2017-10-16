@@ -62,6 +62,9 @@ def compare2Mols(rmol, qmol):
 
 
 def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
+    '''
+
+    '''
     # stagger plots to better see line overlap. works best with few (<4?) numFiles.
     # minimaE for ONE molecule
 
@@ -688,7 +691,8 @@ if __name__ == "__main__":
             for i, name in enumerate(molNames):
 #            for name, fileTimes, stdevs in zip(molNames, allFileTimes, allFileStds, relTimes, sdTimes):
                 compF = open('relene_'+name+'.dat','a')
-                compF.write("\n\n# Avg times, stdevs, avg time ratios relative to ref, stdev of rel. time ratios:")
+                compF.write("\n\n# Four rows: (1) avg times, (2) time stdevs,\
+ (3) avg time ratios wrt ref method, (4) stdevs of time ratios:")
                 avgline = "\n# "
                 stdline = "\n# "
                 a2line =  "\n# "
@@ -708,6 +712,7 @@ if __name__ == "__main__":
 
     if opt['eplot']:
         for name, minE in zip(molNames, trimE):
+            #if name != 'AlkEthOH_c1178': continue
             plotMolMinima(name, minE, thryList)
             #plotMolMinima(name, minE, thryList, selected=[0,7,12]) # zero based index
 

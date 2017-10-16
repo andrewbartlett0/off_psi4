@@ -3,6 +3,7 @@
 ## By: Victoria T. Lim
 
 ## This script parses output of Psi4 calculations and writes data in SD tags.
+## Usage: import procTags as pt, then call pt.SetOptSDTags(args)
 
 import openeye.oechem as oechem
 
@@ -28,6 +29,9 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
     if prop=="QM opt energy":
         taglabel = "QM %s Final Opt. Energy (Har) %s/%s" % (Package, Method, Basisset)
 
+    if prop=="QM opt energy initial":
+        taglabel = "QM %s Initial Opt. Energy (Har) %s/%s" % (Package, Method, Basisset)
+
     if prop=="QM spe":
         taglabel = "QM %s Single Pt. Energy (Har) %s/%s" % (Package, Method, Basisset)
 
@@ -46,6 +50,8 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
     if prop=="opt step":
         taglabel = "QM %s Opt. Steps %s/%s" % (Package, Method, Basisset)
 
+    if prop == "conformer":
+        taglabel = "Original omega conformer number"
 
     SDList = []
     for j, conf in enumerate( mol.GetConfs() ):
