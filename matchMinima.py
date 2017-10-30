@@ -112,10 +112,10 @@ def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
 
     ### Label figure. Label xticks before plot for better spacing.
     plt.title(plttitle,fontsize=16)
-    plt.ylabel(ylabel,fontsize=14)
-    plt.xlabel("conformer minimum",fontsize=14)
-    plt.xticks(list(range(refNumConfs)),xlabs,fontsize=12)
-    plt.yticks(fontsize=12)
+    plt.ylabel(ylabel,fontsize=20)
+    plt.xlabel("conformer minimum",fontsize=20)
+    plt.xticks(list(range(refNumConfs)),xlabs,fontsize=18)
+    plt.yticks(fontsize=18)
 
     ### Plot the data.
     colors = mpl.cm.rainbow(np.linspace(0, 1, numFiles))
@@ -131,10 +131,10 @@ def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
             marker=markers[i],markersize=9)
 
     ### Add legend and set plot limits.
-    plt.legend(bbox_to_anchor=(1.05, 1), loc=2)
+    plt.legend(bbox_to_anchor=(0.96, 1), loc=2,prop={'size':18})
     plt.xlim(-1,refNumConfs+1)
     # y axis limits: min, max, step
-    ax.set_yticks(np.arange(floor-2,ceiling+2,ystep))
+    ax.set_yticks(np.arange(int(round(floor))-2,int(round(ceiling))+2,ystep))
     plt.grid()
 
     plt.savefig(figname,bbox_inches='tight')

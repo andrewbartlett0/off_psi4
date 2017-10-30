@@ -29,24 +29,25 @@ def shiftArray(rmsArray):
         sublist.insert(i,sublist.pop(0))
     return rmsArray
 
-def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fprefix='rmse', colors='jet'):
+def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fprefix='rmse', colors='PRGn_r'):
     plttitle="%s\n%s" % (ptitle,molName)
     figname = "%s_%s.png" % (fprefix, molName)
     x = list(range(len(rmsArray)))
     y = list(range(len(rmsArray)))
 
-    plt.figure(figsize=(20,10))
+    plt.figure(figsize=(10,5))
 
     ### Tranpose and plot data - imshow swaps x and y
     plt.imshow(np.asarray(rmsArray).T, cmap=colors, origin='lower')
-    plt.colorbar()
+    cbar = plt.colorbar()
 
     ### Label figure. Label xticks before plot for better spacing.
-    plt.title(plttitle,fontsize=20)
-    plt.xticks(x,ticklabels,fontsize=12,rotation=-20, ha='left')
-    plt.yticks(y,ticklabels,fontsize=12)
+#    plt.title(plttitle,fontsize=20)
+    plt.xticks(x,ticklabels,fontsize=12,rotation=-30, ha='left')
+    plt.yticks(y,ticklabels,fontsize=14)
     plt.xlabel("reference",fontsize=14)
-    plt.ylabel("compared",fontsize=14)
+    plt.ylabel("compared",fontsize=16)
+    cbar.ax.tick_params(labelsize=14)
 
     ### Save/show plot.
     plt.savefig(figname,bbox_inches='tight')
