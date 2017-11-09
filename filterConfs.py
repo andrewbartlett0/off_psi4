@@ -27,8 +27,8 @@ thresRMSD = 0.2 # above this threshold (Angstrom), confs are "diff" minima
 
 def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
     """
-    For a molecule's set of conformers computed with some level of theory, 
-        whittle down unique conformers based on energy and RMSD. 
+    For a molecule's set of conformers computed with some level of theory,
+        whittle down unique conformers based on energy and RMSD.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
 
     Returns
     -------
-    boolean True if successful filter + delete. False if there's only 
+    boolean True if successful filter + delete. False if there's only
         one conf and it didn't optimize, or something else funky.
 
     """
@@ -50,7 +50,7 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
 
     # if there's only 1 conf, has SDData ==> True, not ==> False
     if Mol.NumConfs()==1:
-        testmol = next(Mol.GetConfs())
+        testmol = Mol.GetConfs(oechem.OEHasConfIdx(0))
         if not oechem.OEHasSDData(testmol, Taglabel):
             return False
         else:
@@ -65,11 +65,11 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
             delCount += 1
             continue
         refE = float(oechem.OEGetSDData(confRef,Taglabel))
-    
+
         for confTest in Mol.GetConfs():
             # upper right triangle comparison
-            if confTest.GetIdx() <= confRef.GetIdx(): 
-                continue 
+            if confTest.GetIdx() <= confRef.GetIdx():
+                continue
             # skip cases already set for removal
             if confTest.GetIdx() in confsToDel:
                 continue
@@ -82,7 +82,7 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
             # if MM (not Psi4) energies, convert absERel to Hartrees
             if 'mm' in Taglabel.lower():
                 absERel = abs(refE-testE)/627.5095
-            else: 
+            else:
                 absERel = abs(refE-testE)
             # if energies are much diff., confs are diff, skip.
             if absERel > ThresholdE:
@@ -91,8 +91,8 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
             rmsd = oechem.OERMSD(confRef,confTest,automorph,heavyOnly,overlay)
             # if RMSD < thresholdRMSD, must be same conf, tag to delete.
             if rmsd < ThresholdRMSD:
-                confsToDel.add(confTest.GetIdx()) 
-            
+                confsToDel.add(confTest.GetIdx())
+
     # for the same molecule, delete tagged conformers
     print("%s original number of conformers: %d" % (Mol.GetTitle(), Mol.NumConfs()))
     if delCount == Mol.NumConfs():
@@ -131,7 +131,7 @@ def filterConfs(rmsdfile, tag, suffix):
         that this file has been filtered.
         Ex. if rmsdfile=/some/dir/basename-210.sdf and suffix=220 then output
             becomes /some/dir/basename-220.sdf
-      
+
     """
 
     wdir, fname = os.path.split(rmsdfile)
@@ -146,7 +146,7 @@ def filterConfs(rmsdfile, tag, suffix):
         oechem.OEThrow.Fatal("Unable to open %s for reading" % rmsdfile)
     rmsd_ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     rmsd_molecules = rmsd_ifs.GetOEMols()
-    
+
     # Open outstream file.
     rmsdout = ( "%s-%s.sdf" % (fname.replace('-', '.').split('.')[0], str(suffix)) )
     rmsd_ofs = oechem.oemolostream()
@@ -156,7 +156,7 @@ def filterConfs(rmsdfile, tag, suffix):
     if not rmsd_ofs.open(rmsdout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % rmsdout)
 
-    # Identify minima and write output file.         
+    # Identify minima and write output file.
     for mol in rmsd_molecules:
         if IdentifyMinima(mol,tag,thresE,thresRMSD):
             numConfsF.write( "%s\t%s\n" % (mol.GetTitle(), mol.NumConfs()) )
