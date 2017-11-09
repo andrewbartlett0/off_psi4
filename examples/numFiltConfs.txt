@@ -1,0 +1,4 @@
+MM Szybki SD Energy
+butane	3
+QM Psi4 Final Opt. Energy (Har) mp2/def2-sv(p)
+butane	3

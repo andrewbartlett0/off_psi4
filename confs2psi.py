@@ -79,14 +79,14 @@ def confs2psi(insdf, method, basis, spe=False, memory=None):
 
     """
     wdir = os.getcwd()
-    
+
     ### Read in .sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     if not ifs.open(insdf):
         oechem.OEThrow.Warning("Unable to open %s for reading" % insdf)
         return
-    
+
     ### For each molecule: for each conf, generate input
     for mol in ifs.GetOEMols():
         print(mol.GetTitle(), mol.NumConfs())
@@ -96,7 +96,7 @@ def confs2psi(insdf, method, basis, spe=False, memory=None):
             if not os.path.isdir(subdir):
                 os.makedirs(subdir)
             if os.path.exists(os.path.join(subdir,'input.dat')):
-                print "Input file (\"input.dat\") already exists. Skipping.\n"
+                print ("Input file (\"input.dat\") already exists. Skipping.\n")
                 continue
             label = mol.GetTitle()+'_'+str(i+1)
             ofile = open(os.path.join(subdir,'input.dat'), 'w')
@@ -112,7 +112,7 @@ def prep(source, sink):
     Makes directory(ies) for sink file if necessary.
 
     Parameters
-    ---------- 
+    ----------
     source: string, filename with absolute path
     sink:   string, filename with absolute path
 
@@ -132,6 +132,6 @@ def prep(source, sink):
     # copy file from olddir to newdir
     try:
         shutil.copy2(source, sink)
-    except IOError, e:
+    except IOError as e:
         print(e)
         return
