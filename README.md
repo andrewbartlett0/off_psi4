@@ -1,27 +1,39 @@
 
+# TODO
+Version: 2017-11-17
+Add python script descriptions, add example set.
+Update instructions.
+
 # Overview
 
 This repository contains a pipeline for generating large sets of QM-optimized molecules using Psi4/Turbomole.  
-For each molecule, conformers are [1] generated, [2] MM-optimized, and [3] geometry optimized at MP2/def2-SV(P)
-in Psi4.
+For each molecule, conformers are [1] generated, then [2] MM-optimized. Then the user can setup QM geometry  
+optimizations or single point energy (SPE) calculations with the desired method. For example, this may entail  
+a quick fine-tuning QM calculation with the MP2/def2-SV(P) level of theory, then using the results of those  
+calculations for a more intensive B3LYP-D3MBJ/def2-TZVP geometry optimization. 
 
-Following this stage, a series of single point energy calculations are performed at the following levels:
-* B3LYP-D3MBJ/def2-TZVP
-* MP2/cc-pVTZ
-* PBE0/6-311G\*\*
+## Repository contents
+Pipeline components and description:
 
-
-## Pipeline Components
-
-  * executor.py
-     * smi2confs.py
-  * avgTimeEne.py
   * confs2psi.py
   * confs2turb.py
+  * executor.py
   * filterConfs.py
   * getPsiResults.py
-  * selectConfs.tcl
+  * getTurbResults.py
+  * matchMinima.py
+  * matchPlot.py
+  * procTags.py
+  * smi2confs.py
   * stitchSpe.py
+
+There are other scripts in this repository that are not integral to the pipeline:
+  * catMols.py
+  * cleanfromvmd.py
+  * findIntraHB.py
+  * loadFromXYZ.py
+  * plotTimes.py
+  * selectConfs.tcl
   * viewer.ipynb
   * writeOneConf.py
 
@@ -54,7 +66,7 @@ An `-f` prefix means filtered but no MM. For example, `basename-f020.sdf` means
 filtered from orig, no MM opt/filter, QM opt/filter, and no second QM stage.
 
 
-## Instructions .... update me!
+## Instructions
 Execute these commands in the directory that you want input/output files to be generated.
 Before starting, you need an input file with a list of SMILES strings and corresponding molecule titles.
 See section on "Naming molecules in the input SMILES file" and "File name limitations".
@@ -67,7 +79,7 @@ See section on "Naming molecules in the input SMILES file" and "File name limita
  3. Get Psi4 results from the last set of optimizations.
      * python executor.py -f /include/full/path/to/file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'
 
- 4. In a new (sub?)directory, set up Psi4 SPE calculations from last results.
+ 4. In a new (sub)directory, set up Psi4 SPE calculations from last results.
      * python executor.py -f /include/full/path/to/file-220.sdf --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
 
  5. Run Psi4 jobs.
