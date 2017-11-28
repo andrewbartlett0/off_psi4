@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+## By: Victoria T. Lim
+
 import re
 import os, sys, glob
 import openeye.oechem as oechem
@@ -52,8 +54,11 @@ def ProcessOutput(filename, Props, spe=False):
     try:
         f = open(filename,"r")
     except IOError:
-        sys.exit("No %s file found in directory of %s" \
-                 % ( filename,os.getcwd() ))
+        print("No {} file found in directory of {}.".format(filename,os.getcwd()))
+        Props['missing'] = True
+        return Props
+#        sys.exit("No %s file found in directory of %s" \
+#                 % ( filename,os.getcwd() ))
 
 
     rough = []
@@ -162,6 +167,7 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
             # GET DETAILS FOR SD TAGS
             props = {} # dictionary of data for this conformer
             props['package'] = "Psi4"
+            props['missing'] = False
             # change into subdirectory ./mol/conf/
             subdir = os.path.join(wdir,"%s/%s" % (mol.GetTitle(), j+1))
             if not os.path.isdir(subdir):
@@ -176,6 +182,9 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
                 pass
             # process output and get dictionary results
             props = ProcessOutput(psiout, props, spe)
+            # if output was missing, move on
+            if props['missing']:
+                continue
 
             # BRIEF ANALYSIS OF STRUCTURE, INTRA HBONDS
             # Set last coordinates from optimization. skip if missing.
