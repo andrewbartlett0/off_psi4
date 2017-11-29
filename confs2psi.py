@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
+## By: Victoria T. Lim, Christopher I. Bayly
+
 ## This script generates Psi4 input files for each conf of each molecule.
 ## Specifying SPE=True will write inputs for single point energy calcns,
 ## else the default input file type is for geometry optimization.
 
-## Import and call confs2psi.confs2psi(insdf, method, basis)
-
-
 import os, sys
 import openeye.oechem as oechem
 import shutil
-
-
-### ------------------- Functions -------------------
 
 
 def MakePSI4Input(mol, label, method, basisset, SPE=False, mem=None):
@@ -64,8 +60,6 @@ def MakePSI4Input(mol, label, method, basisset, SPE=False, mem=None):
     return inputstring
 
 
-### ------------------- Script -------------------
-
 def confs2psi(insdf, method, basis, spe=False, memory=None):
     """
     Parameters
@@ -96,42 +90,10 @@ def confs2psi(insdf, method, basis, spe=False, memory=None):
             if not os.path.isdir(subdir):
                 os.makedirs(subdir)
             if os.path.exists(os.path.join(subdir,'input.dat')):
-                print ("Input file (\"input.dat\") already exists. Skipping.\n")
+                print("Input file (\"input.dat\") already exists. Skipping.\n")
                 continue
             label = mol.GetTitle()+'_'+str(i+1)
             ofile = open(os.path.join(subdir,'input.dat'), 'w')
             ofile.write(MakePSI4Input( conf, label, method, basis, spe, memory))
             ofile.close()
     ifs.close()
-
-def prep(source, sink):
-
-    """
-               untested 1-17-17
-    Copies source file to be sink file. Check for already existing sink file.
-    Makes directory(ies) for sink file if necessary.
-
-    Parameters
-    ----------
-    source: string, filename with absolute path
-    sink:   string, filename with absolute path
-
-    """
-
-    newdir = os.path.dirname(sink)
-
-    # check for existing file
-    if os.path.exists(sink):
-        print("File already exists: %s. Please provide a new filename.\n" % (sink))
-        return
-
-    # make new directory if needed
-    if not os.path.isdir(newdir):
-        os.makedirs(newdir)
-
-    # copy file from olddir to newdir
-    try:
-        shutil.copy2(source, sink)
-    except IOError as e:
-        print(e)
-        return

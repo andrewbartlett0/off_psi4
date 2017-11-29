@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+## By: Victoria T. Lim
+
 ## This script takes a list of smiles as "filename.smi" and, for each smiles:
 ##  - conformers are generated with omega
 ##  - electrostatic clashes are resolved with Szybki minimization
@@ -170,7 +172,7 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
 
     ### Output files detailing number of resolved clashes
     ###   and original number of conformers before MM opt.
-    conffile = open('numOrigConfs.txt', 'a')
+    conffile = open('numConfs.txt', 'a')
 
     ### For each molecule: label atoms, generate confs, resolve clashes, optimize.
     for smimol in ifs.GetOEMols():
@@ -182,14 +184,14 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
             print (mol.GetTitle(), i+1)
             ### Resolve bad clashes.
             if resClash:
-                print ("Resolving bad clashes...")
+                print("Resolving bad clashes...")
                 if not ResolveBadClashes( conf, "numClashes.txt" ):
                     print('Resolving bad clashes failed for molecule %s \
 conformer %d:' % (mol.GetTitle(),i+1) )
                     continue
             ### MM optimization.
             if quickOpt:
-                print ("Doing a quick MM (SD) optimization...")
+                print("Doing a quick MM (SD) optimization...")
                 if not QuickOpt( conf):
                     print('Quick optimization failed for molecule %s \
 conformer %d:' % (mol.GetTitle(),i+1) )

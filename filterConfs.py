@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+## By: Victoria T. Lim
+
 ## This script takes an SDF file and, for each molecule:
 ##  - conformers are compared by energy
 ##  - conformers are compared by RMSD
@@ -137,7 +139,7 @@ def filterConfs(rmsdfile, tag, suffix):
     wdir, fname = os.path.split(rmsdfile)
 #    os.chdir(wdir)
     wdir = os.getcwd()
-    numConfsF = open(os.path.join(wdir,"numFiltConfs.txt"), 'a')
+    numConfsF = open(os.path.join(wdir,"numConfs.txt"), 'a')
     numConfsF.write(tag+"\n")
 
     # Open file to be processed.
