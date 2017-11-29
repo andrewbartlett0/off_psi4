@@ -122,7 +122,7 @@ def QuickOpt( Mol):
 
     # generate szybki MMFF94 engine for minimization
     szOpt = oeszybki.OESzybki( optSzybki)
-    # construct a results object to contain the results of a szybki calculation 
+    # construct a results object to contain the results of a szybki calculation
     szResults = oeszybki.OESzybkiResults()
     # work on a copy of the molecule
     tmpmol = oechem.OEMol( Mol)
@@ -153,17 +153,17 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
     base, extension = os.path.splitext(fname)
     sdfout = base + '.sdf'
     os.chdir(wdir)
-    
+
     ### Read in smiles file.
     ifs = oechem.oemolistream()
     if not ifs.open(smiles):
         oechem.OEThrow.Warning("Unable to open %s for reading" % smiles)
-    
+
     ### Open output file to write molecules.
     ofs = oechem.oemolostream()
     if os.path.exists(sdfout):
         #sys.exit("Output .sdf file already exists. Exiting.\n")
-        print "Output .sdf file already exists. Exiting.\n"
+        print ("Output .sdf file already exists. Exiting.\n")
         return
     if not ofs.open(sdfout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % sdfout)
@@ -171,31 +171,31 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
     ### Output files detailing number of resolved clashes
     ###   and original number of conformers before MM opt.
     conffile = open('numOrigConfs.txt', 'a')
-    
+
     ### For each molecule: label atoms, generate confs, resolve clashes, optimize.
     for smimol in ifs.GetOEMols():
         oechem.OETriposAtomNames(smimol)
         mol = GenerateConfs(smimol)
         conffile.write( "%s\t%s\n" % (mol.GetTitle(), mol.NumConfs()) )
-    
+
         for i, conf in enumerate( mol.GetConfs()):
             print (mol.GetTitle(), i+1)
             ### Resolve bad clashes.
             if resClash:
-                print "Resolving bad clashes..."
+                print ("Resolving bad clashes...")
                 if not ResolveBadClashes( conf, "numClashes.txt" ):
                     print('Resolving bad clashes failed for molecule %s \
 conformer %d:' % (mol.GetTitle(),i+1) )
                     continue
             ### MM optimization.
             if quickOpt:
-                print "Doing a quick MM (SD) optimization..."
+                print ("Doing a quick MM (SD) optimization...")
                 if not QuickOpt( conf):
                     print('Quick optimization failed for molecule %s \
 conformer %d:' % (mol.GetTitle(),i+1) )
                     continue
         oechem.OEWriteConstMolecule(ofs, mol)
-    
+
     ### Close files.
     ifs.close()
     ofs.close()

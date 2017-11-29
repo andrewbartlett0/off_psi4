@@ -11,7 +11,7 @@ import procTags as pt
 ### ------------------- Functions -------------------
 
 def GetTime(filename):
-    """ 
+    """
     Get wall-clock time from Psi4 file. If multiple times are present,
         the average will be taken. Used in CompareTimes(...) function.
 
@@ -33,11 +33,11 @@ def GetTime(filename):
     return time
 
 def ProcessOutput(filename, Props, spe=False):
-    """ 
+    """
     Go through output file and get level of theory (method and basis set),
         number of optimization steps, initial and final energies, and
         optimized coordinates. Returns all this information in a dictionary
-        that was passed to this function. 
+        that was passed to this function.
 
     Parameters
     ----------
@@ -109,7 +109,7 @@ def ProcessOutput(filename, Props, spe=False):
 def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
 
     """
-    Read in OEMols (and each of their conformers) in origsdf file, 
+    Read in OEMols (and each of their conformers) in origsdf file,
         get results from Psi4 calculations in the same directory as origsdf,
         and write out results into finsdf file.
     Directory layout is .../maindir/molName/confNumber/outputfiles .
@@ -149,7 +149,7 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
         oechem.OEThrow.Warning("Unable to open %s for reading" % origsdf)
         quit()
     molecules = ifs.GetOEMols()
-    
+
     # Open outstream file.
     writeout = os.path.join(wdir,finsdf)
     write_ofs = oechem.oemolostream()
@@ -158,14 +158,14 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
         return (None, None)
     if not write_ofs.open(writeout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % writeout)
-    
+
     # For each conformer, process output file and write new data to SDF file
     for mol in molecules:
         print("===== %s =====" % (mol.GetTitle()))
         for j, conf in enumerate( mol.GetConfs()):
 
             # GET DETAILS FOR SD TAGS
-            props = {} # dictionary of data for this conformer 
+            props = {} # dictionary of data for this conformer
             props['package'] = "Psi4"
             props['missing'] = False
             # change into subdirectory ./mol/conf/
@@ -203,7 +203,7 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
     try:
         return props['method'], props['basis']
     except KeyError:
-        return None, None 
+        return None, None
 
 if __name__ == "__main__":
     getPsiResults(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
