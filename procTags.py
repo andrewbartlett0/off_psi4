@@ -6,6 +6,7 @@
 ## Usage: import procTags as pt, then call pt.SetOptSDTags(args)
 
 import openeye.oechem as oechem
+import sys
 
 
 def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
@@ -52,6 +53,9 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
 
     if prop == "conformer":
         taglabel = "Original omega conformer number"
+
+    try: taglabel
+    except UnboundLocalError as e: sys.exit("Error in input tag of extracting SD data.")
 
     SDList = []
     for j, conf in enumerate( mol.GetConfs() ):
