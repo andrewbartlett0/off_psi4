@@ -52,7 +52,9 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
 
     # if there's only 1 conf, has SDData ==> True, not ==> False
     if Mol.NumConfs()==1:
-        testmol = Mol.GetConfs(oechem.OEHasConfIdx(0))
+        #testmol = Mol.GetConfs(oechem.OEHasConfIdx(0))  #mol doesn't get read in right for OEHasData (NotImplementedError)
+        #testmol = next(Mol.GetConfs()) #TypeError: 'OEConfIter' object is not an iterator
+        testmol = Mol.GetConfs().next()
         if not oechem.OEHasSDData(testmol, Taglabel):
             return False
         else:
