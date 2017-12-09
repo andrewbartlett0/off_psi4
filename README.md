@@ -72,30 +72,30 @@ Before starting, you need an input file with a list of SMILES strings and corres
 See section on "Naming molecules in the input SMILES file" and "File name limitations".
 
  1. Generate conformers, quick MM optimization, Psi4 input files.
-     * python executor.py -f file.smi --setup -m 'mp2' -b 'def2-sv(p)'
+    * python executor.py -f file.smi --setup -m 'mp2' -b 'def2-sv(p)'
 
  2. Run Psi4 jobs.
 
  3. Get Psi4 results from the last set of optimizations.
-     * python executor.py -f /include/full/path/to/file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'
+    * python executor.py -f /include/full/path/to/file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'
 
  4. In a new (sub)directory, set up Psi4 SPE calculations from last results.
-     * python executor.py -f /include/full/path/to/file-220.sdf --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
+    * python executor.py -f /include/full/path/to/file-220.sdf --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
 
  5. Run Psi4 jobs.
 
  6. Get Psi4 results from SPE.
-     * python executor.py -f /include/full/path/to/file-220.sdf --results --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
+    * python executor.py -f /include/full/path/to/file-220.sdf --results --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
 
  7. Combine results from various job types to calculate model uncertainty.
-     * See section on "Creating input file for stitchSpe.py"
-     * mpython /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/stitchSpe.py -i /path/and/input.dat --barplots
+    * See section on "Creating input file for stitchSpe.py"
+    * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/stitchSpe.py -i /path/and/input.dat --barplots`
 
  8. (opt.) If some mol has a high RMSD, identify conformer and visualize structure.
-     * mpython /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/writeOneConf.py ...............
+    * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/writeOneConf.py ...............`
 
  9. (opt.) Get wall clock times, num opt steps, relative energies. 
-     * mpython /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/avgTimeEne.py --relene -f /path/&/file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'
+    * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/avgTimeEne.py --relene -f /path/&/file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
 
 ### File name limitations
