@@ -1,0 +1,65 @@
+
+
+Opening reference file ../optB.sdf
+Opening query file ../optB.sdf, and using [ MP2/def2-TZVP ] energies
+
+Skipping comparison against self.
+
+
+Opening reference file ../optB.sdf
+Opening query file ../optA.sdf, and using [ B3LYP-D3MBJ/def2-TZVP ] energies
+>>>> Matching AlkEthOH_c1178 conformers to minima: 1 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 2 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 3 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 4 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 5 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 6 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 7 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 8 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 9 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 10 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 11 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 12 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 13 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 14 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 15 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 16 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 17 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 18 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 19 <<<<
+
+
+Opening reference file ../optB.sdf
+Opening query file ../optC.sdf, and using [ MP2/aug-cc-pVTZ ] energies
+>>>> Matching AlkEthOH_c1178 conformers to minima: 1 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 2 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 3 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 4 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 5 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 6 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 7 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 8 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 9 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 10 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 11 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 12 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 13 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 14 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 15 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 16 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 17 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 18 <<<<
+>>>> Matching AlkEthOH_c1178 conformers to minima: 19 <<<<
+
+molNames
+ ['AlkEthOH_c1178']
+
+refNumConfs
+ [19]
+
+allIndices
+ [[-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 13, 14, 15, 16, 17], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]]
+
+elists
+ [[-465.156073144, -465.148867482, -465.150473978, -465.155928616, -465.14886819, -465.148286217, -465.148286913, -465.15257771, -465.152203301, -465.150474003, -465.150122914, -465.152203917, -465.150122881, -465.145824728, -465.148938464, -465.147650798, -465.155928209, -465.148451922, -465.148938085], [-466.377174577, -466.369915603, -466.371754075, -466.377148457, -466.369915597, -466.369616637, -466.36961476, -466.373708663, -466.373493021, -466.371754017, -466.371484874, -466.373491247, -466.371483481, -466.370352433, -466.369498083, -466.377147549, -466.369985869, -466.370352421], [-465.242466445, -465.235484775, -465.237129307, -465.242372664, -465.235482458, -465.2348854, -465.234885471, -465.239092284, -465.238772779, -465.237129261, -465.236817934, -465.238771756, -465.236816927, -465.232787961, -465.235675149, -465.234471301, -465.242372793, -465.235221173, -465.235672725]]
+mol 0 nanCnt: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]

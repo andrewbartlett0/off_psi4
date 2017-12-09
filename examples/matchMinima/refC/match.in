@@ -1,0 +1,6 @@
+# first line is reference file for all subsequent lines.
+# level of theory, filename, fromSPE.
+#
+MP2/aug-cc-pVTZ, ../optC.sdf, False
+B3LYP-D3MBJ/def2-TZVP, ../optA.sdf, False
+MP2/def2-TZVP, ../optB.sdf, False

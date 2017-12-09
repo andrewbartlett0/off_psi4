@@ -1,0 +1,37 @@
+# Molecule AlkEthOH_c1178
+# Energies (kcal/mol) for each matched conformer relative to conformer 0 across each column.
+# Rows represent conformers of this molecule; columns represent some calculations from a particular file.
+# Columns are ordered by conformer index, then the following levels of theory:
+# 1 MP2/def2-TZVP
+# 2 B3LYP-D3MBJ/def2-TZVP
+# 3 MP2/aug-cc-pVTZ
+
+# RMS errors by level of theory, with respect to the first level of theory listed:
+# 	0.0000	0.4173	0.1791
+
+# 	1	2	3
+0	0.0000	0.0000	0.0000
+1	4.5216	4.5551	4.3811
+2	3.5135	3.4014	3.3491
+3	0.0907	0.0164	0.0588
+4	4.5212	4.5551	4.3825
+5	4.8864	4.7427	4.7572
+6	4.8859	4.7439	4.7571
+7	2.1934	2.1749	2.1173
+8	2.4284	2.3102	2.3178
+9	3.5135	3.4015	3.3491
+10	3.7338	3.5703	3.5445
+11	2.4280	2.3113	2.3185
+12	3.7338	3.5712	3.5451
+13	6.4310	4.8171	6.0733
+14	4.4771	4.2810	4.2616
+15	5.2851	4.8171	5.0170
+16	0.0909	0.0170	0.0588
+17	4.7824	4.5110	4.5465
+18	4.4773	4.2810	4.2631
+
+# Four rows: (1) avg times, (2) time stdevs, (3) avg time ratios wrt ref method, (4) stdevs of time ratios:
+#  4015.0000 3460.4737 169527.5789
+#  787.7772 655.0725 46762.4835
+#  1.0000 0.8742 42.5293
+#  0.0000 0.1486 11.2516
