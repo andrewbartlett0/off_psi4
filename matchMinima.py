@@ -64,9 +64,14 @@ def compare2Mols(rmol, qmol):
 def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
     '''
 
-    '''
-    # stagger plots to better see line overlap. works best with few (<4?) numFiles.
+    selected: list of indexes for methods to be plotted. 0-based index.
+              consider also renaming figname to not overwrite existing plots.
+    stag: Boolean, True to stagger plots to better see line trends.
+          Works best with few (<4?) numFiles.
+          Be very wary of using this to not confuse energy distributions.
+
     # minimaE for ONE molecule
+    '''
 
     refNumConfs = len(minimaE[0])
     refFile = xticklabels[0]
@@ -263,7 +268,7 @@ def matchMinima(sdfList, thryList):
 
 def getAllTimes(sdfList, thryList):
     """
-    Get times saved in SD tages from files listed in python input file lines. 
+    Get times saved in SD tages from files listed in python input file lines.
        No longer used after edits to matchMinima (07/1/2017).
 
     Parameters
@@ -594,7 +599,7 @@ if __name__ == "__main__":
         list1 = []
         for f in sdfList:
             list1.append(os.path.isfile(f))
-    
+
         if all(list1):
             # All elements are True. Therefore all the files exist. Run %run commands
             break
@@ -670,7 +675,7 @@ if __name__ == "__main__":
 
         allFileTimes = [[] for i in range(numMols)]
         allFileStds = [[] for i in range(numMols)]
-            
+
         for i, molTimes in enumerate(timesByMol):
             # loop by each file to remove nans
             for j, molFileList in enumerate(molTimes):
