@@ -1,0 +1,169 @@
+
+Analyzing file: optset2-221-01.sdf
+# Level of theory: B3LYP-D3/6-31+G*
+#AlkEthOH_c260	0.91540 RMSD(Kcal/mol)
+#Div_2	2.99423 RMSD(Kcal/mol)
+#Div_6	0.04664 RMSD(Kcal/mol)
+#Div_9	0.10173 RMSD(Kcal/mol)
+#Div_10	0.09767 RMSD(Kcal/mol)
+#Div_4	0.79842 RMSD(Kcal/mol)
+#Div_5	0.16887 RMSD(Kcal/mol)
+#Div_3b	0.04648 RMSD(Kcal/mol)
+#Div_7b	0.08948 RMSD(Kcal/mol)
+#Div_8b	0.06650 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-02.sdf
+# Level of theory: B3LYP-D3/def2-SV(P)
+#AlkEthOH_c260	0.15010 RMSD(Kcal/mol)
+#Div_2	0.52867 RMSD(Kcal/mol)
+#Div_6	0.01100 RMSD(Kcal/mol)
+#Div_9	0.15179 RMSD(Kcal/mol)
+#Div_10	0.05285 RMSD(Kcal/mol)
+#Div_4	0.64743 RMSD(Kcal/mol)
+#Div_5	0.15135 RMSD(Kcal/mol)
+#Div_3b	0.02680 RMSD(Kcal/mol)
+#Div_7b	0.02555 RMSD(Kcal/mol)
+#Div_8b	0.08995 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-03.sdf
+# Level of theory: B3LYP-D3BJ/6-31+G*
+#AlkEthOH_c260	0.94760 RMSD(Kcal/mol)
+#Div_2	3.06009 RMSD(Kcal/mol)
+#Div_6	0.05070 RMSD(Kcal/mol)
+#Div_9	0.05441 RMSD(Kcal/mol)
+#Div_10	0.06051 RMSD(Kcal/mol)
+#Div_4	0.67893 RMSD(Kcal/mol)
+#Div_5	0.22386 RMSD(Kcal/mol)
+#Div_3b	0.07365 RMSD(Kcal/mol)
+#Div_7b	0.10397 RMSD(Kcal/mol)
+#Div_8b	0.05031 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-04.sdf
+# Level of theory: B3LYP-D3BJ/def2-SV(P)
+#AlkEthOH_c260	0.25447 RMSD(Kcal/mol)
+#Div_2	0.60502 RMSD(Kcal/mol)
+#Div_6	0.00069 RMSD(Kcal/mol)
+#Div_9	0.08219 RMSD(Kcal/mol)
+#Div_10	0.01883 RMSD(Kcal/mol)
+#Div_4	0.55161 RMSD(Kcal/mol)
+#Div_5	0.22236 RMSD(Kcal/mol)
+#Div_3b	0.03814 RMSD(Kcal/mol)
+#Div_7b	0.01332 RMSD(Kcal/mol)
+#Div_8b	0.54056 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-05.sdf
+# Level of theory: B3LYP-D3BJ/def2-TZVP
+#AlkEthOH_c260	0.59937 RMSD(Kcal/mol)
+#Div_2	3.11973 RMSD(Kcal/mol)
+#Div_6	0.00854 RMSD(Kcal/mol)
+#Div_9	0.00925 RMSD(Kcal/mol)
+#Div_10	0.06922 RMSD(Kcal/mol)
+#Div_4	0.65997 RMSD(Kcal/mol)
+#Div_5	0.25428 RMSD(Kcal/mol)
+#Div_3b	0.06360 RMSD(Kcal/mol)
+#Div_7b	0.05222 RMSD(Kcal/mol)
+#Div_8b	0.06446 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-06.sdf
+# Level of theory: B3LYP-D3MBJ/6-31+G*
+#AlkEthOH_c260	0.98238 RMSD(Kcal/mol)
+#Div_2	3.05875 RMSD(Kcal/mol)
+#Div_6	0.05691 RMSD(Kcal/mol)
+#Div_9	0.04567 RMSD(Kcal/mol)
+#Div_10	0.04446 RMSD(Kcal/mol)
+#Div_4	0.70074 RMSD(Kcal/mol)
+#Div_5	0.20767 RMSD(Kcal/mol)
+#Div_3b	0.05757 RMSD(Kcal/mol)
+#Div_7b	0.10211 RMSD(Kcal/mol)
+#Div_8b	0.04659 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-07.sdf
+# Level of theory: B3LYP-D3MBJ/def2-TZVP
+#AlkEthOH_c260	0.60520 RMSD(Kcal/mol)
+#Div_2	4.38729 RMSD(Kcal/mol)
+#Div_6	0.00302 RMSD(Kcal/mol)
+#Div_9	0.02029 RMSD(Kcal/mol)
+#Div_10	0.05113 RMSD(Kcal/mol)
+#Div_4	0.66682 RMSD(Kcal/mol)
+#Div_5	0.20274 RMSD(Kcal/mol)
+#Div_3b	0.06661 RMSD(Kcal/mol)
+#Div_7b	0.05274 RMSD(Kcal/mol)
+#Div_8b	0.05943 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-08.sdf
+# Level of theory: B97-D3/6-31+G*
+#AlkEthOH_c260	0.36106 RMSD(Kcal/mol)
+#Div_2	0.53338 RMSD(Kcal/mol)
+#Div_6	0.07490 RMSD(Kcal/mol)
+#Div_9	0.20250 RMSD(Kcal/mol)
+#Div_10	0.05269 RMSD(Kcal/mol)
+#Div_4	1.02548 RMSD(Kcal/mol)
+#Div_5	0.23750 RMSD(Kcal/mol)
+#Div_3b	0.06286 RMSD(Kcal/mol)
+#Div_7b	0.18808 RMSD(Kcal/mol)
+#Div_8b	0.08360 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-09.sdf
+# Level of theory: B97-D3/def2-SV(P)
+#AlkEthOH_c260	0.17494 RMSD(Kcal/mol)
+#Div_2	0.59299 RMSD(Kcal/mol)
+#Div_6	0.02520 RMSD(Kcal/mol)
+#Div_9	0.16937 RMSD(Kcal/mol)
+#Div_10	0.01042 RMSD(Kcal/mol)
+#Div_4	0.88010 RMSD(Kcal/mol)
+#Div_5	0.26559 RMSD(Kcal/mol)
+#Div_3b	0.06914 RMSD(Kcal/mol)
+#Div_7b	0.05191 RMSD(Kcal/mol)
+#Div_8b	0.10422 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-10.sdf
+# Level of theory: BLYP/6-31+G*
+#AlkEthOH_c260	0.83032 RMSD(Kcal/mol)
+#Div_2	2.77148 RMSD(Kcal/mol)
+#Div_6	0.01408 RMSD(Kcal/mol)
+#Div_9	0.32103 RMSD(Kcal/mol)
+#Div_10	0.31078 RMSD(Kcal/mol)
+#Div_4	1.90549 RMSD(Kcal/mol)
+#Div_5	0.89237 RMSD(Kcal/mol)
+#Div_3b	0.56722 RMSD(Kcal/mol)
+#Div_7b	0.19876 RMSD(Kcal/mol)
+#Div_8b	0.36318 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-12.sdf
+# Level of theory: MP2/6-31+G*
+#AlkEthOH_c260	1.39065 RMSD(Kcal/mol)
+#Div_2	3.82090 RMSD(Kcal/mol)
+#Div_6	0.05473 RMSD(Kcal/mol)
+#Div_9	0.00662 RMSD(Kcal/mol)
+#Div_10	0.01195 RMSD(Kcal/mol)
+#Div_4	0.91032 RMSD(Kcal/mol)
+#Div_5	0.39632 RMSD(Kcal/mol)
+#Div_3b	0.59684 RMSD(Kcal/mol)
+#Div_7b	0.15129 RMSD(Kcal/mol)
+#Div_8b	0.05549 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-14.sdf
+# Level of theory: MP2/def2-TZVP
+#AlkEthOH_c260	0.27039 RMSD(Kcal/mol)
+#Div_2	3.01721 RMSD(Kcal/mol)
+#Div_6	0.02777 RMSD(Kcal/mol)
+#Div_9	0.00307 RMSD(Kcal/mol)
+#Div_10	0.01104 RMSD(Kcal/mol)
+#Div_4	0.19042 RMSD(Kcal/mol)
+#Div_5	0.26556 RMSD(Kcal/mol)
+#Div_3b	0.03580 RMSD(Kcal/mol)
+#Div_7b	0.03507 RMSD(Kcal/mol)
+#Div_8b	0.06414 RMSD(Kcal/mol)
+
+Analyzing file: optset2-221-16.sdf
+# Level of theory: MP2/aug-cc-pVTZ
+#AlkEthOH_c260	0.35816 RMSD(Kcal/mol)
+#Div_2	2.88642 RMSD(Kcal/mol)
+#Div_6	0.08861 RMSD(Kcal/mol)
+#Div_9	0.00868 RMSD(Kcal/mol)
+#Div_10	0.01172 RMSD(Kcal/mol)
+#Div_4	0.11982 RMSD(Kcal/mol)
+#Div_5	-0.00000 RMSD(Kcal/mol)
+#Div_3b	0.04736 RMSD(Kcal/mol)
+#Div_7b	0.11206 RMSD(Kcal/mol)
+#Div_8b	0.07812 RMSD(Kcal/mol)

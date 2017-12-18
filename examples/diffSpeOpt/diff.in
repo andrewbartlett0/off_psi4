@@ -1,0 +1,16 @@
+# level of theory                      filename
+#
+B3LYP-D3/6-31+G*       ,optset2-221-01.sdf
+B3LYP-D3/def2-SV(P)    ,optset2-221-02.sdf
+B3LYP-D3BJ/6-31+G*     ,optset2-221-03.sdf
+B3LYP-D3BJ/def2-SV(P)  ,optset2-221-04.sdf
+B3LYP-D3BJ/def2-TZVP   ,optset2-221-05.sdf
+B3LYP-D3MBJ/6-31+G*    ,optset2-221-06.sdf
+B3LYP-D3MBJ/def2-TZVP  ,optset2-221-07.sdf
+B97-D3/6-31+G*         ,optset2-221-08.sdf
+B97-D3/def2-SV(P)      ,optset2-221-09.sdf
+BLYP/6-31+G*           ,optset2-221-10.sdf
+MP2/6-31+G*            ,optset2-221-12.sdf
+MP2/def2-TZVP          ,optset2-221-14.sdf
+#MP2/aug-cc-pVDZ       ,optset2-221-15.sdf
+MP2/aug-cc-pVTZ        ,optset2-221-16.sdf
