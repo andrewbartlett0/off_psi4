@@ -36,6 +36,7 @@ There are other scripts in this repository that are not integral to the pipeline
   * selectConfs.tcl
   * viewer.ipynb
   * writeOneConf.py
+  * xyzByStep.sh
 
 ## Python Dependencies
 
@@ -79,13 +80,16 @@ See section on "Naming molecules in the input SMILES file" and "File name limita
  3. Get Psi4 results from the last set of optimizations.
     * python executor.py -f /include/full/path/to/file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'
 
- 4. In a new (sub)directory, set up Psi4 SPE calculations from last results.
-    * python executor.py -f /include/full/path/to/file-220.sdf --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
+ 4. In a new (sub)directory, set up Psi4 OPT2 calculations from last results.
+    * `python executor.py -f /include/full/path/to/file-220.sdf --setup -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+    * [for SPE] `python executor.py -f /include/full/path/to/file-220.sdf --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
  5. Run Psi4 jobs.
+    * `xyzByStep.sh 10 output.dat view.xyz` -- can use to view geometry during optimizations. (replace 10 with number of atoms.)
 
- 6. Get Psi4 results from SPE.
-    * python executor.py -f /include/full/path/to/file-220.sdf --results --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
+ 6. Get Psi4 results from second-level calculations.
+    * `python executor.py -f /include/full/path/to/file-220.sdf --results -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+    * [for SPE] `python executor.py -f /include/full/path/to/file-220.sdf --results --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
  7. Combine results from various job types to calculate model uncertainty.
     * See section on "Creating input file for stitchSpe.py"
