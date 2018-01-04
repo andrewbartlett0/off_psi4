@@ -72,15 +72,16 @@ def plotRMSD(rmsdict):
     ax.bar3d(xpos,ypos,zpos, dx, dy, dz, color=colors)
 
 
-    # add labels
+    # format ticks, add labels
     ticksx = np.arange(0.5, numMols, 1)
-    plt.xticks(ticksx, column_names)
-
+    plt.xticks(ticksx, column_names, rotation=40, ha='right')
     ticksy = np.arange(0.5, numFiles, 1)
-    plt.yticks(ticksy, row_names, rotation=-40, ha='left')
+    plt.yticks(ticksy, row_names, rotation=-30, ha='left')
+    for t in ax.zaxis.get_major_ticks(): t.label.set_fontsize(14)
+
     ax.set_xlabel('Molecule')
-    ax.set_ylabel('QM theory')
-    ax.set_zlabel('RMSD (kcal/mol)')
+#    ax.set_ylabel('QM theory')
+    ax.set_zlabel('RMSD (kcal/mol)',fontsize=14)
     plt.savefig('barplot3d.png',bbox_inches='tight')
     plt.show()
 
@@ -150,7 +151,10 @@ def getRMSD(sdfRef, theory, rmsdict, package='Psi4'):
         energies.write("\n#%s\n#%s\n#RMSD = %.5f(y)\t\t(x=Hartree, y=kcal/mol)\n#conf. init. Energy(x)  \t final Energy(x) \t diff.(x)\tdiff. (y) \n" %(theory, molName, average ))
 
         # get list of conformer indices to identify high RMSD ones
-        conformer = np.asarray(pt.GetSDList(rmol, 'conformer', package, method, basis), dtype = int)
+        conflist = pt.GetSDList(rmol, 'conformer', package, method, basis)
+        conformer = []
+        for item in conflist: conformer.append(item.split()[0]) # append orig conf
+        conformer = np.asarray(conformer, dtype=int)
         difference = np.array([])
         for i in range(len(tmol)):
             energies.write("%r \t %5.9f \t %5.9f \t %5.9f\t%5.9f \n" % (conformer[i], initial[i], final[i], final[i] - initial[i], (final[i]-initial[i])*627.5095 ))
@@ -239,4 +243,18 @@ if __name__ == "__main__":
     rmsdict = xdict()
     for fname, theory in zip(sdfList, thryList):
         rmsdict = getRMSD(fname, theory, rmsdict)
+
+    # make sure all mols exist before plotting
+    mostMols = max(rmsdict.values(), key=len) # method with most mols
+    mols2del = [] # mols that are missing from other files
+    for keyfile in rmsdict: # make sure each file has mols of mostMols
+        for keymol in mostMols:
+            if type(rmsdict[keyfile][keymol]) == defaultdict:
+                mols2del.append(keymol)
+    # delete missing mols from main dict
+    if len(mols2del) != 0:
+        rmsdict_orig = rmsdict.copy() # just in case will need later
+        for delmol in mols2del:
+            for keyfile in rmsdict:
+                rmsdict[keyfile].pop(delmol,None)
     plotRMSD(rmsdict)
