@@ -83,7 +83,7 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
 
 def SetOptSDTags(Conf, Props, spe=False):
     """
-    For one particular conformers, set all availble SD tags based on data
+    For one particular conformer, set all available SD tags based on data
         in Props dictionary.
     TODO: what happens if the tag already exists? Is it bypassed? Overwritten?
 
@@ -126,9 +126,17 @@ def SetOptSDTags(Conf, Props, spe=False):
     # Set new SD tag for original conformer number
     # !! Opt2 files should ALREADY have this !! Opt2 index is NOT orig index!
     taglabel = "Original omega conformer number"
-    if not oechem.OEHasSDData(Conf, taglabel): # only add tag if not existing
+    if not oechem.OEHasSDData(Conf, taglabel): # add new tag if not existing
         try:
             oechem.OEAddSDData(Conf, taglabel, str(Conf.GetIdx()+1))
+        except AttributeError as err:
+            pass  # if not working with confs, will have no GetIdx
+    else: # if tag exists, append to it
+        try:
+            oldid = oechem.OEGetSDData(Conf, taglabel)
+            newid = str(Conf.GetIdx()+1)
+            totid = "{}, {}".format(oldid,newid)
+            oechem.OESetSDData(Conf, taglabel, totid)
         except AttributeError as err:
             pass  # if not working with confs, will have no GetIdx
 
