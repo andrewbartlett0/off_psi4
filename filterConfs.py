@@ -27,15 +27,15 @@ thresRMSD = 0.2 # above this threshold (Angstrom), confs are "diff" minima
 
 ### ------------------- Functions -------------------
 
-def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
+def IdentifyMinima(mol,tag,ThresholdE,ThresholdRMSD):
     """
     For a molecule's set of conformers computed with some level of theory,
         whittle down unique conformers based on energy and RMSD.
 
     Parameters
     ----------
-    Mol           OEChem molecule with all of its conformers
-    Taglabel      string name of the SD tag in this molecule
+    mol           OEChem molecule with all of its conformers
+    tag           string name of the SD tag in this molecule
     ThresholdE    float value for abs(E1-E2), below which 2 confs are "same"
         Units are hartrees (default output units of Psi4)
     ThresholdR    float value for RMSD, below which 2 confs are "same"
@@ -51,26 +51,34 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
     delCount = 0
 
     # if there's only 1 conf, has SDData ==> True, not ==> False
-    if Mol.NumConfs()==1:
-        #testmol = Mol.GetConfs(oechem.OEHasConfIdx(0))  #mol doesn't get read in right for OEHasData (NotImplementedError)
-        #testmol = next(Mol.GetConfs()) #TypeError: 'OEConfIter' object is not an iterator
-        testmol = Mol.GetConfs().next()
-        if not oechem.OEHasSDData(testmol, Taglabel):
-            return False
-        else:
-            return True
+    if mol.NumConfs()==1:
+        #testmol = mol.GetConfs(oechem.OEHasConfIdx(0))  #mol doesn't get read in right for OEHasData (NotImplementedError)
+        #testmol = next(mol.GetConfs()) #TypeError: 'OEConfIter' object is not an iterator
+        testmol = mol.GetConfs().next()
+
+        for x in oechem.OEGetSDDataPairs(mol):
+            if tag.lower() in x.GetTag().lower():
+                return True
+            else:
+                return False
 
     # Loop over conformers twice (NxN diagonal comparison of RMSDs)
-    for confRef in Mol.GetConfs():
-        print(" ~ Reference: %s conformer %d" % (Mol.GetTitle(), confRef.GetIdx()+1))
+    for confRef in mol.GetConfs():
+        print(" ~ Reference: %s conformer %d" % (mol.GetTitle(), confRef.GetIdx()+1))
+
+        # get real tag (correct for capitalization) (TODO make this more efficient)
+        for x in oechem.OEGetSDDataPairs(confRef):
+            if tag.lower() in x.GetTag().lower():
+                taglabel = x.GetTag()
+
         # delete cases that don't have energy (opt not converged; or other)
-        if not oechem.OEHasSDData(confRef, Taglabel):
+        if not oechem.OEHasSDData(confRef, taglabel):
             confsToDel.add(confRef.GetIdx())
             delCount += 1
             continue
-        refE = float(oechem.OEGetSDData(confRef,Taglabel))
+        refE = float(oechem.OEGetSDData(confRef,taglabel))
 
-        for confTest in Mol.GetConfs():
+        for confTest in mol.GetConfs():
             # upper right triangle comparison
             if confTest.GetIdx() <= confRef.GetIdx():
                 continue
@@ -78,13 +86,13 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
             if confTest.GetIdx() in confsToDel:
                 continue
             # delete cases that don't have energy
-            if not oechem.OEHasSDData(confTest, Taglabel):
+            if not oechem.OEHasSDData(confTest, taglabel):
                 confsToDel.add(confTest.GetIdx())
                 continue
 
-            testE = float(oechem.OEGetSDData(confTest,Taglabel))
+            testE = float(oechem.OEGetSDData(confTest,taglabel))
             # if MM (not Psi4) energies, convert absERel to Hartrees
-            if 'mm' in Taglabel.lower():
+            if 'mm' in taglabel.lower():
                 absERel = abs(refE-testE)/627.5095
             else:
                 absERel = abs(refE-testE)
@@ -98,17 +106,17 @@ def IdentifyMinima(Mol,Taglabel,ThresholdE,ThresholdRMSD):
                 confsToDel.add(confTest.GetIdx())
 
     # for the same molecule, delete tagged conformers
-    print("%s original number of conformers: %d" % (Mol.GetTitle(), Mol.NumConfs()))
-    if delCount == Mol.NumConfs():
+    print("%s original number of conformers: %d" % (mol.GetTitle(), mol.NumConfs()))
+    if delCount == mol.NumConfs():
         return False
 
-    for conf in Mol.GetConfs():
+    for conf in mol.GetConfs():
         if conf.GetIdx() in confsToDel:
             print('Removing %s conformer index %d' \
-                  % (Mol.GetTitle(),conf.GetIdx()))
-            if not Mol.DeleteConf(conf):
+                  % (mol.GetTitle(),conf.GetIdx()))
+            if not mol.DeleteConf(conf):
                 oechem.OEThrow.Fatal("Unable to delete %s GetIdx() %d" \
-                                  % (Mol.GetTitle(), conf.GetIdx()))
+                                  % (mol.GetTitle(), conf.GetIdx()))
     return True
 
 

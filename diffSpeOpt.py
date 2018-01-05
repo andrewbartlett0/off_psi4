@@ -10,6 +10,7 @@
 #  reference conformer subtracted among all will be the same reference conf.
 
 import os
+import sys
 import openeye.oechem as oechem
 import numpy as np
 import procTags as pt
@@ -126,7 +127,10 @@ def getRMSD(sdfRef, theory, rmsdict, package='Psi4'):
         initial = imol.copy()
 
         # subtract conformer[0] energies from all conformers
-        tmol -= tmol[0]
+        try: tmol -= tmol[0]
+        except IndexError as e:
+            sys.exit("No energies found for {} {}/{}! Check that data is \
+stored in tags. Exiting.".format(rmol.GetTitle(), method, basis))
         imol -= imol[0]
 
         #subtracts initial minus final and sqaures all values
@@ -151,9 +155,9 @@ def getRMSD(sdfRef, theory, rmsdict, package='Psi4'):
         energies.write("\n#%s\n#%s\n#RMSD = %.5f(y)\t\t(x=Hartree, y=kcal/mol)\n#conf. init. Energy(x)  \t final Energy(x) \t diff.(x)\tdiff. (y) \n" %(theory, molName, average ))
 
         # get list of conformer indices to identify high RMSD ones
-        conflist = pt.GetSDList(rmol, 'conformer', package, method, basis)
+        conflist = pt.GetSDList(rmol, "original index", package, method, basis)
         conformer = []
-        for item in conflist: conformer.append(item.split()[0]) # append orig conf
+        for item in conflist: conformer.append(item.split(',')[0]) # append orig conf
         conformer = np.asarray(conformer, dtype=int)
         difference = np.array([])
         for i in range(len(tmol)):

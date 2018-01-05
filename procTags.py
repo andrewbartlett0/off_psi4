@@ -51,9 +51,6 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
     if prop=="opt step":
         taglabel = "QM %s Opt. Steps %s/%s" % (Package, Method, Basisset)
 
-    if prop == "conformer":
-        taglabel = "Original omega conformer number"
-
     try: taglabel
     except UnboundLocalError as e: sys.exit("Error in input tag of extracting SD data.")
 
@@ -68,16 +65,9 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
                 break
             # Case: want energy value
             # Case: want original index number
-            #elif taglabel.lower() in x.GetTag().lower() or prop =="original index":
             elif taglabel.lower() in x.GetTag().lower():
                 SDList.append(x.GetValue())
                 break
-    #for j, conf in enumerate( mol.GetConfs() ):
-    #    if "DID NOT FINISH" not in oechem.OEGetSDData(conf, "Note on opt.")\
-# or prop =="original index":
-    #        SDList.append((oechem.OEGetSDData(conf, taglabel)))
-    #    else:
-    #        SDList.append('nan')
     return SDList
 
 
