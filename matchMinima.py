@@ -31,6 +31,10 @@ def compare2Mols(rmol, qmol):
     rmol:       reference OEChem molecule with all its filtered conformers
     qmol:       query OEChem molecule with all its filtered conformers
 
+    Returns
+    -------
+    molIndices: 1D list of qmol conformer indices that correspond to rmol confs
+
     """
 
     automorph = True   # take into acct symmetry related transformations
@@ -168,7 +172,7 @@ def plotAvgTimes(molName, avgTimes, sdTimes, xticklabels):
 
 
 
-def matchMinima(sdfList, thryList):
+def matchMinima(sdfList, thryList, *tags):
     """
     For list of SDF files, match the conformer minima to those of the reference
        SDF file. Ex. Conf G of reference file matches with conf R of file3.
@@ -179,20 +183,14 @@ def matchMinima(sdfList, thryList):
           This list should include reference SDF file (sdfRef) as first element.
     thryList: str list - list of levels of theory corresponding to the files
           in sdfList. E.g., ['MP2/def2-TZVP','B3LYP-D3MBJ/6-311++G**']
+    tags: variable number of arguments for the SD tag to get during matching
 
     Returns
     -------
-    molNames: list of molecule names from the reference molecules
-    refNumConfs: list of ints representing each reference mol's number of conformers
-    allIndices: 2D list representing, for each sdfQuery, the conformer indices
-       that match reference conformer.
-       [[-1, -1, -1], [-1], [2, 3, 1], [0]] means there are two molecules, one
-       with 3 confs, and one with 1 conf. The first two sublists are -1 because
-       sdfQuery matched sdfRef. For the second two sublists, sdfQuery's
-       mol1 conf2 matches with sdfRef's mol1 conf1.
-    elists: 2D list of floats in similar format of allIndices, being energies
-       of [[file1 mol1], ..., [file1 molN], [file2 mol1], ... [file2 molN]]
-       Note that the mols belonging to one file are not separated in a sublist.
+    moldict: nested dictionary. example format:
+        moldict['molName']['QM opt energy']
+          = 2d list, [[file1: conf1 conf2] [file2: conf1 conf2]]
+        Second-level keys are from tags variable.
 
     """
     def loadFile(fname):
@@ -204,12 +202,8 @@ def matchMinima(sdfList, thryList):
         return mols
 
     sdfRef = sdfList[0]
-    numFiles = len(sdfList)
     allIndices = [] # for M mols, N reference minima of each mol, P matching indices for each ref minimia
-    elists = [] # 2D list: K mols per file x J numFiles
-    tlists = [] # 2D list: K mols per file x J numFiles
-    refNumConfs = [] # number of conformers for each mol in reference file
-    molNames = [] # name of each molecule. for plotting.
+    moldict = {} # nested dictionary with 1st layer of mol names, 2nd layer of properties (energies, opt times, etc)
 
     for i, sdfQuery in enumerate(sdfList):
         qthry = thryList[i]
@@ -224,98 +218,47 @@ def matchMinima(sdfList, thryList):
 
         # loop over each molecule in reference file and in query file
         for rmol in molsRef:
-            #qmol = molsQuery.next()
+            name = rmol.GetTitle()
             noMatch = True
             for qmol in molsQuery:
                 if rmol.GetTitle() == qmol.GetTitle():
-                    noMatch = False
+                    noMatch = False # only continue match for same mols
                     break
+            # before reaching verdict of match, check tag holders in moldict
+            if name not in moldict: moldict[name] = {}
+            for t in tags:
+                if t not in moldict[name]: moldict[name][t] = []
+            if 'indices' not in moldict[name]: moldict[name]['indices'] = []
+            if 'refNumConfs' not in moldict[name]: moldict[name]['refNumConfs'] = []
+            # no match was found; don't continue match function
             if noMatch:
-                allIndices.append([-2]*rmol.NumConfs())
-                elists.append([nan]*rmol.NumConfs())
-                tlists.append([nan]*rmol.NumConfs())
+                moldict[name]['indices'].append([-2]*rmol.NumConfs())
+                for t in tags:
+                    moldict[name][t].append([nan]*rmol.NumConfs())
                 print("No %s molecule found in %s" % (rmol.GetTitle(), sdfQuery))
-                # gotta reset the molsQuery generator
+                # reset molsQuery generator
                 molsQuery = loadFile(sdfQuery)
                 continue
 
-            # get energies for plotting relative energies
-            elists.append(list(map(float, pt.GetSDList(qmol, "QM opt energy",'Psi4', qmethod, qbasis)))) # adapt for SPE? === *
-            tlists.append(list(map(float, pt.GetSDList(qmol, "opt runtime",'Psi4', qmethod, qbasis))))
-
+            # get data from tags
+            for t in tags:
+                if t not in moldict[name]: moldict[name][t] = []
+                moldict[name][t].append(list(map(float, pt.GetSDList(qmol, t,'Psi4', qmethod, qbasis))))
 
             # Skip minmatch if this query file is same as reference file;
             #    before skip, get data for elists, refNumConfs, allIndices.
             if(sdfQuery == sdfRef):
                 print("\nSkipping comparison against self.")
-                molNames.append(rmol.GetTitle())
-                refNumConfs.append(rmol.NumConfs())
-                allIndices.append([-1]*rmol.NumConfs())
+                moldict[name]['refNumConfs'].append(rmol.NumConfs())
+                moldict[name]['indices'].append([-1]*rmol.NumConfs())
                 continue
 
             # get indices of qmol conformers that match rmol conformers
             molIndices = compare2Mols(rmol, qmol)
-            allIndices.append(molIndices)
+            moldict[name]['indices'].append(molIndices)
 
-    numMols = len(refNumConfs)
-    molNames = molNames[:numMols]
-    print("\nmolNames\n",molNames)
-    print("\nrefNumConfs\n",refNumConfs)
-    print("\nallIndices\n",allIndices)
-    print("\nelists\n",elists)
+    return moldict
 
-    return molNames, refNumConfs, allIndices, elists, tlists
-
-def getAllTimes(sdfList, thryList):
-    """
-    Get times saved in SD tages from files listed in python input file lines.
-       No longer used after edits to matchMinima (07/1/2017).
-
-    Parameters
-    ----------
-    sdfList: str list - list of the SDF file names to be analyzed.
-          This list should include reference SDF file (sdfRef) as first element.
-    thryList: str list - list of levels of theory corresponding to the files
-          in sdfList. E.g., ['MP2/def2-TZVP','B3LYP-D3MBJ/6-311++G**']
-
-    Returns
-    -------
-    timelists: 3D list where timelists[i][j][k] is the wall time for optimizing
-       for the ith level of theory, jth molecule, kth conformer
-
-    """
-
-    sdfRef = sdfList[0]
-    timelists = []
-    for i, sdfQuery in enumerate(sdfList):
-        qthry = thryList[i]
-        qmethod = qthry.split('/')[0].strip()
-        qbasis = qthry.split('/')[1].strip()
-
-        print("\n\nOpening reference file %s" % sdfRef)
-        ifsRef = oechem.oemolistream()
-        ifsRef.SetConfTest( oechem.OEAbsoluteConfTest() )
-        if not ifsRef.open(sdfRef):
-            oechem.OEThrow.Fatal("Unable to open %s for reading" % sdfRef)
-        molsRef = ifsRef.GetOEMols()
-
-        print("Opening query file %s, and using [ %s ] wall times" % (sdfQuery, qthry))
-        ifsQuery = oechem.oemolistream()
-        ifsQuery.SetConfTest( oechem.OEAbsoluteConfTest() )
-        if not ifsQuery.open(sdfQuery):
-            oechem.OEThrow.Fatal("Unable to open %s for reading" % sdfQuery)
-        molsQuery = ifsQuery.GetOEMols()
-
-        for rmol in molsRef:
-            try:
-                qmol = next(molsQuery)
-                timelists.append(map(float, pt.GetSDList(qmol, "opt runtime",'Psi4', qmethod, qbasis))) # for opt, not spe
-            except StopIteration:
-                print("No %s molecule found in %s" % (rmol.GetTitle(), sdfQuery))
-                timelists.append([nan]*rmol.NumConfs())
-                continue
-
-    return timelists
 
 def calcRMSError(trimE, zeroes):
     """
@@ -435,24 +378,13 @@ def calcRelEne(minimaE):
         else:
             zeroes.append(nanCnt.index(min(nanCnt)))
 
-#    # delete cases with just one conformer
-#    print("ATTN: these (zero-indexed) mols were removed from analysis due to "
-#         +"single conformer or no conformer matches in at least one file: ",
-#         mols2del)
-#    trimE = np.delete(np.asarray(minimaE),mols2del,axis=0)
-#    if len(trimE) != len(zeroes):
-#        print len(trimE), zeroes
-#        sys.exit("Error in determining reference confs for molecules.")
-
     # calc relative energies, and convert Hartrees to kcal/mol.
-    mintemp = []  # not sure why this is needed but writeRelEne kicks fuss without it
+    trimE = []
     for z, molE in zip(zeroes, minimaE):
-    #for z, molE in zip(zeroes, trimE):
         temp = [] # temp list for this mol's relative energies
         for fileE in molE:
             temp.append([627.5095*(fileE[i]-fileE[z]) for i in range(len(fileE))])
-        mintemp.append(temp)
-    trimE = mintemp
+        trimE.append(temp)
 
     return trimE, zeroes
 
@@ -492,58 +424,59 @@ def writeRelEne(molName, rmse, relEnes, zero, thryList, prefix='relene'):
         compF.write(thisline)
     compF.close()
 
-def reorganizeSublists(theArray,allMolIndices):
+def extractMatches(moldict, *tags):
     """
-    theArray should be a three-dimensional list, in which theArray[i][j][k]
-        represents the ith molecule, jth opt file, kth conformer.
-    allMolIndices should be the exact same shape.
+    This function checks if minima is matched, using indices lists inside dict.
+        If there is no match, the value (energy, time, etc) listed in the dict
+        is not used, and nan is added as placeholder. After matching from
+        indices, the new list is stored under a new key with the original tag
+        label plus '_matched' suffix.
 
-    Instead of grouping by files then by molecule,
-        reorder to group by molecules then by file.
-    Something like this:
-       [[[file1 mol1] [file1 mol2]] ... [[file2 mol1] [file2 mol2]]]
-    Goes to this:
-       [[[file1 mol1] [file2 mol1]] ... [[file1 molN] [file2 molN]]]
+    TODO - remove need for tags var since tags of interest are already in dct
 
-    This function checks if minima is matched, using allMolIndices. If not, the
-       value in theArray is NOT used, and nan is used instead.
 
+    Parameter
+    ---------
+    moldict
+
+    Returns
+    -------
+    same as the parameter with new key/value pairs for matched data
     """
-    # get list lengths for debugging
-#    for i in range(len(theArray)):
-#        for l in range(len(theArray[0])):
-#            print(len(allMolIndices), len(allMolIndices[i]), len(allMolIndices[i][l]))
-#            print(len(theArray), len(theArray[i]), len(theArray[i][l]))
 
-    minimaE = []
-    for i, molIndices in enumerate(allMolIndices):
-        molE = [] # all conf energies from ith mol in all files
-        for j, fileIndices in enumerate(molIndices):
-            fileE = []  # all conf energies from ith mol in jth file
-            for k, confNum in enumerate(fileIndices):
-                if confNum == None:
-                    print("No matching conformer within 0.5 A RMSD for {}th\
- conf of {}th mol in {}th file.".format(k, i, j))
-                    fileE.append(nan)
-                elif confNum==-2:
-                    # only print this warning message once per mol
-                    if k==0: print("!!!! The entire {}th mol is not found in {}th\
- file. !!!!".format(i, j))
-                    fileE.append(nan)
-                elif len(theArray[i][j])==0:
-                    print("!!!! Mol {} was found and confs were matched by RMSD but\
- there are no energies of {}th method. !!!!".format(i, j))
-                    fileE.append(nan)
-                elif confNum == -1:   # -1 signifies reference theory
-                    fileE.append(float(theArray[i][j][k]))
-                else:
-                    #print(theArray[i][j])
-                    fileE.append(float(theArray[i][j][confNum]))
-            molE.append(fileE)
-        minimaE.append(molE)
-    return minimaE
+    for m in moldict:
+        fileIndices = moldict[m]['indices']
+
+        for t in tags:
+            tagData = moldict[m][t] # 2D list, 1st layer is file, 2nd layer is ene/time/etc
+            updated = []
+
+            for i, f in enumerate(fileIndices): # 1D list of indices for this file
+                fileData = []
 
 
+                for j, confNum in enumerate(f):
+                    if confNum == None:
+                        print("No matching conformer within 0.5 A RMSD for {}th\
+ conf of {} mol in {}th file.".format(j, m, i))
+                        fileData.append(nan)
+                    elif confNum==-2:
+                        # only print this warning message once per mol
+                        if j==0: print("!!!! The entire {} mol is not found\
+ in {}th file. !!!!".format(m, i))
+                        fileData.append(nan)
+                    elif len(tagData[i])==0:
+                        print("!!!! Mol {} was found and confs were matched by\
+ RMSD but there are no energies of {}th method. !!!!".format(m, i))
+                        fileData.append(nan)
+                    elif confNum == -1:   # -1 signifies reference theory
+                        fileData.append(float(tagData[i][j]))
+                    else:
+                        #print(theArray[i][j])
+                        fileData.append(float(tagData[i][confNum]))
+                updated.append(fileData)
+            moldict[m][t+'_matched'] = updated
+    return moldict
 
 ### ------------------- Parser -------------------
 
@@ -606,28 +539,28 @@ if __name__ == "__main__":
         else:
             raise parser.error("One or more input files are missing!!")
 
-    # =========================================================================
+    # run the workhorse, unless reading in from pickle file
     if not opt['readpickle']:
-        molNames, refNumConfs, allIndices, elists, tlists = matchMinima(sdfList, thryList)
-        pickle.dump([molNames, refNumConfs,allIndices,elists,tlists], open('match.pickle', 'wb'))
+        moldict = matchMinima(sdfList, thryList, 'QM opt energy', 'opt runtime', 'opt step')
+        pickle.dump(moldict, open('match.pickle', 'wb'))
     else:
-        molNames, refNumConfs, allIndices, elists, tlists = pickle.load(open('match.pickle', 'rb'))
-    # =========================================================================
+        moldict = pickle.load(open('match.pickle', 'rb'))
 
-    numMols = len(refNumConfs)
-    # Separate molecules by sublist, 2D --> 3D
-    allMolIndices = [allIndices[i::numMols] for i in range(numMols)]
-    elists = [elists[i::numMols] for i in range(numMols)]
-    # Reorder indices and energies lists by molecules instead of by files.
-    #   [[[file1 mol1] [file2 mol1]] ... [[file1 molN] [file2 molN]]]
-    minimaE = reorganizeSublists(elists, allMolIndices)
+    # process dictionary to match the data values by RMSD-matched conformers
+    numMols = len(moldict)
+    #moldict = extractMatches(moldict, 'QM opt energy', 'opt runtime', 'opt step')
+    moldict = extractMatches(moldict, 'QM opt energy', 'opt runtime')
+    minimaE = []
+    for m in moldict:
+        minimaE.append(moldict[m]['QM opt energy_matched'])
 
-    # =========================================================================
+    # with matched energies, calculate relative values and RMS error
     trimE, zeroes = calcRelEne(minimaE)
     rmselist = calcRMSError(trimE, zeroes)
 
     # =========================================================================
 
+    molNames = moldict.keys() # temp workaround since adding dictionary (TODO)
     if opt['verbose']:
         for i, mn in enumerate(molNames):
             try:
@@ -638,39 +571,9 @@ if __name__ == "__main__":
 
 
     if opt['tplot']:
-#        allMolTimes = getAllTimes(sdfList, thryList) # ordered by file, mol, conf
-#        allMolTimes = tlists
-
-#        # match conformer times using indices from matchMinima then get stats
-#        allFileTimes = [[] for i in range(numMols)]
-#        allFileStds = [[] for i in range(numMols)]
-#        for i in range(len(sdfList)*numMols):
-#            timeSuc = 0     # running sum of successfully matched minima times
-#            numSuc = 0      # running number of successful minima
-#            numconfs = refNumConfs[i%numMols]  # i%numMols gets some mol
-#            fileTimes = []  # collect successful times for stdevs
-#            for k in range(numconfs):
-#                thisIndex = allIndices[i][k]
-#                if thisIndex == -1:
-#                    timeSuc += allMolTimes[i][k]
-#                    numSuc += 1
-#                    fileTimes.append(allMolTimes[i][k])
-#                elif thisIndex > -1:
-#                    timeSuc += allMolTimes[i][thisIndex]
-#                    numSuc += 1
-#                    fileTimes.append(allMolTimes[i][thisIndex])
-#            try:
-#                fTimeAvg = float(timeSuc)/numSuc
-#            except ZeroDivisionError:
-#                fTimeAvg = nan
-#            allFileTimes[i%numMols].append(fTimeAvg)
-#            allFileStds[i%numMols].append(np.std(np.array(fileTimes)))
-#            #print 'average ',fTimeAvg,' over ',numSuc," samples"
-
-        # separately, go from allMolTimes and calculate relative speeds
-        #   [[[file1 mol1] [file2 mol1]] ... [[file1 molN] [file2 molN]]]
-        allMolTimes = [tlists[i::numMols] for i in range(numMols)]
-        timesByMol = reorganizeSublists(allMolTimes, allMolIndices)
+        timesByMol = []
+        for m in moldict:
+            timesByMol.append(moldict[m]['opt runtime_matched'])
         relTimes, sdTimes = getRatioTimes(timesByMol, zeroes)
 
         allFileTimes = [[] for i in range(numMols)]
@@ -692,16 +595,43 @@ if __name__ == "__main__":
             thryList_i = [element for i, element in enumerate(thryList) if i not in to_exclude]
             plotAvgTimes(name, fileTimes_i, stdevs_i, thryList_i)
 
+#        if opt['combineAll']: pass # TODO
+            # reognize allFileTimes, allFileStds to group by opt-type, not mol
+            #plotAllBars()
+# def plotAllBars( thryList):
+#
+#     # horizonal range
+#     x = np.arange(len(titles))
+#     width = 1./(len(x))
+#     # loop over all the SDF files
+#     coeff = 0
+# #    colors = mpl.cm.rainbow(np.linspace(0, 1, len(x)))
+#     for y, s in zip(timeplot, stdplot):
+#         plt.bar(x+coeff*width, y, yerr=s, alpha=1-0.5*coeff) # alpha:opacity
+#         print(1-0.5*coeff)
+#         coeff += 1
+#
+#     ### Label figure. Label xticks before plot for better spacing.
+# #    plttitle="Average Wall-Clock Times for %s" % (basename)
+# #    plttitle+="\nGeometry Optimization in Psi4"
+# #    plt.title(plttitle,fontsize=20)
+# #    plt.ylabel("time (s)",fontsize=18)
+# #    plt.xticks(x,xticklabels,fontsize=14,rotation=30, ha='left')
+# #    plt.yticks(fontsize=14)
+#     plt.legend(thryList)
+#
+#     plt.savefig('rename_me.png',bbox_inches='tight')
+#     plt.show()
+
+
+
+
         if opt['verbose']: # append time to relative energies file
             for i, name in enumerate(molNames):
-#            for name, fileTimes, stdevs in zip(molNames, allFileTimes, allFileStds, relTimes, sdTimes):
                 compF = open('relene_'+name+'.dat','a')
                 compF.write("\n\n# Four rows: (1) avg times, (2) time stdevs,\
  (3) avg time ratios wrt ref method, (4) stdevs of time ratios:")
-                avgline = "\n# "
-                stdline = "\n# "
-                a2line =  "\n# "
-                s2line =  "\n# "
+                avgline = stdline = a2line = s2line = "\n# "
                 for j, t in enumerate(thryList):
                     avgline += ' %.4f' % allFileTimes[i][j]
                     stdline += ' %.4f' % allFileStds[i][j]
@@ -716,8 +646,8 @@ if __name__ == "__main__":
 
 
     if opt['eplot']:
-        for name, minE in zip(molNames, trimE):
-            #if name != 'AlkEthOH_c1178': continue
-            plotMolMinima(name, minE, thryList)
-            #plotMolMinima(name, minE, thryList, selected=[0,7,12]) # zero based index
+        for i, m in enumerate(moldict):
+#            if m != 'AlkEthOH_c1178': continue
+            plotMolMinima(m, trimE[i], thryList)
+#            plotMolMinima(m, trimE[i], thryList, selected=[0]) # zero based index
 
