@@ -184,6 +184,7 @@ stored in tags. Exiting.".format(rmol.GetTitle(), method, basis))
             max3 = conformer[confmax3]
         except ValueError as e:
             #print("ValueError: {}".format(e))
+            # TODO don't plot this mol for all nan's
             print("All RMSDs in list for file {} mol {} are nan!!!".format(sdfRef, molName))
             max1 = max2 = max3 = -1
 
@@ -254,6 +255,7 @@ if __name__ == "__main__":
     for keyfile in rmsdict: # make sure each file has mols of mostMols
         for keymol in mostMols:
             if type(rmsdict[keyfile][keymol]) == defaultdict:
+                print("Skip plotting {} bc missing data from {}".format(keymol,keyfile))
                 mols2del.append(keymol)
     # delete missing mols from main dict
     if len(mols2del) != 0:

@@ -1,10 +1,9 @@
 
-# TODO
-Version: 2017-11-17
-Add python script descriptions, add example set.
-Update instructions.
-
 # Overview
+Version: 2017-11-17
+Update README:
+* Add python script descriptions
+* Update instructions.
 
 This repository contains a pipeline for generating large sets of QM-optimized molecules using Psi4/Turbomole.  
 For each molecule, conformers are [1] generated, then [2] MM-optimized. Then the user can setup QM geometry  
