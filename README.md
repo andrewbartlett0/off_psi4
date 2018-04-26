@@ -12,22 +12,24 @@ calculations for a more intensive B3LYP-D3MBJ/def2-TZVP geometry optimization.
 
 Pipeline components and description:
 
-| Script               | Stage     | Brief description                                                          |
-| ---------------------|-----------|----------------------------------------------------------------------------|
-| `confs2psi.py`       | setup     | generate Psi4 input files for each conformer/molecule                      |
-| `confs2turb.py`      | setup     | generate Turbomole input files for each conformer/molecule                 |
-| `diffSpeOpt`         | analysis  | compare how diff OPT energy is from pre-OPT single point energy            |
-| `executor.py`        | N/A       | main interface connecting "setup" and "results" scripts for Psi4           |
-| `filterConfs.py`     | setup     | remover conformers of molecules that may be same structure                 |
-| `getPsiResults.py`   | results   | get job results from Psi4                                                  |
-| `getTurbResults.py`  | results   | get job results from Turbomole                                             |
-| `matchMinima.py`     | analysis  | match conformers from sets of different optimizations                      |
-| `matchPlot.py`       | analysis  | additional plots that can be used from `matchMinima.py` results            |
-| `plotTimes.py`       | analysis  | plot calculation time averaged over the conformers for each molecule       |
-| `procTags.py`        | results   | store QM energies & conformer details as data tags in SDF molecule files   |
-| `smi2confs.py`       | setup     | generate molecular structures and conformers for input SMILES string       |
-| `stitchSpe.py`       | analysis  | calculate relative conformer energies from sets of different SPEs          |
+| Script               | Stage         | Brief description                                                          |
+| ---------------------|---------------|----------------------------------------------------------------------------|
+| `confs2psi.py`       | setup         | generate Psi4 input files for each conformer/molecule                      |
+| `confs2turb.py`      | setup         | generate Turbomole input files for each conformer/molecule                 |
+| `diffSpeOpt.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
+| `executor.py`        | N/A           | main interface connecting "setup" and "results" scripts for Psi4           |
+| `filterConfs.py`     | setup/results | remover conformers of molecules that may be same structure                 |
+| `getPsiResults.py`   | results       | get job results from Psi4                                                  |
+| `getTurbResults.py`  | results       | get job results from Turbomole                                             |
+| `matchMinima.py`     | analysis      | match conformers from sets of different optimizations                      |
+| `matchPlot.py`       | analysis      | additional plots that can be used from `matchMinima.py` results            |
+| `plotTimes.py`       | analysis      | plot calculation time averaged over the conformers for each molecule       |
+| `procTags.py`        | results       | store QM energies & conformer details as data tags in SDF molecule files   |
+| `smi2confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
+| `stitchSpe.py`       | analysis      | calculate relative conformer energies from sets of different SPEs          |
 
+**Example workflow**:
+`smi2confs.py` &rarr; `confs2psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
 
 There are other scripts in this repository that are not integral to the pipeline. These are found in the `tools` directory.
 
@@ -148,12 +150,12 @@ CCOC(C)(C)C(C)(C)O AlkEthOH_c1178
  * This should be a text file directing the script to process a particular quantity.
  * The first uncommented line should be the keyword of the specific quantity (e.g., energy) found in the SD tag label.
  * Following lines should contain the following information in order, separated by a comma:
-    * sdf file with full path
-    * Boolean, True if SPE, False if optimization
+    * SDF file with full path
+    * Boolean: True for SPE values, False for optimization values
     * method
     * basis set
- * The first sdf file listed will be the reference values for all following lines when computing RMSDs.
- * The sdf files on each line should ALL have the same molecules, same conformers, etc. These may differ in coordinates or SD tags.
+ * The first SDF file listed will be the reference values for all following lines when computing RMSDs.
+ * The SDF files on each line should ALL have the same molecules, same conformers, etc. These may differ in coordinates or SD tags.
  * Example:
 
 ```
@@ -163,25 +165,25 @@ CCOC(C)(C)C(C)(C)O AlkEthOH_c1178
 
  /path/and/setofMols-221-opt2.sdf, False, b3lyp-d3mbj ,    def2-tzvp
  /path/and/setofMols-221-spe1.sdf, True , b3lyp-d3mbj ,    def2-tzvp
- /path/and/setofMols-221-spe2.sdf, True , mp2,  cc-pvtz ,
- /path/and/setofMols-221-spe3.sdf, True , pbe0, 6-311g**
+ /path/and/setofMols-221-spe2.sdf, True , mp2         ,    cc-pvtz
+ /path/and/setofMols-221-spe3.sdf, True , pbe0        ,    6-311g**
 ```
 
 
 ## Some terms
 
- * Pertaining to method
-   * MP2 - second order Moller-Plesset perturbation theory (adds electron corr effects upon Hartree-Fock)
-   * B3LYP - DFT hybrid functional, (Becke, three-parameter, Lee-Yang-Parr) exchange-correlation functional
-   * PBE0 - DFT functional hybrid functional, (Perdew–Burke-Ernzerhof)
-   * D3 - Grimme et al. dispersion correction method
-   * D3BJ - D3 with Becke-Johnson damping
-   * D3MBJ - Sherrill et al. modifications to D3BJ approach
+ * Pertaining to method:
+   * `MP2` - second order Moller-Plesset perturbation theory (adds electron corr effects upon Hartree-Fock)
+   * `B3LYP` - DFT hybrid functional, (Becke, three-parameter, Lee-Yang-Parr) exchange-correlation functional
+   * `PBE0` - DFT functional hybrid functional, (Perdew–Burke-Ernzerhof)
+   * `D3` - Grimme et al. dispersion correction method
+   * `D3BJ` - D3 with Becke-Johnson damping
+   * `D3MBJ` - Sherrill et al. modifications to D3BJ approach
 
- * Pertaining to basis set
-   * def2 - 'default' basis sets with additional polarization fx compared to 'def-'
-   * SV(P) - double zeta valence with polarization on all non-hydrogen atoms
-   * TZVP - triple zeta valence with polarization on all atoms
+ * Pertaining to basis set:
+   * `def2` - 'default' basis sets with additional polarization fx compared to 'def-'
+   * `SV(P)` - double zeta valence with polarization on all non-hydrogen atoms
+   * `TZVP` - triple zeta valence with polarization on all atoms
 
 ## Potential errors and how to get around them [TODO]
  * `KeyError` from processing results. Did you specify spe for single point calculations?
