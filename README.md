@@ -13,7 +13,7 @@ calculations for a more intensive B3LYP-D3MBJ/def2-TZVP geometry optimization.
 Pipeline components and description:
 
 | Script               | Stage     | Brief description                                                          |
-| ---------------------|----------------------------------------------------------------------------------------|
+| ---------------------|-----------|----------------------------------------------------------------------------|
 | `confs2psi.py`       | setup     | generate Psi4 input files for each conformer/molecule                      |
 | `confs2turb.py`      | setup     | generate Turbomole input files for each conformer/molecule                 |
 | `diffSpeOpt`         | analysis  | compare how diff OPT energy is from pre-OPT single point energy            |
@@ -71,7 +71,7 @@ or geometry optimizations, since (mol1,confA) will start from the same structure
 the number of conformers may be reduced, so it can be hard to compare one to one.
 
 An `-f` prefix means that the Omega-generated conformers were filtered based on their structures, but that these have not  
-been MM-optimized. For example, `basename-f020.sdf` means filtered from omega, no MM opt/filter, yes QM opt/filter, no QM stage 2.
+been MM-optimized. For example, `basename-f020.sdf` means filtered from OpenEye Omega, no MM opt/filter, yes QM opt/filter, no QM stage 2.
 
 In summary,
 
@@ -119,7 +119,7 @@ See section on "Naming molecules in the input SMILES file" and "File name limita
  9. (opt.) Get wall clock times, num opt steps, relative energies. 
     * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/avgTimeEne.py --relene -f /path/&/file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
-## Notes
+## Important Notes
 
 ### File name limitations
 
@@ -136,8 +136,7 @@ Base names (e.g. `basename.smi`, `basename.sdf`) can contain underscores but NO 
 Smiles file should contain, in each line: `SMILES_STRING molecule_title` and be named in format of `basename.smi`.
   * Molecule title should have no dashes, as Psi4 will raise an error.
   * Molecule title should NOT start with a number, as Psi4 will raise error.
-
-Example:
+  * Example:
 ```
 CC(C(C(C)O)O)O AlkEthOH_c42
 CCCC AlkEthOH_c1008
@@ -155,11 +154,10 @@ CCOC(C)(C)C(C)(C)O AlkEthOH_c1178
     * basis set
  * The first sdf file listed will be the reference values for all following lines when computing RMSDs.
  * The sdf files on each line should ALL have the same molecules, same conformers, etc. These may differ in coordinates or SD tags.
-
  * Example:
 
 ```
- \# comments begin with pound symbol and are ignored
+ # comments begin with pound symbol and are ignored
 
  energy
 
