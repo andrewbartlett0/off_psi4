@@ -1,6 +1,6 @@
 
 # QM Pipeline
-Version: 2018-04-25
+README last updated: 2018-04-25
 
 This repository contains a pipeline for generating large sets of QM-optimized molecules using Psi4 or Turbomole.  
 For each molecule, conformers are generated then MM-optimized. The user can set up QM geometry optimizations or  
