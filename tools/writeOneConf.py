@@ -19,14 +19,14 @@ import argparse
 def main(**kwargs):
     outfn = os.path.splitext(opt['infn'])[0]+'_'+opt['suffix']+'.mol2'
     success = False
-    
+
     ### Read in .sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     if not ifs.open(opt['infn']):
         oechem.OEThrow.Warning("Unable to open %s for reading" % opt['infn'])
         return
-    
+
     for mol in ifs.GetOEMols():
         if mol.GetTitle() == opt['title']:
             for i, conf in enumerate( mol.GetConfs()):

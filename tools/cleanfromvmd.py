@@ -9,7 +9,7 @@ def convertSDFfile(reffile, filtfile, writeout):
     refifs = oechem.oemolistream()
     filtifs = oechem.oemolistream()
     ofs = oechem.oemolostream()
-    
+
     ### Read in reference file, but don't need its old conformers
     if not refifs.open(reffile):
         oechem.OEThrow.Warning("Unable to open %s for reading" % reffile)

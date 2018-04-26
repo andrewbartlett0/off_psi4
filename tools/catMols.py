@@ -2,7 +2,7 @@
 # https://docs.eyesopen.com/toolkits/python/oechemtk/examplesoechem.html#section-example-oeoechem-catmols
 # Example:   python catMols2.py -i diverse-200-Div1.mol2 diverse-200-Div4.mol2 -o 41.mol2
 #            python catMols2.py -i diverse-200.sdf diverse-200-Div4-selected.mol2 -list exclude.txt -o new.sdf
-# Adapted to: 
+# Adapted to:
 #   (1) write out indiv molecules, instead of adding all data to one mol (OEAddMols)
 #   (2) skip the mols with specified titles from the first (parent) input file.
 

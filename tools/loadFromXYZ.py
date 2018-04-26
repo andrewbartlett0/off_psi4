@@ -16,7 +16,7 @@ import argparse
 
 def main(**kwargs):
     outfn = opt['fout']
-    
+
     # Open input files.
     mifs = oechem.oemolistream()
     if not mifs.open(opt['fmol2']):
@@ -30,7 +30,7 @@ def main(**kwargs):
     xmol = xifs.GetOEMols().next()
 
     mmol.SetCoords(xmol.GetCoords())
-    
+
     ofs = oechem.oemolostream()
     if not ofs.open(outfn):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % outfn)
