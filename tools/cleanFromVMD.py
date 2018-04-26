@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# Usage: python sdfMol2.py path/with/refFile path/with/filteredFile path/with/newFiltfile
+# Usage: python cleanFromVMD.py referenceInput filteredInput cleanedOutput
+# By: Victoria T. Lim
 
 import os,sys
 import openeye.oechem as oechem
