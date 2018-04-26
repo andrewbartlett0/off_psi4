@@ -249,7 +249,7 @@ def main(wholedict, verbose=False,outfn='relene-rmsd.dat', plotbars=False):
                 temp.append(subset[2][f][m])
                 plotlist.append(temp)
         plotlist = np.array(plotlist)
-    
+
         # generate plot
         fig = plt.figure()
         ax = fig.add_subplot(111)

@@ -165,7 +165,7 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
     ofs = oechem.oemolostream()
     if os.path.exists(sdfout):
         #sys.exit("Output .sdf file already exists. Exiting.\n")
-        print ("Output .sdf file already exists. Exiting.\n")
+        print("Output .sdf file already exists. Exiting.\n")
         return
     if not ofs.open(sdfout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % sdfout)
@@ -173,6 +173,7 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
     ### Output files detailing number of resolved clashes
     ###   and original number of conformers before MM opt.
     conffile = open('numConfs.txt', 'a')
+    conffile.write( "Number of original conformers\n")
 
     ### For each molecule: label atoms, generate confs, resolve clashes, optimize.
     for smimol in ifs.GetOEMols():

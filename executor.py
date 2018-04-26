@@ -8,7 +8,6 @@ import filterConfs
 import confs2psi
 import getPsiResults
 
-#
 # Envisioned pipeline stages with this script:
 #   I.   feed in smiles file > generate confs > MM optimize > generate psi4 inputs
 #   II.  process psi4 results
@@ -21,13 +20,13 @@ import getPsiResults
 #   python executor.py -f /path/to/inputfile --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
 #   python executor.py -f /path/to/inputfile --results --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'
 #
-# Note 1: This pipeline uses some preset parameters, such as 
+# Note 1: This pipeline uses some preset parameters, such as
 #    resClash=True and quickOpt=True (with SD opt) in smi2confs, and
 #    MP2/def2-sv(p) for QM opt1. These can be modified in the argument
 #    inputs here, or in the parent code itself.
 # Note 2: The input file must be in the same directory that the script is
 #    called. The directory tree goes (pwd)/molName/confNum .
-# Note 3: can sort of setup mol2 files (e.g. for one mol and all its confs) but 
+# Note 3: can sort of setup mol2 files (e.g. for one mol and all its confs) but
 #     check that molecule name and total charge is correct in Psi4 input files.
 #
 
@@ -49,7 +48,7 @@ def main(**kwargs):
             smi2confs.smi2confs(os.path.join(hdir,opt['filename']))
             filterConfs.filterConfs(os.path.join(hdir, msdf), "MM Szybki SD Energy", suffix='200')
             msdf = base+'-200.sdf'
-        else: 
+        else:
             msdf = fullname
 
         ### Generate Psi4 inputs.
@@ -75,10 +74,10 @@ def main(**kwargs):
 
         ### Filter optimized results.
         print("Filtering Psi4 results for %s ..." %(osdf))
-        if not opt['spe']: 
+        if not opt['spe']:
             tag = "QM Psi4 Final Opt. Energy (Har) %s/%s" % (method, basisset)
             filterConfs.filterConfs(osdf, tag, suffix)
-#        else: 
+#        else:
 #            tag = "QM Psi4 Single Pt. Energy (Har) %s/%s" % (method, basisset)
 
 

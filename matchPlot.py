@@ -10,7 +10,7 @@ import matplotlib as mpl
 
 '''
 Generate heat plots, scatter plots, and 3D plots from output of matchMinima.py.
-This extends results from matchMinima.py which only plots 
+This extends results from matchMinima.py which only plots
 simple bar plots and line plots.
 
 '''
@@ -43,7 +43,7 @@ def plotHeatRMSE(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fpr
 
     ### Label figure. Label xticks before plot for better spacing.
 #    plt.title(plttitle,fontsize=20)
-    plt.xticks(x,ticklabels,fontsize=12,rotation=-30, ha='left')
+    plt.xticks(x,ticklabels,fontsize=12,rotation=-40, ha='left')
     plt.yticks(y,ticklabels,fontsize=14)
     plt.xlabel("reference",fontsize=14)
     plt.ylabel("compared",fontsize=16)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
             sdfList.append(dataline[1])
 
 
-    # ========================================================================= 
+    # =========================================================================
     if opt['eheatplot'] is not None:
         rmsArray = []
         for infile in sdfList:
@@ -155,7 +155,7 @@ if __name__ == "__main__":
             with open(infile) as f:
                 for line in f:
                     if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # ratio line via iterator 
+                        ravgs = itertools.islice(f,3) # ratio line via iterator
                         for j in ravgs:            # get last item of iterator
                             pass
                         ravgs = [float(s) for s in j.split()[1:]]
@@ -177,7 +177,7 @@ if __name__ == "__main__":
                         rmse = [float(s) for s in rmse.split()[1:]]
                         eArray.append(rmse)
                     if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # ratio line via iterator 
+                        ravgs = itertools.islice(f,3) # ratio line via iterator
                         for j in ravgs:            # get last item of iterator
                             pass
                         ravgs = [float(s) for s in j.split()[1:]]

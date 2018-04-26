@@ -15,7 +15,7 @@ import procTags as pt
 
 
 def GetTime():
-    """ 
+    """
     Subtract time from beginning of job.start and job.last files.
 
     Returns
@@ -42,25 +42,23 @@ def GetTime():
             break
     fp.close()
 
-    print init, final
     d1 = datetime.datetime.strptime(init, "%a %b %d %H:%M:%S %Z %Y")
     d2 = datetime.datetime.strptime(final, "%a %b %d %H:%M:%S %Z %Y")
     dtime = (d2-d1).total_seconds()
-    print init, final, dtime
     return dtime
 
 def ProcessOutput(Props, spe=False):
-    """ 
+    """
 
     TO BE UPDATED
 
     Go through output file and get level of theory (method and basis set),
         number of optimization steps, initial and final energies, and
         optimized coordinates. Returns all this information in a dictionary
-        that was passed to this function. 
+        that was passed to this function.
 
     Relevant Turbomole output files:
-     * GEO_OPT_CONVERGED or GEO_OPT_FAILED 
+     * GEO_OPT_CONVERGED or GEO_OPT_FAILED
      * job.last
 
     Parameters
@@ -108,7 +106,7 @@ def ProcessOutput(Props, spe=False):
 #            details = line.split()
 #            # "A HF calculation using ..."
 #            if details[0] == 'A': Props['method'] = details[1]
-#            else: 
+#            else:
 #            print Props['basis']
 #        if "basis set information" in line:
 #            line = next(it) # "-----"
@@ -139,7 +137,7 @@ def ProcessOutput(Props, spe=False):
     initEnergy = lines[1].split()[1]
     finalEnergy = lines[-2].split()[1]
     numSteps = len(lines)-2
-    Props['initEnergy'] = initEnergy 
+    Props['initEnergy'] = initEnergy
     Props['finalEnergy'] = finalEnergy
     Props['numSteps'] = numSteps
     return Props
@@ -156,14 +154,14 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
 
     method = theory.split('/')[0]
     basisset = theory.split('/')[1]
-    
+
     ### Read in .sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     if not ifs.open(origsdf):
         oechem.OEThrow.Warning("Unable to open %s for reading" % origsdf)
         return
-    
+
     ### Open outstream file.
     writeout = os.path.join(wdir,finsdf)
     write_ofs = oechem.oemolostream()
@@ -176,7 +174,7 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
     for mol in ifs.GetOEMols():
         print("===== %s =====" % (mol.GetTitle()))
         for i, conf in enumerate( mol.GetConfs()):
-            props = {} # dictionary of data for this conformer 
+            props = {} # dictionary of data for this conformer
             props['package'] = "Turbomole"
             props['method'] = method
             props['basis'] = basisset
@@ -216,7 +214,7 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
     try:
         return props['method'], props['basis']
     except KeyError:
-        return None, None 
+        return None, None
 
     ifs.close()
 

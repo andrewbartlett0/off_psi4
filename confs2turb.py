@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-## Usage: python confs2turb.py -i /path/and/filename.sdf
+## By: Victoria T. Lim
 
+## Usage: python confs2turb.py -i /path/and/filename.sdf
 ## Different from confs2psi.py since method, basisset, calc type, mem
 ##    should be specified in the templateOptions file of Turbomole setup.
 
@@ -53,14 +54,14 @@ def confs2turb(insdf):
     """
     homedir = os.getcwd()
     p = sp.call('module load turbomole/7.1/intel', shell=True)
-    
+
     ### Read in .sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     if not ifs.open(insdf):
         oechem.OEThrow.Warning("Unable to open %s for reading" % insdf)
         return
-    
+
     ### For each molecule: for each conf, generate input
     for mol in ifs.GetOEMols():
         print(mol.GetTitle(), mol.NumConfs())
@@ -71,7 +72,7 @@ def confs2turb(insdf):
                 os.makedirs(subdir)
             os.chdir(subdir)
 
-            # write out relevant files 
+            # write out relevant files
             label = mol.GetTitle()+'_'+str(i+1)
             ofile = open('options','w')
             xfile = open('input.xyz','w')
@@ -85,15 +86,15 @@ def confs2turb(insdf):
             p=sp.Popen('x2t input.xyz > coord',shell=True)
             p.wait()
             #os.chdir(wdir) # i don't think i need this?
-            
+
     ifs.close()
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='This script generates, for \
- each conformer, a Turbomole-style coord file as well as an options\
- file for use with autoDefine.py which automates define process of Turbomole.\
- Options file contains title and charge of mol.\
+    parser = argparse.ArgumentParser(description='This script generates, for\
+ each conformer, a Turbomole-style coord file as well as an options file\
+ for subsequent use with `autoDefine.py` (by Matt Agee) which automates the\
+ `define` function of Turbomole. Options file contains title and charge of mol.\
  x2t is run for each coord file to generate Turbomole coordinates.')
 
     parser.add_argument('-i','--infile', help='Input file with mols and confs\
