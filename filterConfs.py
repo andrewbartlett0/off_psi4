@@ -15,16 +15,6 @@ import os, sys, glob
 import openeye.oechem as oechem
 
 
-### ------------------- Variables -------------------
-
-### Parameters for distinguishing minima & OERMSD
-automorph = True
-heavyOnly = False
-overlay = True
-thresE = 5.E-4 # declare confs diff & skip RMSD comparison above this threshold
-thresRMSD = 0.2 # above this threshold (Angstrom), confs are "diff" minima
-
-
 ### ------------------- Functions -------------------
 
 def IdentifyMinima(mol,tag,ThresholdE,ThresholdRMSD):
@@ -47,15 +37,18 @@ def IdentifyMinima(mol,tag,ThresholdE,ThresholdRMSD):
         one conf and it didn't optimize, or something else funky.
 
     """
-    confsToDel = set() # declare an empty set (unordered) for confs to delete
+    # Parameters for OpenEye RMSD calculation
+    automorph = True
+    heavyOnly = False
+    overlay = True
+
+    # declare variables for conformers to delete
+    confsToDel = set()
     delCount = 0
 
-    # if there's only 1 conf, has SDData ==> True, not ==> False
+    # check if SD tag exists for the case of single conformer
     if mol.NumConfs()==1:
-        #testmol = mol.GetConfs(oechem.OEHasConfIdx(0))  #mol doesn't get read in right for OEHasData (NotImplementedError)
-        #testmol = next(mol.GetConfs()) #TypeError: 'OEConfIter' object is not an iterator
         testmol = mol.GetConfs().next()
-
         for x in oechem.OEGetSDDataPairs(mol):
             if tag.lower() in x.GetTag().lower():
                 return True
@@ -66,7 +59,7 @@ def IdentifyMinima(mol,tag,ThresholdE,ThresholdRMSD):
     for confRef in mol.GetConfs():
         print(" ~ Reference: %s conformer %d" % (mol.GetTitle(), confRef.GetIdx()+1))
 
-        # get real tag (correct for capitalization) (TODO make this more efficient)
+        # get real tag (correct for capitalization)
         for x in oechem.OEGetSDDataPairs(confRef):
             if tag.lower() in x.GetTag().lower():
                 taglabel = x.GetTag()
@@ -96,24 +89,23 @@ def IdentifyMinima(mol,tag,ThresholdE,ThresholdRMSD):
                 absERel = abs(refE-testE)/627.5095
             else:
                 absERel = abs(refE-testE)
-            # if energies are much diff., confs are diff, skip.
+            # if energies are diff enough --> confs are diff --> keep & skip ahead
             if absERel > ThresholdE:
                 continue
-            # for the confs with similar E, see if they are diff with RMSD
+            # if energies are similar, see if they are diff by RMSD
             rmsd = oechem.OERMSD(confRef,confTest,automorph,heavyOnly,overlay)
-            # if RMSD < thresholdRMSD, must be same conf, tag to delete.
+            # if measured_RMSD < threshold_RMSD --> confs are same --> delete
             if rmsd < ThresholdRMSD:
                 confsToDel.add(confTest.GetIdx())
 
     # for the same molecule, delete tagged conformers
     print("%s original number of conformers: %d" % (mol.GetTitle(), mol.NumConfs()))
     if delCount == mol.NumConfs():
+        # all conformers in this mol has been tagged for deletion
         return False
-
     for conf in mol.GetConfs():
         if conf.GetIdx() in confsToDel:
-            print('Removing %s conformer index %d' \
-                  % (mol.GetTitle(),conf.GetIdx()))
+            print('Removing %s conformer index %d' % (mol.GetTitle(),conf.GetIdx()))
             if not mol.DeleteConf(conf):
                 oechem.OEThrow.Fatal("Unable to delete %s GetIdx() %d" \
                                   % (mol.GetTitle(), conf.GetIdx()))
@@ -145,11 +137,12 @@ def filterConfs(rmsdfile, tag, suffix):
             becomes /some/dir/basename-220.sdf
 
     """
+    # Parameters for distinguishing cutoff of conformer similarity
+    thresE = 5.E-4 # declare confs diff & skip RMSD comparison above this threshold
+    thresRMSD = 0.2 # above this threshold (Angstrom), confs are "diff" minima
 
     wdir, fname = os.path.split(rmsdfile)
-#    os.chdir(wdir)
-    wdir = os.getcwd()
-    numConfsF = open(os.path.join(wdir,"numConfs.txt"), 'a')
+    numConfsF = open(os.path.join(os.getcwd(),"numConfs.txt"), 'a')
     numConfsF.write(tag+"\n")
 
     # Open file to be processed.
@@ -180,5 +173,4 @@ def filterConfs(rmsdfile, tag, suffix):
     rmsd_ofs.close()
 
     print("Done filtering %s to %s.\n" % (fname, rmsdout))
-# done
 

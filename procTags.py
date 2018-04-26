@@ -57,14 +57,11 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
     SDList = []
     for j, conf in enumerate( mol.GetConfs() ):
         for x in oechem.OEGetSDDataPairs(conf):
-            #dir(x) yields ['GetTag', 'GetValue', 'SetTag', 'SetValue', '__class__', '__del__', '__delattr__', '__dict__', '__doc__', '__format__', '__getattribute__', '__hash__', '__init__', '__module__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__swig_destroy__', '__weakref__', '_itr', 'this', 'thisown']
-
             # Case: opt did not finish --> append nan
             if "Note on opt." in x.GetTag() and "DID NOT FINISH" in x.GetValue():
                 SDList.append('nan')
                 break
-            # Case: want energy value
-            # Case: want original index number
+            # Case: want energy value OR want original index number
             elif taglabel.lower() in x.GetTag().lower():
                 SDList.append(x.GetValue())
                 break
@@ -74,8 +71,16 @@ def GetSDList(mol, prop, Package='Psi4', Method=None, Basisset=None):
 def SetOptSDTags(Conf, Props, spe=False):
     """
     For one particular conformer, set all available SD tags based on data
-        in Props dictionary.
-    TODO: what happens if the tag already exists? Is it bypassed? Overwritten?
+    in Props dictionary.
+
+    Warning
+    -------
+    If the exact tag already exists, and you want to add a new one then there
+    will be duplicate tags with maybe different data. (NOT recommended).
+    Then the function to get SDList will only get one or the other;
+    I think it just gets the first matching tag.
+
+    TODO: maybe add some kind of checking to prevent duplicate tags added
 
     Parameters
     ----------
@@ -114,21 +119,25 @@ def SetOptSDTags(Conf, Props, spe=False):
     if spe: return # stop here if SPE
 
     # Set new SD tag for original conformer number
-    # !! Opt2 files should ALREADY have this !! Opt2 index is NOT orig index!
+    # !! Opt2 files should ALREADY have this !! Opt2 index is NOT orig index !!
     taglabel = "Original omega conformer number"
-    if not oechem.OEHasSDData(Conf, taglabel): # add new tag if not existing
+    # add new tag if not existing
+    if not oechem.OEHasSDData(Conf, taglabel):
+        # if not working with confs, will have no GetIdx
         try:
             oechem.OEAddSDData(Conf, taglabel, str(Conf.GetIdx()+1))
         except AttributeError as err:
-            pass  # if not working with confs, will have no GetIdx
-    else: # if tag exists, append to it
+            pass
+    # if tag exists, append new conformer ID after the old one
+    else:
+        # if not working with confs, will have no GetIdx
         try:
             oldid = oechem.OEGetSDData(Conf, taglabel)
             newid = str(Conf.GetIdx()+1)
             totid = "{}, {}".format(oldid,newid)
             oechem.OESetSDData(Conf, taglabel, totid)
         except AttributeError as err:
-            pass  # if not working with confs, will have no GetIdx
+            pass
 
     # Set new SD tag for numSteps of geom. opt.
     taglabel = "QM %s Opt. Steps %s/%s" % (pkg, method, basisset)
