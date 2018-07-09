@@ -11,7 +11,7 @@ import openeye.oechem as oechem
 import shutil
 
 
-def MakePSI4Input(mol, label, method, basisset, SPE=False, mem=None):
+def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
     """
     Parameters
     ----------
@@ -42,15 +42,23 @@ def MakePSI4Input(mol, label, method, basisset, SPE=False, mem=None):
         inputstring+=( '\n  %s %10.4f %10.4f  %10.4f' \
                        %(oechem.OEGetAtomicSymbol(atom.GetAtomicNum()),
                        xyz[0], xyz[1], xyz[2]) )
-    inputstring+=( '\n  units angstrom')
+    inputstring+=( '\n  units angstrom\n}')
+    # check if mol has a "freeze" tag
+    for x in oechem.OEGetSDDataPairs(mol):
+        if "atoms to freeze" in x.GetTag():
+            freeze_list = x.GetValue()
+            inputstring += "\n\nfreeze_list = \"\"\"\n  {} xyz\n  {} xyz\n  {} xyz\n  {} xyz\n\"\"\"".format(freeze_list[1], freeze_list[4],
+                freeze_list[7], freeze_list[10])
+            inputstring += "\nset optking frozen_cartesian $freeze_list"
+            inputstring += "\nset optking dynamic_level = 1\nset optking consecutive_backsteps = 2\nset optking intrafrag_step_limit = 0.1\nset optking interfrag_step_limit = 0.1"
     # explicitly specify MP2 RI-auxiliary basis for Ahlrichs basis set
     # http://www.psicode.org/psi4manual/master/basissets_byfamily.html
     if method.lower()=='mp2' and 'def' in basisset and basisset.lower()!='def2-qzvpd':
-        inputstring+=('\n}\n\nset basis %s' % (basisset))
+        inputstring+=('\n\nset basis %s' % (basisset))
         inputstring+=('\nset df_basis_mp2 %s-ri' % (basisset))
         inputstring+=('\nset freeze_core True')
     else:
-        inputstring+=('\n}\n\nset basis %s' % (basisset))
+        inputstring+=('\n\nset basis %s' % (basisset))
         inputstring+=('\nset freeze_core True')
     # specify command for type of calculation
     if SPE is False:
@@ -84,6 +92,8 @@ def confs2psi(insdf, method, basis, spe=False, memory=None):
     ### For each molecule: for each conf, generate input
     for mol in ifs.GetOEMols():
         print(mol.GetTitle(), mol.NumConfs())
+        if not mol.GetTitle():
+            sys.exit("ERROR: OEMol must have title assigned! Exiting.")
         for i, conf in enumerate( mol.GetConfs()):
             # change into subdirectory ./mol/conf/
             subdir = os.path.join(wdir,"%s/%s" % (mol.GetTitle(), i+1))
@@ -94,6 +104,6 @@ def confs2psi(insdf, method, basis, spe=False, memory=None):
                 continue
             label = mol.GetTitle()+'_'+str(i+1)
             ofile = open(os.path.join(subdir,'input.dat'), 'w')
-            ofile.write(MakePSI4Input( conf, label, method, basis, spe, memory))
+            ofile.write(make_psi_input( conf, label, method, basis, spe, memory))
             ofile.close()
     ifs.close()
