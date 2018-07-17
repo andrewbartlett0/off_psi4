@@ -10,7 +10,7 @@ import procTags as pt
 
 ### ------------------- Functions -------------------
 
-def GetTime(filename):
+def get_psi_time(filename):
     """
     Get wall-clock time from Psi4 file. If multiple times are present,
         the average will be taken. Used in CompareTimes(...) function.
@@ -30,9 +30,11 @@ def GetTime(filename):
             if "Wall Time:" in line:
                 times.append(float(line.split()[2]))
     time = sum(times) / float(len(times))
+
     return time
 
-def ProcessOutput(filename, Props, spe=False):
+
+def process_psi_out(filename, properties, spe=False):
     """
     Go through output file and get level of theory (method and basis set),
         number of optimization steps, initial and final energies, and
@@ -42,12 +44,12 @@ def ProcessOutput(filename, Props, spe=False):
     Parameters
     ----------
     filename: string name of the output file. E.g. "output.dat"
-    Props: dictionary where all the data will go. Can be empty or not.
+    properties: dictionary where all the data will go. Can be empty or not.
     spe: Boolean - are the Psi4 results of a single point energy calcn?
 
     Returns
     -------
-    Props: dictionary with summarized data from output file.
+    properties: dictionary with summarized data from output file.
            keys are: basis, method, numSteps, initEnergy, finalEnergy, coords
 
     """
@@ -55,8 +57,8 @@ def ProcessOutput(filename, Props, spe=False):
         f = open(filename,"r")
     except IOError:
         print("No {} file found in directory of {}.".format(filename,os.getcwd()))
-        Props['missing'] = True
-        return Props
+        properties['missing'] = True
+        return properties
 #        sys.exit("No %s file found in directory of %s" \
 #                 % ( filename,os.getcwd() ))
 
@@ -69,26 +71,26 @@ def ProcessOutput(filename, Props, spe=False):
     if spe: # Process single point energy calcns differently
         for line in it:
             if "set basis" in line:
-                Props['basis'] = line.split()[2]
+                properties['basis'] = line.split()[2]
             if "energy(" in line:
-                Props['method'] = line.split('\'')[1]
+                properties['method'] = line.split('\'')[1]
             if "Total Energy =" in line:
-                Props['finalEnergy'] = float(line.split()[3])
-        return Props
+                properties['finalEnergy'] = float(line.split()[3])
+        return properties
 
     # Loop through file to get method, basis set, numSteps, energies, coords
     for line in it:
         if "set basis" in line:
-            Props['basis'] = line.split()[2]
+            properties['basis'] = line.split()[2]
         if "optimize(" in line:
-            Props['method'] = line.split('\'')[1]
+            properties['method'] = line.split('\'')[1]
         if "Optimization is complete" in line:
-            Props['numSteps'] = line.strip().split(' ')[5]
+            properties['numSteps'] = line.strip().split(' ')[5]
             for _ in range(8):
                 line = next(it)
-            Props['initEnergy'] = float(line.split()[1])
+            properties['initEnergy'] = float(line.split()[1])
         if "Final energy" in line:
-            Props['finalEnergy'] = float(line.split()[3])
+            properties['finalEnergy'] = float(line.split()[3])
             line = next(it) # "Final (previous) structure:"
             line = next(it) # "Cartesian Geometry (in Angstrom)"
             line = next(it) # Start of optimized geometry
@@ -99,14 +101,14 @@ def ProcessOutput(filename, Props, spe=False):
     # Convert the 2D (3xN) coordinates to 1D list of length 3N (N atoms).
     for atomi in rough:
         coords += [float(i) for i in atomi]
-    Props['coords'] = coords
+    properties['coords'] = coords
     f.close()
-    return Props
+    return properties
 
 
 ### ------------------- Script -------------------
 
-def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
+def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="timer.dat"):
 
     """
     Read in OEMols (and each of their conformers) in origsdf file,
@@ -121,8 +123,8 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
         This path will house soon-generated final output sdf file.
     finsdf:   string - full name of final SDF file with optimized results.
     spe:     Boolean - are the Psi4 results of a single point energy calcn?
-    timefile: string - name of the Psi4 timer files. Default is "timer.dat"
     psiout:   string - name of the Psi4 output files. Default is "output.dat"
+    timeout: string - name of the Psi4 timer files. Default is "timer.dat"
 
     Returns
     -------
@@ -134,10 +136,6 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
        iteration of output file (last conf of last mol).
 
     """
-    if timefile is None:
-        timefile = "timer.dat"
-    if psiout is None:
-        psiout = "output.dat"
 
     wdir, fname = os.path.split(origsdf)
     wdir = os.getcwd()
@@ -176,15 +174,21 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
             os.chdir(subdir)
             # Get wall clock time of the job
             try:
-                props['time'] = GetTime(timefile)
+                props['time'] = get_psi_time(timeout)
             except IOError:
-                props['time'] = "timer.dat file not found"
+                props['time'] = "Timer output file not found"
                 pass
             # process output and get dictionary results
-            props = ProcessOutput(psiout, props, spe)
+            props = process_psi_out(psiout, props, spe)
             # if output was missing, move on
             if props['missing']:
                 continue
+            try:
+                props['numSteps']
+                props['finalEnergy']
+                props['coords']
+            except KeyError:
+                sys.exit("ERROR: Psi4 job was incomplete in {}".format(subdir))
 
             # BRIEF ANALYSIS OF STRUCTURE, INTRA HBONDS
             # Set last coordinates from optimization. skip if missing.
@@ -204,6 +208,87 @@ def getPsiResults(origsdf, finsdf, spe=False, timefile=None, psiout=None):
         return props['method'], props['basis']
     except KeyError:
         return None, None
+
+
+def getPsiOne(insmi, outfile, spe=False, psiout="output.dat", timeout="timer.dat"):
+
+    """
+    Write out Psi4 optimized geometry details into a new OEMol.
+
+    Parameters
+    ----------
+    insmi : string
+        SMILES string for the input molecule to determine molecular identity.
+    outfile : string
+        Name of output geometry file with optimized results.
+    spe : Boolean
+        Are the Psi4 results of a single point energy calcn?
+    psiout : string
+        Name of the Psi4 output files. Default is "output.dat"
+    timeout : string
+        Name of the Psi4 timer files. Default is "timer.dat"
+
+    Returns
+    -------
+    method: string - QM method from Psi4 calculations
+    basisset: string - QM basis set from Psi4 calculations
+
+    None is returned if the function returns early (e.g., if output file
+       already exists)
+
+    """
+
+    # create a new molecule
+    mol = oechem.OEGraphMol()
+    oechem.OESmilesToMol(mol,insmi)
+
+    # Get details for SD tags
+    props = {} # dictionary of data for this mol
+    props['package'] = "Psi4"
+    props['missing'] = False
+
+    # Get wall clock time of the job
+    try:
+        props['time'] = get_psi_time(timeout)
+    except IOError:
+        props['time'] = "Timer output file not found"
+        pass
+
+    # process output and get dictionary results
+    props = process_psi_out(psiout, props, spe)
+    if props['missing']:
+        sys.exit("ERROR: Psi4 output file not found")
+    try:
+        props['numSteps']
+        props['finalEnergy']
+        props['coords']
+    except KeyError:
+        sys.exit("ERROR: Psi4 job was incomplete.")
+
+    # Set last coordinates from optimization. skip if missing.
+    if 'coords' in props and len(props['coords']) != 0 :
+        mol.SetCoords(oechem.OEFloatArray(props['coords']))
+
+    # Set SD tags for this molecule
+    pt.SetOptSDTags(mol, props, spe)
+
+    # Open outstream file.
+    write_ofs = oechem.oemolostream()
+    if os.path.exists(outfile):
+        print("File already exists: %s. Skip getting results.\n" % (outfile))
+        return (None, None)
+    if not write_ofs.open(outfile):
+        oechem.OEThrow.Fatal("Unable to open %s for writing" % outfile)
+
+    # Write output file
+    oechem.OEWriteConstMolecule(write_ofs, mol)
+    write_ofs.close()
+
+    try:
+        return props['method'], props['basis']
+    except KeyError:
+        return None, None
+
 
 if __name__ == "__main__":
     getPsiResults(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
