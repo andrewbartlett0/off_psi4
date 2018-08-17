@@ -116,6 +116,12 @@ def SetOptSDTags(Conf, Props, spe=False):
     else: taglabel = "QM %s Single Pt. Runtime (sec) %s/%s" % (pkg, method, basisset)
     oechem.OEAddSDData(Conf, taglabel, str(Props['time']))
 
+    # Add COSMO energy with outlying charge correction. Turbomole only!
+    if 'ocEnergy' in Props:
+        if not spe: taglabel = "QM %s Final Opt. Energy with OC correction (Har) %s/%s" % (pkg, method, basisset)
+        else: print("Extraction of COSMO OC energy from Turbomole not yet supported for SPE calcns")
+        oechem.OEAddSDData(Conf, taglabel, str(Props['ocEnergy']))
+
     if spe: return # stop here if SPE
 
     # Set new SD tag for original conformer number

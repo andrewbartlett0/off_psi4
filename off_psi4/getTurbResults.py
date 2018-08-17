@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 ## Description: Summarize results from Turbomole set of calculations into single SDF file.
+## !! Must manually set cosmo=True to get these values (!!) If set to True but is actually false is ok, just wastes time.
 
+## TODO: make cosmo boolean a command line arg?
 ## TODO: get SPE results
 
 import os
@@ -47,7 +49,7 @@ def GetTime():
     dtime = (d2-d1).total_seconds()
     return dtime
 
-def ProcessOutput(Props, spe=False):
+def process_turb_out(Props, spe, cosmo):
     """
 
     TO BE UPDATED
@@ -70,6 +72,7 @@ def ProcessOutput(Props, spe=False):
     -------
     Props: dictionary with summarized data from output file.
            keys are: basis, method, numSteps, initEnergy, finalEnergy, coords
+           ocEnergy is included if cosmo=True for implicit solvent calculation
 
     """
     if os.path.exists('GEO_OPT_FAILED'):
@@ -86,53 +89,6 @@ def ProcessOutput(Props, spe=False):
     rough = []
     coords = []
     lines = f.readlines()
-#    it = iter(lines)
-
-    #if spe: # Process single point energy calcns differently
-    #    for line in it:
-    #        if "set basis" in line:
-    #            Props['basis'] = line.split()[2]
-    #        if "energy(" in line:
-    #            Props['method'] = line.split('\'')[1]
-    #        if "Total Energy =" in line:
-    #            Props['finalEnergy'] = float(line.split()[3])
-    #    return Props
-
-#    for line in it:
-#        if "general information about current run" in line:
-#            line = next(it) # "-----"
-#            line = next(it) # blank
-#            line = next(it) # blank
-#            details = line.split()
-#            # "A HF calculation using ..."
-#            if details[0] == 'A': Props['method'] = details[1]
-#            else:
-#            print Props['basis']
-#        if "basis set information" in line:
-#            line = next(it) # "-----"
-#            line = next(it) # blank
-#            line = next(it) # "we will work"
-#            line = next(it) # "spherical basis functions"
-#            line = next(it) # blank
-#            line = next(it) # "-----"
-#            line = next(it) # "we will work"
-#            Props['basis'] = line.split()[4]
-#            print Props['basis']
-#        if "optimize(" in line:
-#            Props['method'] = line.split('\'')[1]
-#        if "Optimization is complete" in line:
-#            Props['numSteps'] = line.strip().split(' ')[5]
-#            for _ in xrange(8):
-#                line = next(it)
-#            Props['initEnergy'] = float(line.split()[1])
-#        if "Final energy" in line:
-#            Props['finalEnergy'] = float(line.split()[3])
-#            line = next(it) # "Final (previous) structure:"
-#            line = next(it) # "Cartesian Geometry (in Angstrom)"
-#            line = next(it) # Start of optimized geometry
-#            while "Saving final" not in line:
-#                rough.append(line.split()[1:4])
-#                line = next(it)
 
     initEnergy = lines[1].split()[1]
     finalEnergy = lines[-2].split()[1]
@@ -140,6 +96,23 @@ def ProcessOutput(Props, spe=False):
     Props['initEnergy'] = initEnergy
     Props['finalEnergy'] = finalEnergy
     Props['numSteps'] = numSteps
+    f.close()
+
+    if not cosmo:
+        return Props
+
+    # check if there's an outlying charge corrected value in job.last for COSMO
+    try:
+        f = open("job.last","r")
+    except IOError:
+        print("No 'job.last' file found in directory of %s" % os.getcwd() )
+        return Props
+    # reading in whole file not is not the most efficient
+    for line in reversed(list(f)):
+        if "Total energy + OC corr." in line:
+            Props['ocEnergy'] = line.split()[-1]
+    f.close()
+
     return Props
 
 
@@ -204,7 +177,7 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
             xfs.close()
 
             # process output and get dictionary results
-            props = ProcessOutput(props, spe)
+            props = process_turb_out(props, spe, cosmo)
             pt.SetOptSDTags(conf, props, spe)
             oechem.OEWriteConstMolecule(write_ofs, conf)
     ifs.close()
