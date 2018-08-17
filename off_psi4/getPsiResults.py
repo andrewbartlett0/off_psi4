@@ -210,15 +210,16 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
         return None, None
 
 
-def getPsiOne(insmi, outfile, spe=False, psiout="output.dat", timeout="timer.dat"):
+def getPsiOne(infile, outfile, spe=False, psiout="output.dat", timeout="timer.dat"):
 
     """
     Write out Psi4 optimized geometry details into a new OEMol.
 
     Parameters
     ----------
-    insmi : string
-        SMILES string for the input molecule to determine molecular identity.
+    infile : string
+        Name of input geometry file THAT WAS USED TO WRITE THE PSI INPUT.
+        To ensure that the atom orderings remain constant.
     outfile : string
         Name of output geometry file with optimized results.
     spe : Boolean
@@ -238,9 +239,13 @@ def getPsiOne(insmi, outfile, spe=False, psiout="output.dat", timeout="timer.dat
 
     """
 
-    # create a new molecule
+    # Read in SINGLE MOLECULE .sdf file
+    ifs = oechem.oemolistream()
     mol = oechem.OEGraphMol()
-    oechem.OESmilesToMol(mol,insmi)
+    if not ifs.open(infile):
+        oechem.OEThrow.Warning("Unable to open %s for reading" % origsdf)
+        quit()
+    oechem.OEReadMolecule(ifs,mol)
 
     # Get details for SD tags
     props = {} # dictionary of data for this mol
@@ -271,6 +276,11 @@ def getPsiOne(insmi, outfile, spe=False, psiout="output.dat", timeout="timer.dat
 
     # Set SD tags for this molecule
     pt.SetOptSDTags(mol, props, spe)
+
+    # Check if mol has title and set one on filename if not existing
+    extract_fname = os.path.splitext(os.path.basename(infile))[0]
+    if mol.GetTitle() == "":
+        mol.SetTitle(extract_fname)
 
     # Open outstream file.
     write_ofs = oechem.oemolostream()
