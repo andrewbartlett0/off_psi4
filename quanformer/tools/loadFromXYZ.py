@@ -26,8 +26,8 @@ def main(**kwargs):
     if not xifs.open(opt['fxyz']):
         oechem.OEThrow.Warning("Unable to open %s for reading" % opt['fxyz'])
         return
-    mmol = mifs.GetOEMols().next()
-    xmol = xifs.GetOEMols().next()
+    mmol = next(mifs.GetOEMols())
+    xmol = next(xifs.GetOEMols())
 
     mmol.SetCoords(xmol.GetCoords())
 
