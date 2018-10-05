@@ -96,12 +96,12 @@ def confs2psi(insdf, method, basis, spe=False, memory=None):
     ### For each molecule: for each conf, generate input
     for mol in ifs.GetOEMols():
         print(mol.GetTitle(), mol.NumConfs())
+        if not mol.GetTitle():
+            sys.exit("ERROR: OEMol must have title assigned! Exiting.")
         for i, conf in enumerate( mol.GetConfs()):
             # change into subdirectory ./mol/conf/
             subdir = os.path.join(wdir,"%s/%s" % (mol.GetTitle(), i+1))
-            print(os.getcwd())
             if not os.path.isdir(subdir):
-                print(subdir)
                 os.makedirs(subdir)
             if os.path.exists(os.path.join(subdir,'input.dat')):
                 print("Input file (\"input.dat\") already exists. Skipping.\n")
