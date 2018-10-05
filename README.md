@@ -1,14 +1,39 @@
 
-# QM Pipeline
-README last updated: 2018-04-26
+# Quanformer
+README last updated: Oct 04 2018  
 
-This repository contains a pipeline for generating large sets of QM-optimized molecules using Psi4 or Turbomole.  
-For each molecule, conformers are generated then MM-optimized. The user can set up QM geometry optimizations or  
-single point energy (SPE) calculations with the desired method. For example, one may choose to do a quick   
-fine-tuning geometry optimization with the MP2/def2-SV(P) level of theory, then using the results of those  
-calculations for a more intensive B3LYP-D3MBJ/def2-TZVP geometry optimization. 
+Quanformer is a Python-based pipeline for generating conformers, preparing quantum mechanical (QM) calculations, and processing QM results for a set of input molecules. 
+This pipeline is robust enough to use with hundreds of conformers per molecule. You will need access to either Psi4 or Turbomole for QM calculations.  
 
-## I. Repository contents
+For each molecule, conformers are generated and optimized with the MM94S force field. 
+Then input files for QM calculations are prepared for geometry optimizations or single point energy (SPE) calculations.
+The user can specify any QM method and basis set that is supported in the QM software package.
+After the calculations have finished, this pipeline will extract final energies and geometries as well as collect job-related details such as calculation time and number of optimization steps.
+Analysis scripts are provided for comparing conformer energies from different QM methods, comparing calculation times from different methods, and generating nicely-formatted plots.
+
+*Example application*: 
+ * Input five molecules and generate conformations for each one.
+ * Then run QM geometry optimizations using the MP2/def2-SV(P) level of theory as a relatively quick fine-tuning of the geometries.
+ * Take those QM results and run a second geometry optimization stage using the more intensive B3LYP-D3MBJ/def2-TZVP method.
+ * Consider questions such as, "What is the spread of the conformer energies for molecule _x_?", "How does method _a_ compare to method _b_ for this functional group?", etc.
+
+In concept, this example would look like:
+`smi2confs.py` &rarr; `confs2psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
+
+In practice, the `executor.py` code provides the interface for the various stages and components. 
+That being said, each component was written to be able to run independently of the others so variations of this pipeline can be conducted. 
+Instructions are provided below for following the example workflow.
+
+
+## I. Python Dependencies
+
+  * [OEChem Python Toolkit](https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html)
+  * [Psi4 QM software package](http://www.psicode.org/)
+     * [Conda install](http://www.psicode.org/psi4manual/master/conda.html) of Psi4 recommended
+     * [Conda install of dftd3](http://www.psicode.org/psi4manual/master/dftd3.html)
+
+
+## II. Repository contents
 
 Pipeline components and description:
 
@@ -28,9 +53,6 @@ Pipeline components and description:
 | `smi2confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
 | `stitchSpe.py`       | analysis      | calculate relative conformer energies from sets of different SPEs          |
 
-**Example workflow**:
-`smi2confs.py` &rarr; `confs2psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
-
 There are other scripts in this repository that are not integral to the pipeline. These are found in the `tools` directory.
 
 | Script               | Brief description
@@ -41,19 +63,12 @@ There are other scripts in this repository that are not integral to the pipeline
 | `loadFromXYZ.py`     | copy coordinates from XYZ to MOL2 file                                                 |
 | `selectConfs.tcl`    | script for VMD to further filter molecule set, e.g., by some internal distance         |
 | `viewer.ipynb`       | visualize molecules in iPython notebook                                                |
-| `writeOneConf.py`    | write out a single conformer of specified molecule based on tagged identifier          |
+| `writeOneMol.py`     | write out single mol and all its conformers OR single conformer of specified mol       |
 | `xyzByStep.sh`       | simple Bash processing of Psi4 output file to see geometries throughout optimization   |
 
 
-## II. Python Dependencies
 
-  * [OEChem Python Toolkit](https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html)
-  * [Psi4 QM software package](http://www.psicode.org/)
-     * [Conda install](http://www.psicode.org/psi4manual/master/conda.html) of Psi4 recommended
-     * [Conda install of dftd3](http://www.psicode.org/psi4manual/master/dftd3.html)
-
-
-## III. Output files throughout the pipeline
+## III. Files that are generated throughout the pipeline
 
 SDF files are numbered with the following code system. Let's say the pipeline starts with a file called `basename.smi`  
 and contains the list of SMILES strings.
@@ -64,7 +79,7 @@ and contains the list of SMILES strings.
 5. The QM molecules are filtered analogously to step 3 to yield `basename-220.sdf`.
 
 This process can go through a second round of QM calculations. QM calculations can be either geometry optimizations or  
-single point energy calculations. If the `basename-200.sdf` is fed into each route, then each route will have its own  
+single point energy calculations. If the `basename-200.sdf` is fed into both routes, then each route will have its own  
 `basename-210.sdf` file. Don't do this in the same directory obviously, else one file will be overwritten. The endmost  
 product will be `basename-222.sdf` though one could certainly stop before QM stage 2.
 
@@ -87,7 +102,7 @@ In summary,
 
 
 ## IV. Instructions
-This section lists instructions on how to take a set of molecules from their starting SMILES strings to:
+The instructions below describe how to take a set of molecules from their starting SMILES strings to:
  * Generate conformers
  * MM minimize those conformers using the MMFF94S force field
  * Filter out potentially redundant structures
@@ -105,7 +120,6 @@ This section lists instructions on how to take a set of molecules from their sta
 
 Before starting, you need an input file (here called `file.smi`) with your list of SMILES strings and molecule titles.
 See subsections below on "Naming molecules in the input SMILES file" and "File name limitations".
-TODO: I don't think the full path is required in many of these commands anymore. Need to verify.
 
  1. Generate conformers, perform quick MM optimization, and create Psi4 input files.
     * `python executor.py -f file.smi --setup -m 'mp2' -b 'def2-sv(p)'`
@@ -134,26 +148,27 @@ TODO: I don't think the full path is required in many of these commands anymore.
     * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/stitchSpe.py -i /path/and/input.dat --barplots`
 
  8. (opt.) If some mol has a high RMSD, identify the outlying conformer and visualize structure.
-    * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/writeOneConf.py  ___TODO___`
+    * See `examples` directory.
 
  9. (opt.) Get wall clock times, num opt steps, relative energies. 
     * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/avgTimeEne.py --relene -f /include/full/path/to/file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
 ### A. File name limitations
 
-Base names (e.g. `basename.smi`, `basename.sdf`) can contain underscores but NO dashes or dots.
-  * Dash is used for SDF numbering code (see above).
-  * Dot is used for splitting based on file extension.
+Base names (e.g. `basename.smi`, `basename.sdf`) can contain underscores but *no dashes and no dots*.
+  * Dashes should not be used in the base filename because this is a delimiter for the SDF numbering code (see above).
+  * Dots should not be used in the base filename because this is used to extract the file information such as file extension.
   * Examples:
     * Good: `basename_set1.smi`
     * Bad:  `basename-set1.smi`
     * Bad:  `basename.set1.smi`
 
-### B. Naming molecules in the input SMILES file
+### B. Molecule name limitations
 
 Smiles file should contain, in each line: `SMILES_STRING molecule_title` and be named in format of `basename.smi`.
-  * Molecule title should have no dashes, as Psi4 will raise an error.
-  * Molecule title should NOT start with a number, as Psi4 will raise error.
+  * Molecule titles are required, as these are used to create subdirectories for the QM jobs. So don't have a space or strange characters in your molecule names.
+  * Molecule title should have *no dashes*, as Psi4 will raise an error.
+  * Molecule title should *NOT start with a number*, as Psi4 will raise error.
   * Example:
 ```
 CC(C(C(C)O)O)O AlkEthOH_c42
@@ -185,12 +200,7 @@ CCOC(C)(C)C(C)(C)O AlkEthOH_c1178
  /path/and/setofMols-221-spe3.sdf, True , pbe0        ,    6-311g**
 ```
 
-## V. Potential errors and how to get around them [TODO]
- * `KeyError` from processing results. Did you specify spe for single point calculations?
- * Segmentation fault from ....
-
-
-## VI. Some terms and references
+## V. Some terms and references
 
 Pertaining to software packages:
  * [Psi4](http://www.psicode.org/)

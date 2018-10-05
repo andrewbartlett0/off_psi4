@@ -1,0 +1,65 @@
+    -----------------------------------------------------------------------
+          Psi4: An Open-Source Ab Initio Electronic Structure Package
+                              Psi4 1.0.24 Driver
+
+                          Git: Rev {master} 45aac03 dirty
+
+    J. M. Turney, A. C. Simmonett, R. M. Parrish, E. G. Hohenstein,
+    F. A. Evangelista, J. T. Fermann, B. J. Mintz, L. A. Burns, J. J. Wilke,
+    M. L. Abrams, N. J. Russ, M. L. Leininger, C. L. Janssen, E. T. Seidl,
+    W. D. Allen, H. F. Schaefer, R. A. King, E. F. Valeev, C. D. Sherrill,
+    and T. D. Crawford, WIREs Comput. Mol. Sci. 2, 556-565 (2012)
+    (doi: 10.1002/wcms.93)
+
+                         Additional Contributions by
+    A. E. DePrince, U. Bozkaya, A. Yu. Sokolov, D. G. A. Smith, R. Di Remigio,
+    R. M. Richard, J. F. Gonthier, H. R. McAlexander, M. Saitow, and
+    B. P. Pritchard
+    -----------------------------------------------------------------------
+
+
+    Psi4 started on: Mon May  1 17:35:35 2017
+
+    Process ID: 194973
+    PSI4DATADIR: /home/limvt/local/miniconda2/share/psi4
+    Memory level set to 256.000 MB
+
+  ==> Input File <==
+
+--------------------------------------------------------------------------
+memory 5.0 Gb
+molecule 2GBI_1 {
+  1 1
+  C     2.0470    -0.4963      0.6488
+  C     0.6748    -0.3243      0.8484
+  C     2.8822    -0.8969      1.7007
+  C     0.0892    -0.5452      2.0997
+  C     2.3110    -1.1219      2.9615
+  C     0.9457    -0.9429      3.1273
+  C     1.9263    -1.5790      5.0340
+  C     3.1321    -2.2569      6.9973
+  N     2.8988    -1.5128      4.1401
+  N     0.7277    -1.2401      4.4470
+  N     4.3112    -2.2914      6.3721
+  N     3.0986    -2.5705      8.2978
+  N     1.9876    -1.9205      6.3702
+  H     2.4748    -0.3169     -0.3367
+  H     0.0472    -0.0117      0.0138
+  H     3.9483    -1.0299      1.5439
+  H    -0.9774    -0.4121      2.2574
+  H    -0.1618    -1.2153      4.9215
+  H     5.1612    -2.5445      6.8523
+  H     4.3455    -2.0543      5.3843
+  H     3.9453    -2.8245      8.7867
+  H     2.2325    -2.5593      8.8177
+  H     1.1566    -1.9311      6.9488
+  units angstrom
+}
+
+set basis def2-SV(P)
+set df_basis_mp2 def2-SV(P)-ri
+set freeze_core True
+optimize('mp2')--------------------------------------------------------------------------
+An error has occurred python-side. SyntaxError: ('invalid syntax', ('<string>', 26, 6, '2GBI_1 = geometry("""\n'))
+
+
