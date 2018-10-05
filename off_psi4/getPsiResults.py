@@ -137,7 +137,7 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
 
     """
 
-    wdir, fname = os.path.split(origsdf)
+    hdir, fname = os.path.split(origsdf)
     wdir = os.getcwd()
 
     # Read in .sdf file and distinguish each molecule's conformers
@@ -166,20 +166,20 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
             props = {} # dictionary of data for this conformer
             props['package'] = "Psi4"
             props['missing'] = False
-            # change into subdirectory ./mol/conf/
-            subdir = os.path.join(wdir,"%s/%s" % (mol.GetTitle(), j+1))
-            if not os.path.isdir(subdir):
-                print("*** No directory found for %s ***" % (subdir))
+            # check whether output files exist
+            outf = os.path.join(hdir,"%s/%s/%s" % (mol.GetTitle(),j+1,psiout))
+            timef = os.path.join(hdir,"%s/%s/%s" % (mol.GetTitle(),j+1,timeout))
+            if not (os.path.isfile(outf) and os.path.isfile(timef)):
+                print("*** ERROR: Output (or timer) file not found: {} ***".format(outf))
                 continue
-            os.chdir(subdir)
             # Get wall clock time of the job
             try:
-                props['time'] = get_psi_time(timeout)
+                props['time'] = get_psi_time(timef)
             except IOError:
                 props['time'] = "Timer output file not found"
                 pass
             # process output and get dictionary results
-            props = process_psi_out(psiout, props, spe)
+            props = process_psi_out(outf, props, spe)
             # if output was missing, move on
             if props['missing']:
                 continue
@@ -203,7 +203,6 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
             oechem.OEWriteConstMolecule(write_ofs, conf)
     ifs.close()
     write_ofs.close()
-    os.chdir(wdir)
     try:
         return props['method'], props['basis']
     except KeyError:
