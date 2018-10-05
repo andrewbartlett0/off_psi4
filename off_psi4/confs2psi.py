@@ -46,11 +46,15 @@ def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
     # check if mol has a "freeze" tag
     for x in oechem.OEGetSDDataPairs(mol):
         if "atoms to freeze" in x.GetTag():
-            freeze_list = x.GetValue()
-            inputstring += "\n\nfreeze_list = \"\"\"\n  {} xyz\n  {} xyz\n  {} xyz\n  {} xyz\n\"\"\"".format(freeze_list[1], freeze_list[4],
-                freeze_list[7], freeze_list[10])
+            b = x.GetValue()
+            y = b.replace("[", "")
+            z = y.replace("]", "")
+            a = z.replace(" ", "")
+            freeze_list = a.split(",")
+            inputstring += "\n\nfreeze_list = \"\"\"\n  {} xyz\n  {} xyz\n  {} xyz\n  {} xyz\n\"\"\"".format(freeze_list[0], freeze_list[1], freeze_list[2], freeze_list[3])
             inputstring += "\nset optking frozen_cartesian $freeze_list"
             inputstring += "\nset optking dynamic_level = 1\nset optking consecutive_backsteps = 2\nset optking intrafrag_step_limit = 0.1\nset optking interfrag_step_limit = 0.1"
+
     # explicitly specify MP2 RI-auxiliary basis for Ahlrichs basis set
     # http://www.psicode.org/psi4manual/master/basissets_byfamily.html
     if method.lower()=='mp2' and 'def' in basisset and basisset.lower()!='def2-qzvpd':
