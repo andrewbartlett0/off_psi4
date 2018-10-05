@@ -1,14 +1,17 @@
 
+TODO for all scripts
+ * check that full path is not necessary at any stage
+ * in docstrings, remove the need for fullpath
+ * docstrings
+ * clean up argument names (underscore instead of upper case)
+ * remove imported modules that are not used
+
 TODO for specific scripts
 
+ * avgTimeEne: check that this script still works
  * stitchSpe: something about confNums checking
- * diffSpeOpt:  check that works with just one input file 
+ * diffSpeOpt:  check that works with just one input file, WRITE DESCRIPTION
  * plotTimes: argparse docs
  * getTurbResults: get SPE results; opt wall time
  * matchMinima: argparse docs, parallelize?
 
-TODO for all scripts
-
- * docstrings
- * clean up argument names (underscore instead of upper case)
- * remove imported modules that are not used

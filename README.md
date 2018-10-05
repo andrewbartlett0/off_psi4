@@ -15,14 +15,14 @@ Analysis scripts are provided for comparing conformer energies from different QM
  * Input five molecules and generate conformations for each one.
  * Then run QM geometry optimizations using the MP2/def2-SV(P) level of theory as a relatively quick fine-tuning of the geometries.
  * Take those QM results and run a second geometry optimization stage using the more intensive B3LYP-D3MBJ/def2-TZVP method.
- * Consider questions such as, "What is the spread of the conformer energies for molecule _x_?", "How does method _a_ compare to method _b_ for this functional group?", etc.
+ * Consider questions such as, "What is the spread of the conformer energies for molecule _x_?", "How does method _a_ compare to method _b_ for this molecule?", etc.
 
-In concept, this example would look like:
+In concept, this example would look like:   
 `smi2confs.py` &rarr; `confs2psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
 
 In practice, the `executor.py` code provides the interface for the various stages and components. 
 That being said, each component was written to be able to run independently of the others so variations of this pipeline can be conducted. 
-Instructions are provided below for following the example workflow.
+Instructions are provided below for following this example workflow.
 
 
 ## I. Python Dependencies
@@ -39,6 +39,7 @@ Pipeline components and description:
 
 | Script               | Stage         | Brief description                                                          |
 | ---------------------|---------------|----------------------------------------------------------------------------|
+| `avgTimeEne.py`      | analysis      | analyze calculation stats and relative energies for a single batch of mols |
 | `confs2psi.py`       | setup         | generate Psi4 input files for each conformer/molecule                      |
 | `confs2turb.py`      | setup         | generate Turbomole input files for each conformer/molecule                 |
 | `diffSpeOpt.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
@@ -129,29 +130,33 @@ See subsections below on "Naming molecules in the input SMILES file" and "File n
       E.g., `xyzByStep.sh 10 output.dat view.xyz`
 
  3. Get Psi4 results.
-    * `python executor.py -f /include/full/path/to/file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'`
+    * `python executor.py -f file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'`
 
  4. In a different directory (e.g., subdirectory), set up Psi4 OPT2 calculations from last results.
-    * [for stage 2 OPT] `python executor.py -f /include/full/path/to/file-220.sdf --setup -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
-    * [for stage 2 SPE] `python executor.py -f /include/full/path/to/file-220.sdf --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+    * [for stage 2 OPT]  
+      `python executor.py -f file-220.sdf --setup -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+    * [for stage 2 SPE]   
+      `python executor.py -f file-220.sdf --setup --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
  5. Run Psi4 jobs.
     * You can check the geometry during optimization with the `xyzByStep.sh` script in the tools directory.  
       E.g., `xyzByStep.sh 10 output.dat view.xyz`
 
  6. Get Psi4 results from second-level calculations.
-    * [for stage 2 OPT] `python executor.py -f /include/full/path/to/file-220.sdf --results -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
-    * [for stage 2 SPE] `python executor.py -f /include/full/path/to/file-220.sdf --results --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+    * [for stage 2 OPT]   
+      `python executor.py -f file-220.sdf --results -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+    * [for stage 2 SPE]   
+      `python executor.py -f file-220.sdf --results --spe -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
  7. Combine results from various job types to calculate model uncertainty.
     * See subsection below on "Creating input file for stitchSpe.py"
-    * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/stitchSpe.py -i /path/and/input.dat --barplots`
+    * `python stitchSpe.py -i /path/and/input.dat --barplots`
 
  8. (opt.) If some mol has a high RMSD, identify the outlying conformer and visualize structure.
     * See `examples` directory.
 
  9. (opt.) Get wall clock times, num opt steps, relative energies. 
-    * `python /data12/cmf/limvt/qm_AlkEthOH/pipeline/01_scripts/avgTimeEne.py --relene -f /include/full/path/to/file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+    * `python avgTimeEne.py --relene -f file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
 ### A. File name limitations
 

@@ -1,7 +1,7 @@
 
 # Potential errors and how to get around them
 
-Errors thrown by Quanformer
+Errors thrown by Quanformer/Python:
  * `KeyError` from processing results. Did you remember to specify `spe` for single point calculations?
 
 Errors thrown by Psi4:
