@@ -1,0 +1,33 @@
+molecule testmol_4 {
+  0 1
+  C    -0.0567    -0.1114     -0.4716
+  C     0.0740     0.6347     -1.7879
+  C     0.2576     0.0714      1.9673
+  N     0.3007     0.6181      0.6294
+  O    -0.5427    -1.2341     -0.4017
+  H     1.1168     0.5233     -2.1349
+  H    -0.5920     0.1731     -2.5321
+  H    -0.1535     1.7115     -1.7061
+  H    -0.3743     0.6859      2.6331
+  H     1.2687    -0.0081      2.4062
+  H    -0.1774    -0.9359      1.8917
+  H     0.6538     1.5588      0.4963
+  units angstrom
+}
+
+freeze_list = """
+  4 xyz
+  1 xyz
+  3 xyz
+  12 xyz
+"""
+set optking frozen_cartesian $freeze_list
+set optking dynamic_level = 1
+set optking consecutive_backsteps = 2
+set optking intrafrag_step_limit = 0.1
+set optking interfrag_step_limit = 0.1
+
+set basis def2-SV(P)
+set df_basis_mp2 def2-SV(P)-ri
+set freeze_core True
+optimize('mp2')
