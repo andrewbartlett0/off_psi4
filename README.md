@@ -228,3 +228,9 @@ Pertaining to basis set:
   * `SV(P)` - double zeta valence with polarization on all non-hydrogen atoms
   * `TZVP` - triple zeta valence with polarization on all atoms
 
+## VI. Contributors
+
+* Victoria Lim (UCI)
+* Chris Bayly (OpenEye)
+* Jessica Maat (UCI)
+
