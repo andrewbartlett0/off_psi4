@@ -232,5 +232,6 @@ Pertaining to basis set:
 
 * Victoria Lim (UCI)
 * Chris Bayly (OpenEye)
+* Caitlin Bannan (UCI)
 * Jessica Maat (UCI)
 
