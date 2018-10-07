@@ -3,7 +3,8 @@
 README last updated: Oct 04 2018  
 
 Quanformer is a Python-based pipeline for generating conformers, preparing quantum mechanical (QM) calculations, and processing QM results for a set of input molecules. 
-This pipeline is robust enough to use with hundreds of conformers per molecule. You will need access to either Psi4 or Turbomole for QM calculations.  
+This pipeline is robust enough to use with hundreds of conformers per molecule and tens or hundreds of molecules.
+You will need access to either Psi4 or Turbomole for running QM calculations.  
 
 For each molecule, conformers are generated and optimized with the MM94S force field. 
 Then input files for QM calculations are prepared for geometry optimizations or single point energy (SPE) calculations.
@@ -158,7 +159,10 @@ See subsections below on "Naming molecules in the input SMILES file" and "File n
  9. (opt.) Get wall clock times, num opt steps, relative energies. 
     * `python avgTimeEne.py --relene -f file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
-### A. File name limitations
+### A. Molecules NOT supported by Quanformer
+* Molecules with spin multiplicity not equal to one (i.e., having unpaired electrons)
+
+### B. File name limitations
 
 Base names (e.g. `basename.smi`, `basename.sdf`) can contain underscores but *no dashes and no dots*.
   * Dashes should not be used in the base filename because this is a delimiter for the SDF numbering code (see above).
@@ -168,7 +172,7 @@ Base names (e.g. `basename.smi`, `basename.sdf`) can contain underscores but *no
     * Bad:  `basename-set1.smi`
     * Bad:  `basename.set1.smi`
 
-### B. Molecule name limitations
+### C. Molecule name limitations
 
 Smiles file should contain, in each line: `SMILES_STRING molecule_title` and be named in format of `basename.smi`.
   * Molecule titles are required, as these are used to create subdirectories for the QM jobs. So don't have a space or strange characters in your molecule names.
@@ -181,7 +185,7 @@ CCCC AlkEthOH_c1008
 CCOC(C)(C)C(C)(C)O AlkEthOH_c1178
 ```
 
-### C. Creating input file for analysis with `stitchSpe.py`
+### D. Creating input file for analysis with `stitchSpe.py`
 
  * This should be a text file directing the script to process a particular quantity.
  * The first uncommented line should be the keyword of the specific quantity (e.g., energy) found in the SD tag label.
