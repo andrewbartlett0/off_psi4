@@ -51,19 +51,26 @@ def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
             z = y.replace("]", "")
             a = z.replace(" ", "")
             freeze_list = a.split(",")
-            inputstring += "\n\nfreeze_list = \"\"\"\n  {} xyz\n  {} xyz\n  {} xyz\n  {} xyz\n\"\"\"".format(freeze_list[0], freeze_list[1], freeze_list[2], freeze_list[3])
+            inputstring += ("\n\nfreeze_list = \"\"\"\n  {} xyz\n  {} xyz\n  {} "
+                           "xyz\n  {} xyz\n\"\"\"".format(freeze_list[0],
+                           freeze_list[1], freeze_list[2], freeze_list[3]))
             inputstring += "\nset optking frozen_cartesian $freeze_list"
-            inputstring += "\nset optking dynamic_level = 1\nset optking consecutive_backsteps = 2\nset optking intrafrag_step_limit = 0.1\nset optking interfrag_step_limit = 0.1"
+            inputstring += ("\nset optking dynamic_level = 1\nset optking "
+                "consecutive_backsteps = 2\nset optking intrafrag_step_limit = "
+                "0.1\nset optking interfrag_step_limit = 0.1\n")
 
     # explicitly specify MP2 RI-auxiliary basis for Ahlrichs basis set
     # http://www.psicode.org/psi4manual/master/basissets_byfamily.html
-    if method.lower()=='mp2' and 'def' in basisset and basisset.lower()!='def2-qzvpd':
-        inputstring+=('\n\nset basis %s' % (basisset))
-        inputstring+=('\nset df_basis_mp2 %s-ri' % (basisset))
-        inputstring+=('\nset freeze_core True')
-    else:
-        inputstring+=('\n\nset basis %s' % (basisset))
-        inputstring+=('\nset freeze_core True')
+    # DFMP2 *should* get MP2 aux sets fine for Pople/Dunning
+    # http://www.psicode.org/psi4manual/master/dfmp2.html
+    if method.lower()=='mp2' and 'def2' in basisset:
+        if basisset.lower()=='def2-sv(p)':
+            inputstring+=('\nset df_basis_mp2 def2-sv_p_-ri')
+        elif basisset.lower()!='def2-qzvpd':  # no aux set for qzvpd 10-6-18
+            inputstring+=('\nset df_basis_mp2 %s-ri' % (basisset))
+
+    inputstring+=('\nset basis %s' % (basisset))
+    inputstring+=('\nset freeze_core True')
     # specify command for type of calculation
     if SPE is False:
         inputstring+=('\noptimize(\'%s\')' % (method))
