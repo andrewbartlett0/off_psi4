@@ -2,6 +2,8 @@
 # local testing on greenplanet
 import sys
 sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
+#from filterConfs import *
+from quanformer.filterConfs import *
 
 # define location of input files for testing
 import os
@@ -10,7 +12,6 @@ mydir = os.path.dirname(os.path.abspath(__file__))
 # -----------------------
 
 import pytest
-from filterConfs import *
 
 def test_identify_minima():
     ifs = oechem.oemolistream()
