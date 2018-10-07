@@ -178,6 +178,7 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
     ### For each molecule: label atoms, generate confs, resolve clashes, optimize.
     for smimol in ifs.GetOEMols():
         oechem.OETriposAtomNames(smimol)
+        oechem.OEAddExplicitHydrogens(smimol)
         mol = GenerateConfs(smimol)
         conffile.write( "%s\t%s\n" % (mol.GetTitle(), mol.NumConfs()) )
 
