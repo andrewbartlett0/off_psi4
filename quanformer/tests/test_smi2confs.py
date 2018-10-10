@@ -1,9 +1,10 @@
 
-# local testing on greenplanet
-import sys
-sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
-#from smi2confs import *
-from quanformer.smi2confs import *
+try:    # local testing on greenplanet
+    import sys
+    sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
+    from smi2confs import *
+except ModuleNotFoundError:
+    from quanformer.smi2confs import *
 
 # define location of input files for testing
 import os
@@ -31,9 +32,10 @@ def test_smi2confs():
     except FileNotFoundError:
         pass
     smi2confs(os.path.join(mydir,'methane.smi'))
-    statinfo = os.stat('methane.sdf')
+    statinfo = os.stat(os.path.join(mydir,'methane.sdf'))
     assert statinfo.st_size == 612
     os.remove(os.path.join(mydir,'methane.sdf'))
+    os.remove(os.path.join(mydir,'numConfs.txt'))
 
 # test manually without pytest
 if 0:
