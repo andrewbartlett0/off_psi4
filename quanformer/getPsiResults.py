@@ -59,9 +59,6 @@ def process_psi_out(filename, properties, spe=False):
         print("No {} file found in directory of {}.".format(filename,os.getcwd()))
         properties['missing'] = True
         return properties
-#        sys.exit("No %s file found in directory of %s" \
-#                 % ( filename,os.getcwd() ))
-
 
     rough = []
     coords = []
@@ -188,7 +185,7 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
                 props['finalEnergy']
                 props['coords']
             except KeyError:
-                sys.exit("ERROR: Psi4 job was incomplete in {}".format(subdir))
+                sys.exit("ERROR: Psi4 job was incomplete for {}".format(outf))
 
             # BRIEF ANALYSIS OF STRUCTURE, INTRA HBONDS
             # Set last coordinates from optimization. skip if missing.
