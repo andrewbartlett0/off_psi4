@@ -1,10 +1,11 @@
 
-try:    # local testing on greenplanet
+# local testing vs. travis testing
+try:
+    from quanformer.filterConfs import *
+except ModuleNotFoundError:
     import sys
     sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
     from filterConfs import *
-except ModuleNotFoundError:
-    from quanformer.filterConfs import *
 
 # define location of input files for testing
 import os
