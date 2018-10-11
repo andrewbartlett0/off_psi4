@@ -17,7 +17,7 @@ import pytest
 
 def test_identify_minima():
     ifs = oechem.oemolistream()
-    if not ifs.open(os.path.join(mydir,'gbi.sdf')):
+    if not ifs.open(os.path.join(mydir,'data_tests','gbi.sdf')):
         oechem.OEThrow.Fatal("Unable to open gbi.sdf for reading")
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     mol = next(ifs.GetOEMols())

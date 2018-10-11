@@ -29,14 +29,14 @@ def test_quick_opt():
 
 def test_smi2confs():
     try:
-        os.remove(os.path.join(mydir,'methane.sdf'))
+        os.remove(os.path.join(mydir,'data_tests','methane.sdf'))
     except FileNotFoundError:
         pass
-    smi2confs(os.path.join(mydir,'methane.smi'))
-    statinfo = os.stat(os.path.join(mydir,'methane.sdf'))
+    smi2confs(os.path.join(mydir,'data_tests','methane.smi'))
+    statinfo = os.stat(os.path.join(mydir,'data_tests','methane.sdf'))
     assert statinfo.st_size == 612
-    os.remove(os.path.join(mydir,'methane.sdf'))
-    os.remove(os.path.join(mydir,'numConfs.txt'))
+    os.remove(os.path.join(mydir,'data_tests','methane.sdf'))
+    os.remove(os.path.join(mydir,'data_tests','numConfs.txt'))
 
 # test manually without pytest
 if 0:
