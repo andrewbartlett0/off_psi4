@@ -16,7 +16,7 @@ before_install:
   - free -m
   - df -h
   - ulimit -a
-  - if [ "$TRAVIS_SECURE_ENV_VARS" == true ]; then openssl aes-256-cbc -K $encrypted_d1ab99926862_key -iv $encrypted_d1ab99926862_iv -in oe_license.txt.enc -out oe_license.txt -d; fi
+  - if [ "$TRAVIS_SECURE_ENV_VARS" == true ]; then openssl aes-256-cbc -K $encrypted_f0234faf2f39_key -iv $encrypted_f0234faf2f39_iv -in oe_license.txt.enc -out oe_license.txt -d; fi
   - if [ "$TRAVIS_SECURE_ENV_VARS" == false ]; then echo "OpenEye license will not be installed in forks."; fi
 
 install:
