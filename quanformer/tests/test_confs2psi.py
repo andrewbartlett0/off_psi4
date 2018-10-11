@@ -15,9 +15,6 @@ mydir = os.path.dirname(os.path.abspath(__file__))
 
 import pytest
 
-def input_file_reader():
-    return
-
 def read_mol(infile):
     ifs = oechem.oemolistream()
     if not ifs.open(infile):
