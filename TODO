@@ -1,17 +1,23 @@
 
-TODO for all scripts
- * check that full path is not necessary at any stage
- * in docstrings, remove the need for fullpath
- * docstrings
- * clean up argument names (underscore instead of upper case)
+TODO testing
+ * adding calctype hess
+ * check that full path is not necessary anywhere
+
+TODO organization
+ * move descriptions of tools scripts to a separate readme file
+
+TODO scripts
+ * check docstrings (and remove need for fullpath)
+ * check argparse description
  * remove imported modules that are not used
+ * write tests
 
 TODO for specific scripts
-
  * avgTimeEne: check that this script still works
  * stitchSpe: something about confNums checking
- * diffSpeOpt:  check that works with just one input file, WRITE DESCRIPTION
- * plotTimes: argparse docs
+ * diffSpeOpt: check that works with just one input file, WRITE DESCRIPTION
+
+TODO longer term
  * getTurbResults: get SPE results; opt wall time
- * matchMinima: argparse docs, parallelize?
+
 
