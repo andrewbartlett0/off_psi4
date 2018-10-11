@@ -5,7 +5,6 @@
 import re
 import os, sys, glob
 import openeye.oechem as oechem
-import procTags as pt
 
 
 ### ------------------- Functions -------------------
@@ -106,6 +105,7 @@ def process_psi_out(filename, properties, spe=False):
 ### ------------------- Script -------------------
 
 def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="timer.dat"):
+    import procTags as pt # VTL temp move bc travis fails to import
 
     """
     Read in OEMols (and each of their conformers) in origsdf file,
@@ -207,6 +207,7 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
 
 
 def getPsiOne(infile, outfile, spe=False, psiout="output.dat", timeout="timer.dat"):
+    import procTags as pt # VTL temp move bc travis fails to import
 
     """
     Write out Psi4 optimized geometry details into a new OEMol.
