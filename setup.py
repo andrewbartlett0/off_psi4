@@ -9,7 +9,7 @@ if __name__ == "__main__":
     setuptools.setup(
         name='off_psi4',
         version="0.0.1",
-        description='Quantum mechanical calculations for Open Force Field project',
+        description='Generate conformers for quantum mechanical calculations',
         author='Victoria Lim',
         author_email='limvt@uci.edu',
         url="https://github.com/vtlim/off_psi4",
