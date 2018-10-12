@@ -33,7 +33,7 @@ def get_psi_time(filename):
     return time
 
 
-def process_psi_out(filename, properties, spe=False):
+def process_psi_out(filename, properties, calctype='opt'):
     """
     Go through output file and get level of theory (method and basis set),
         number of optimization steps, initial and final energies, and
@@ -44,12 +44,15 @@ def process_psi_out(filename, properties, spe=False):
     ----------
     filename: string name of the output file. E.g. "output.dat"
     properties: dictionary where all the data will go. Can be empty or not.
-    spe: Boolean - are the Psi4 results of a single point energy calcn?
+    calctype: string; one of 'opt','spe','hess' for geometry optimization,
+        single point energy calculation, or Hessian calculation
 
     Returns
     -------
     properties: dictionary with summarized data from output file.
-           keys are: basis, method, numSteps, initEnergy, finalEnergy, coords
+        spe keys:  basis, method, finalEnergy
+        opt keys:  basis, method, numSteps, initEnergy, finalEnergy, coords
+        hess keys: basis, method,
 
     """
     try:
@@ -59,12 +62,11 @@ def process_psi_out(filename, properties, spe=False):
         properties['missing'] = True
         return properties
 
-    rough = []
-    coords = []
     lines = f.readlines()
     it = iter(lines)
 
-    if spe: # Process single point energy calcns differently
+    # process results for single point energy calculation
+    if calctype=='spe':
         for line in it:
             if "set basis" in line:
                 properties['basis'] = line.split()[2]
@@ -74,7 +76,66 @@ def process_psi_out(filename, properties, spe=False):
                 properties['finalEnergy'] = float(line.split()[3])
         return properties
 
-    # Loop through file to get method, basis set, numSteps, energies, coords
+    # process results for Hessian calculation
+    elif calctype=='hess':
+        import math
+        import numpy as np
+        hess = []
+        for line in it:
+            if "set basis" in line:
+                properties['basis'] = line.split()[2]
+            if "=hessian(" in ''.join(line.split()): # remove any spaces around eql
+                properties['method'] = line.split('\'')[1]
+            if "## Hessian" in line:
+                line = next(it) # "Irrep:"
+                line = next(it) # blank line
+                line = next(it) # column index labels
+                line = next(it) # blank line
+
+                # convert the rest of file/iterator to list
+                rough = list(it)
+                # remove last 5 lines: four blank, one exit message
+                rough = rough[:-5]
+                # convert strings to floats
+                rough = [[float(i) for i in line.split()] for line in rough]
+                # find blank sublists
+                empty_indices = [i for i,x in enumerate(rough) if not x]
+                # blank sublists are organized in groups of three lines:
+                # (1) blank (2) column labels (3) blank. empty_ind has (1) and (3)
+                # delete in reverse to maintain index consistency
+                num_chunks = 1 # how many chunks psi4 printed the Hessian into
+                for i in reversed(range(0,len(empty_indices),2)):
+                    del rough[empty_indices[i+1]] # (3)
+                    del rough[empty_indices[i]+1] # (2)
+                    del rough[empty_indices[i]]   # (1)
+                    num_chunks += 1
+                # now remove first element of every list of row label
+                _ = [ l.pop(0) for l in rough ]
+                # get dimension of Hessian (3N for 3Nx3N matrix)
+                three_n = int(len(rough) / num_chunks)
+                # concatenate the chunks
+                hess = np.array([]).reshape(three_n,0)
+                for i in range(num_chunks):
+                    beg_ind = i*three_n
+                    end_ind = (i+1)*three_n
+                    chunk_i = np.array(rough[beg_ind:end_ind])
+                    hess = np.concatenate((hess,chunk_i), axis=1)
+                # check that final matrix is symmetric
+                if not np.allclose(hess, hess.T, atol=0):
+                    print("ERROR: Hessian read from Psi4 output file not symmetric")
+                    properties['hessian'] = "Hessian not found in output file"
+                    return properties
+                properties['hessian'] = hess
+            # the Hessian pattern was never found
+            else:
+                properties['hessian'] = "Hessian not found in output file"
+
+        return properties
+
+    # process results for geometry optimization
+    # loop through file to get method, basis set, numSteps, energies, coords
+    rough = []
+    coords = []
     for line in it:
         if "set basis" in line:
             properties['basis'] = line.split()[2]
@@ -94,7 +155,7 @@ def process_psi_out(filename, properties, spe=False):
                 rough.append(line.split()[1:4])
                 line = next(it)
 
-    # Convert the 2D (3xN) coordinates to 1D list of length 3N (N atoms).
+    # convert the 2D (3xN) coordinates to 1D list of length 3N (N atoms)
     for atomi in rough:
         coords += [float(i) for i in atomi]
     properties['coords'] = coords
