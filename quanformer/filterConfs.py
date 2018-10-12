@@ -129,8 +129,8 @@ def filterConfs(rmsdfile, tag, suffix):
         filter conformers. A very small energy difference is considered
         to be the same conformer (see thresE). Above this energy difference,
         RMSD comparison is evaluated to distinguish if two confs are diff.
-        Ex. QM Psi4 Final Opt. Energy (Har) mp2/def-sv(p)
-            QM Psi4 Single Pt. Energy (Har) mp2/def-sv(p)
+        Ex. "QM Psi4 Final Opt. Energy (Har) mp2/def-sv(p)"
+            "QM Psi4 Final Single Pt. Energy (Har) mp2/def-sv(p)"
     suffix:   string - string appended to the basename of rmsdfile to distinguish
         that this file has been filtered.
         Ex. if rmsdfile=/some/dir/basename-210.sdf and suffix=220 then output
