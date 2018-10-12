@@ -1,12 +1,6 @@
 
-TODO testing
- * adding calctype hess
- * check that full path is not necessary anywhere
 
-TODO organization
- * move descriptions of tools scripts to a separate readme file
-
-TODO scripts
+TODO all scripts
  * check docstrings (and remove need for fullpath)
  * check argparse description
  * remove imported modules that are not used

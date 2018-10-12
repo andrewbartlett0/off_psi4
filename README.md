@@ -1,6 +1,6 @@
 
 # Quanformer
-README last updated: Oct 04 2018  
+README last updated: Oct 12 2018  
 
 Quanformer is a Python-based pipeline for generating conformers, preparing quantum mechanical (QM) calculations, and processing QM results for a set of input molecules. 
 This pipeline is robust enough to use with hundreds of conformers per molecule and tens or hundreds of molecules.
@@ -55,19 +55,7 @@ Pipeline components and description:
 | `smi2confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
 | `stitchSpe.py`       | analysis      | calculate relative conformer energies from sets of different SPEs          |
 
-There are other scripts in this repository that are not integral to the pipeline. These are found in the `tools` directory.
-
-| Script               | Brief description
-| ---------------------|----------------------------------------------------------------------------------------|
-| `catMols.py`         | concatenates molecules from various files into single output file                      |
-| `cleanfromvmd.py`    | clean molecules that were filtered ad hoc through VMD                                  |
-| `findIntraHB.py`     | identify molecules that may have internal hydrogen bonding                             |
-| `loadFromXYZ.py`     | copy coordinates from XYZ to MOL2 file                                                 |
-| `selectConfs.tcl`    | script for VMD to further filter molecule set, e.g., by some internal distance         |
-| `viewer.ipynb`       | visualize molecules in iPython notebook                                                |
-| `writeOneMol.py`     | write out single mol and all its conformers OR single conformer of specified mol       |
-| `xyzByStep.sh`       | simple Bash processing of Psi4 output file to see geometries throughout optimization   |
-
+There are other scripts in this repository that are not integral to the pipeline. These are found in the `tools` directory. See the README file there.
 
 
 ## III. Files that are generated throughout the pipeline
@@ -135,37 +123,33 @@ The instructions below describe how to take a set of molecules from their starti
     * `python executor.py -f file.smi --setup -m 'mp2' -b 'def2-sv(p)'`
 
  3. Run Psi4 QM calculations.
-    * You can check the geometry during optimization with the `xyzByStep.sh` script in the tools directory.  
+    * The `jobcount.sh` script in the tools directory can be helpful for counting number of total/remaining jobs.
+    * You can check the geometry for some optimization with the `xyzByStep.sh` script in the tools directory.  
       E.g., `xyzByStep.sh 10 output.dat view.xyz`
 
  4. Get Psi4 results.
-    * `python executor.py -f file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'`
+    * `python executor.py -f file-200.sdf --results`
 
- 5. In a different directory (e.g., subdirectory), set up Psi4 OPT2 calculations from last results.
+ 5. In a **different directory** (e.g., subdirectory), set up Psi4 OPT2 calculations from last results.
     * [for stage 2 OPT]  
       `python executor.py -f file-220.sdf --setup -t 'opt' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
     * [for stage 2 SPE]   
       `python executor.py -f file-220.sdf --setup -t 'spe' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
- 6. Run Psi4 jobs.
-    * You can check the geometry during optimization with the `xyzByStep.sh` script in the tools directory.  
-      E.g., `xyzByStep.sh 10 output.dat view.xyz`
+ 6. Run Psi4 jobs. (See notes on step 3.)
 
  7. Get Psi4 results from second-level calculations.
     * [for stage 2 OPT]   
-      `python executor.py -f file-220.sdf --results -t 'opt' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+      `python executor.py -f file-220.sdf --results -t 'opt'`
     * [for stage 2 SPE]   
-      `python executor.py -f file-220.sdf --results -t 'spe' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
+      `python executor.py -f file-220.sdf --results -t 'spe'`
 
- 8. Combine results from various job types to calculate model uncertainty.
-    * See subsection below on "Creating input file for stitchSpe.py"
-    * `python stitchSpe.py -i /path/and/input.dat --barplots`
+ 8. (opt.) Get wall clock times, num opt steps, relative energies. 
+    * `python avgTimeEne.py --relene -f file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'` -- [TODO recheck]
 
- 9. (opt.) If some mol has a high RMSD, identify the outlying conformer and visualize structure.
-    * See `examples` directory.
+ 9. Combine results from various job types to calculate model uncertainty.
+    * See file `analysis.md`
 
- 10. (opt.) Get wall clock times, num opt steps, relative energies. 
-    * `python avgTimeEne.py --relene -f file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
 ### A. Chemistry that is NOT currently supported by Quanformer
 * Molecules with spin multiplicity not equal to one (i.e., having unpaired electrons)
@@ -206,30 +190,6 @@ Descriptions coming soon. [TODO]
  * `smi2confs.py`: resClash=True, for ...
  * `smi2confs.py`: quickOpt=True, for ...
 
-
-### F. Creating input file for analysis with `stitchSpe.py`
-
- * This should be a text file directing the script to process a particular quantity.
- * The first uncommented line should be the keyword of the specific quantity (e.g., energy) found in the SD tag label.
- * Following lines should contain the following information in order, separated by a comma:
-    * SDF file with full path
-    * Boolean: True for SPE values, False for optimization values
-    * method
-    * basis set
- * The first SDF file listed will be the reference values for all following lines when computing RMSDs.
- * The SDF files on each line should ALL have the same molecules, same conformers, etc. These may differ in coordinates or SD tags.
- * Example:
-
-```
- # comments begin with pound symbol and are ignored
-
- energy
-
- /path/and/setofMols-221-opt2.sdf, False, b3lyp-d3mbj ,    def2-tzvp
- /path/and/setofMols-221-spe1.sdf, True , b3lyp-d3mbj ,    def2-tzvp
- /path/and/setofMols-221-spe2.sdf, True , mp2         ,    cc-pvtz
- /path/and/setofMols-221-spe3.sdf, True , pbe0        ,    6-311g**
-```
 
 ## V. Some terms and references
 
