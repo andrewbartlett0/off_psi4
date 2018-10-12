@@ -14,15 +14,7 @@ mydir = os.path.dirname(os.path.abspath(__file__))
 # -----------------------
 
 import pytest
-
-def read_mol(infile):
-    ifs = oechem.oemolistream()
-    if not ifs.open(infile):
-        oechem.OEThrow.Fatal("Unable to open {} for reading".format(infile))
-    ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
-    mol = oechem.OEGraphMol()
-    oechem.OEReadMolecule(ifs, mol)
-    return mol, ifs
+from helper import *
 
 def close_mol(ifs):
     ifs.close()
