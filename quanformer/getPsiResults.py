@@ -1,13 +1,99 @@
 #!/usr/bin/env python
 
-## By: Victoria T. Lim
+"""
+Purpose:    Process results from a Psi4 QM calculation.
+By:         Victoria T. Lim
+Version:    Oct 12 2018
+
+"""
 
 import re
 import os, sys, glob
 import openeye.oechem as oechem
 
+# local testing vs. travis testing
+try:
+    import quanformer.procTags as pt
+except ModuleNotFoundError:
+    import procTags as pt # VTL temporary bc travis fails to import
+
 
 ### ------------------- Functions -------------------
+
+
+def initiate_dict():
+    """
+    Initiate conformer's data dict and set initial details
+
+    Returns
+    -------
+    dictionary with keys for 'package' and 'missing'
+        'package' is the name of the QM software package
+        'missing' is whether the output file can be found
+
+    """
+
+    props = {}
+    props['package'] = "Psi4"
+    props['missing'] = False
+
+    return props
+
+
+def get_conf_data(props, calctype, timeout, psiout):
+    """
+    Call the relevant functions to process the output
+    files for one calculation.
+
+    Parameters
+    ----------
+    """
+
+    # get wall clock time of the job
+    props['time'] = get_psi_time(timeout)
+
+    # get calculation details
+    props = process_psi_out(psiout, props, calctype)
+
+    return props
+
+
+def set_conf_data(mol, props, calctype):
+
+    # Set last coordinates from optimization. skip if missing.
+    if 'coords' in props and len(props['coords']) != 0 :
+        mol.SetCoords(oechem.OEFloatArray(props['coords']))
+
+    # Set SD tags for this molecule
+    pt.SetSDTags(mol, props, calctype)
+
+    return mol
+
+
+def check_title(mol, infile):
+    """
+    Check if mol has title which is required for setting up new subdirectories.
+    If not title listed, rename molecule based on filename. Process filename
+    to remove dashes and dots due to file name limitations of pipeline.
+
+    Parameters
+    ----------
+    mol : OpenEye OEMol
+    infile : string, name of the file from which the mol came
+
+    Returns
+    -------
+    OpenEye OEMol
+
+    """
+    extract_fname = os.path.splitext(os.path.basename(infile))[0]
+    extract_fname = extract_fname.replace("-", "")
+    extract_fname = extract_fname.replace(".", "")
+    if mol.GetTitle() == "":
+        mol.SetTitle(extract_fname)
+
+    return mol
+
 
 def get_psi_time(filename):
     """
@@ -21,8 +107,16 @@ def get_psi_time(filename):
     Returns
     -------
     time: float of the average wall-clock time of a single timefile
+        OR string of error message if file not found
 
     """
+
+    # check whether file exists
+    if not os.path.isfile(filename):
+        print("*** ERROR: timer file not found: {} ***".format(filename))
+        return ("Timer output file not found")
+
+    # read file and extract time
     with open(filename) as fname:
         times = []
         for line in fname:
@@ -52,16 +146,18 @@ def process_psi_out(filename, properties, calctype='opt'):
     properties: dictionary with summarized data from output file.
         spe keys:  basis, method, finalEnergy
         opt keys:  basis, method, numSteps, initEnergy, finalEnergy, coords
-        hess keys: basis, method,
+        hess keys: basis, method, hessian
 
     """
-    try:
-        f = open(filename,"r")
-    except IOError:
-        print("No {} file found in directory of {}.".format(filename,os.getcwd()))
+
+    # check whether output file exists
+    if not os.path.isfile(filename):
+        print("*** ERROR: Output file not found: {} ***".format(filename))
         properties['missing'] = True
         return properties
 
+    # open and read file
+    f = open(filename,"r")
     lines = f.readlines()
     it = iter(lines)
 
@@ -165,29 +261,27 @@ def process_psi_out(filename, properties, calctype='opt'):
 
 ### ------------------- Script -------------------
 
-def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="timer.dat"):
-    import procTags as pt # VTL temp move bc travis fails to import
+def getPsiResults(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout="timer.dat"):
 
     """
     Read in OEMols (and each of their conformers) in origsdf file,
         get results from Psi4 calculations in the same directory as origsdf,
         and write out results into finsdf file.
     Directory layout is .../maindir/molName/confNumber/outputfiles .
+    Both origsdf and finsdf are located in maindir.
 
     Parameters
     ----------
-    origsdf:  string - PATH+full name of orig pre-opt SDF file.
-        Path should contain (1) all confs' jobs, (2) orig sdf file.
-        This path will house soon-generated final output sdf file.
+    origsdf:  string - original SDF file of input structures of QM calculation
     finsdf:   string - full name of final SDF file with optimized results.
-    spe:     Boolean - are the Psi4 results of a single point energy calcn?
+    calctype: string; one of 'opt','spe','hess' for geometry optimization,
+        single point energy calculation, or Hessian calculation
     psiout:   string - name of the Psi4 output files. Default is "output.dat"
     timeout: string - name of the Psi4 timer files. Default is "timer.dat"
 
     Returns
     -------
-    method: string - QM method from Psi4 calculations
-    basisset: string - QM basis set from Psi4 calculations
+    OpenEye OEMol with data in SD tags
 
     None is returned if the function returns early (e.g., if output file
        already exists) or if there is KeyError from processing last
@@ -198,7 +292,7 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
     hdir, fname = os.path.split(origsdf)
     wdir = os.getcwd()
 
-    # Read in .sdf file and distinguish each molecule's conformers
+    # read in sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     if not ifs.open(origsdf):
@@ -206,7 +300,7 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
         quit()
     molecules = ifs.GetOEMols()
 
-    # Open outstream file.
+    # open outstream file
     writeout = os.path.join(wdir,finsdf)
     write_ofs = oechem.oemolostream()
     if os.path.exists(writeout):
@@ -215,50 +309,35 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
     if not write_ofs.open(writeout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % writeout)
 
-    # For each conformer, process output file and write new data to SDF file
+    # for each conformer, process output file and write new data to SDF file
     for mol in molecules:
         print("===== %s =====" % (mol.GetTitle()))
         for j, conf in enumerate( mol.GetConfs()):
 
-            # GET DETAILS FOR SD TAGS
-            props = {} # dictionary of data for this conformer
-            props['package'] = "Psi4"
-            props['missing'] = False
-            # check whether output files exist
-            outf = os.path.join(hdir,"%s/%s/%s" % (mol.GetTitle(),j+1,psiout))
+            props = initiate_dict()
+
+            # set file locations
             timef = os.path.join(hdir,"%s/%s/%s" % (mol.GetTitle(),j+1,timeout))
-            if not (os.path.isfile(outf) and os.path.isfile(timef)):
-                print("*** ERROR: Output (or timer) file not found: {} ***".format(outf))
-                continue
-            # Get wall clock time of the job
-            try:
-                props['time'] = get_psi_time(timef)
-            except IOError:
-                props['time'] = "Timer output file not found"
-                pass
+            outf = os.path.join(hdir,"%s/%s/%s" % (mol.GetTitle(),j+1,psiout))
+
             # process output and get dictionary results
-            props = process_psi_out(outf, props, spe)
-            # if output was missing, move on
-            if props['missing']:
+            props = get_conf_data(props, calctype, timef, outf)
+
+            # if output was missing or are missing calculation details
+            # move on to next conformer
+            if props['missing'] or (calctype=='opt' and not all(key in props for key in ['numSteps','finalEnergy','coords'])):
+                print("ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n".format(outf))
                 continue
-            try:
-                props['numSteps']
-                props['finalEnergy']
-                props['coords']
-            except KeyError:
-                sys.exit("ERROR: Psi4 job was incomplete for {}".format(outf))
 
-            # BRIEF ANALYSIS OF STRUCTURE, INTRA HBONDS
-            # Set last coordinates from optimization. skip if missing.
-            if 'coords' in props and len(props['coords']) != 0 :
-                conf.SetCoords(oechem.OEFloatArray(props['coords']))
-            # _____________________
+            # add data to oemol
+            conf = set_conf_data(mol, props, calctype)
 
-            # SET DETAILS TO WRITE MOLECULE
-            # Set SD tags for this molecule
-            pt.SetOptSDTags(conf, props, spe)
-            # Write output file
+            # check mol title
+            conf = check_title(mol, origsdf)
+
+            # write output file
             oechem.OEWriteConstMolecule(write_ofs, conf)
+
     ifs.close()
     write_ofs.close()
     try:
@@ -267,8 +346,7 @@ def getPsiResults(origsdf, finsdf, spe=False, psiout="output.dat", timeout="time
         return None, None
 
 
-def getPsiOne(infile, outfile, spe=False, psiout="output.dat", timeout="timer.dat"):
-    import procTags as pt # VTL temp move bc travis fails to import
+def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="timer.dat"):
 
     """
     Write out Psi4 optimized geometry details into a new OEMol.
@@ -280,8 +358,8 @@ def getPsiOne(infile, outfile, spe=False, psiout="output.dat", timeout="timer.da
         To ensure that the atom orderings remain constant.
     outfile : string
         Name of output geometry file with optimized results.
-    spe : Boolean
-        Are the Psi4 results of a single point energy calcn?
+    calctype: string; one of 'opt','spe','hess' for geometry optimization,
+        single point energy calculation, or Hessian calculation
     psiout : string
         Name of the Psi4 output files. Default is "output.dat"
     timeout : string
@@ -305,41 +383,6 @@ def getPsiOne(infile, outfile, spe=False, psiout="output.dat", timeout="timer.da
         quit()
     oechem.OEReadMolecule(ifs,mol)
 
-    # Get details for SD tags
-    props = {} # dictionary of data for this mol
-    props['package'] = "Psi4"
-    props['missing'] = False
-
-    # Get wall clock time of the job
-    try:
-        props['time'] = get_psi_time(timeout)
-    except IOError:
-        props['time'] = "Timer output file not found"
-        pass
-
-    # process output and get dictionary results
-    props = process_psi_out(psiout, props, spe)
-    if props['missing']:
-        sys.exit("ERROR: Psi4 output file not found")
-    try:
-        props['numSteps']
-        props['finalEnergy']
-        props['coords']
-    except KeyError:
-        sys.exit("ERROR: Psi4 job was incomplete.")
-
-    # Set last coordinates from optimization. skip if missing.
-    if 'coords' in props and len(props['coords']) != 0 :
-        mol.SetCoords(oechem.OEFloatArray(props['coords']))
-
-    # Set SD tags for this molecule
-    pt.SetOptSDTags(mol, props, spe)
-
-    # Check if mol has title and set one on filename if not existing
-    extract_fname = os.path.splitext(os.path.basename(infile))[0]
-    if mol.GetTitle() == "":
-        mol.SetTitle(extract_fname)
-
     # Open outstream file.
     write_ofs = oechem.oemolostream()
     if os.path.exists(outfile):
@@ -348,14 +391,27 @@ def getPsiOne(infile, outfile, spe=False, psiout="output.dat", timeout="timer.da
     if not write_ofs.open(outfile):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % outfile)
 
-    # Write output file
+    props = initiate_dict()
+
+    # process output and get dictionary results
+    props = get_conf_data(props, calctype, timeout, psiout)
+
+    # if output was missing or are missing calculation details
+    # move on to next conformer
+    if props['missing'] or (calctype=='opt' and not all(key in props for key in ['numSteps','finalEnergy','coords'])):
+        sys.exit("ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n".format(outfile))
+
+    # add data to oemol
+    mol = set_conf_data(mol, props, calctype)
+
+    # check mol title
+    mol = check_title(mol, infile)
+
+    # write output file
     oechem.OEWriteConstMolecule(write_ofs, mol)
     write_ofs.close()
 
-    try:
-        return props['method'], props['basis']
-    except KeyError:
-        return None, None
+    return mol
 
 
 if __name__ == "__main__":

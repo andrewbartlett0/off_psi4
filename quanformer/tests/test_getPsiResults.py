@@ -14,6 +14,26 @@ mydir = os.path.dirname(os.path.abspath(__file__))
 # -----------------------
 
 import pytest
+from helper import *
+
+def test_initiate_dict():
+    d = initiate_dict()
+    assert d['package'] == 'Psi4'
+    assert d['missing'] == False
+
+def test_get_conf_data():
+    # TODO
+    pass
+
+def test_set_conf_data():
+    # TODO
+    pass
+
+def test_check_title():
+    mol, ifs = read_mol(os.path.join(mydir,'data_tests','methane_title-1.0.sdf'))
+    mol = check_title(mol, os.path.join(mydir,'data_tests','methane_title-1.0.sdf'))
+    assert mol.GetTitle() == 'methane_title10'
+    ifs.close()
 
 def test_get_psi_time():
     time = get_psi_time(os.path.join(mydir,'data_tests','timer.dat'))
@@ -51,6 +71,30 @@ def test_process_psi_out_two():
     # TODO what happens if passed in psi4 output with opt-->hess, or opt-->spe
     pass
 
+#def test_getPsiResults():
+#    infile = os.path.join(mydir,'data_tests','gbi-200.sdf')
+#    outfile = os.path.join(mydir,'data_tests','gbi-210.sdf')
+#    m, b = getPsiResults(infile, outfile, calctype='opt', psiout="output.dat", timeout="timer.dat")
+#    print(m,b)
+#    #os.remove(os.path.join(mydir,'data_tests','gbi-210.sdf'))
+
+def test_getPsiOne():
+    infile = os.path.join(mydir,'data_tests','gbi_single.sdf')
+    outfile = os.path.join(mydir,'data_tests','gbi_single-210.sdf')
+    psiout = os.path.join(mydir,'data_tests','GBI','1','output.dat')
+    timeout = os.path.join(mydir,'data_tests','GBI','1','timer.dat')
+    mol = getPsiOne(infile, outfile, 'opt', psiout, timeout)
+    assert oechem.OEHasSDData(mol, "QM Psi4 Opt. Runtime (sec) mp2/def2-SV(P)") == True
+    assert float(oechem.OEGetSDData(mol, "QM Psi4 Opt. Runtime (sec) mp2/def2-SV(P)")) == 847.0
+    assert oechem.OEHasSDData(mol, "QM Psi4 Final Opt. Energy (Har) mp2/def2-SV(P)") == True
+    assert float(oechem.OEGetSDData(mol, "QM Psi4 Final Opt. Energy (Har) mp2/def2-SV(P)")) ==  pytest.approx(-582.156839405,0.00000001)
+    assert oechem.OEHasSDData(mol, "QM Psi4 Initial Opt. Energy (Har) mp2/def2-SV(P)") == True
+    assert float(oechem.OEGetSDData(mol, "QM Psi4 Initial Opt. Energy (Har) mp2/def2-SV(P)")) ==  pytest.approx(-582.14892208,0.00000001)
+    assert oechem.OEHasSDData(mol, "QM Psi4 Opt. Steps mp2/def2-SV(P)") == True
+    assert int(oechem.OEGetSDData(mol, "QM Psi4 Opt. Steps mp2/def2-SV(P)")) == 8
+    os.remove(os.path.join(mydir,'data_tests','gbi_single-210.sdf'))
+
 # test manually without pytest
 if 0:
-    test_process_psi_out_hess()
+    test_getPsiOne()
+    #test_getPsiResults()
