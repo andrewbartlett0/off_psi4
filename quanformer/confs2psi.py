@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 
-## By: Victoria T. Lim, Christopher I. Bayly
+"""
+Purpose:    Generate Psi4 inputs for many molecules/conformers.
+By:         Victoria T. Lim, Christopher I. Bayly
+Version:    Oct 12 2018
 
-## This script generates Psi4 input files for each conf of each molecule.
-## Specifying SPE=True will write inputs for single point energy calcns,
-## else the default input file type is for geometry optimization.
+"""
 
 import os, sys
 import openeye.oechem as oechem
 import shutil
 
 
-def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
+def make_psi_input(mol, label, method, basisset, calctype='opt', mem=None):
     """
     Parameters
     ----------
@@ -19,7 +20,8 @@ def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
     label: string - name of the molecule. Can be an empty string.
     method: string - specification of method (see Psi4 website for options)
     basisset: string - specification of basis set
-    SPE: boolean - False (default) for geom opt. True for single point E calcns
+    calctype: string - one of 'opt','spe','hess' for geometry optimization,
+        single point energy calculation, or Hessian calculation
     mem: string - specify Psi4 job memory. E.g. "2 Gb" "2000 Mb" "2000000 Kb"
 
     Returns
@@ -27,15 +29,23 @@ def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
     inputstring: string - containing contents of whole input file for this conf
 
     """
+
+    # check that specified calctype is valid
+    if calctype not in {'opt','spe','hess'}:
+        sys.exit("Specify a valid calculation type.")
+
     inputstring = ""
     xyz = oechem.OEFloatArray(3)
+
     # specify memory requirements, if defined
     if mem != None:
         inputstring += "memory %s\n" % mem
     inputstring+=( 'molecule %s {\n' % label )
+
     # charge and multiplicity; multiplicity hardwired to singlet (usually is)
     netCharge = oechem.OENetCharge( mol)
     inputstring+=( '  %s 1' % netCharge )
+
     # get coordinates of each atom
     for atom in mol.GetAtoms():
         mol.GetCoords( atom, xyz)
@@ -43,9 +53,10 @@ def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
                        %(oechem.OEGetAtomicSymbol(atom.GetAtomicNum()),
                        xyz[0], xyz[1], xyz[2]) )
     inputstring+=( '\n  units angstrom\n}')
+
     # check if mol has a "freeze" tag
     for x in oechem.OEGetSDDataPairs(mol):
-        if "atoms to freeze" in x.GetTag():
+        if calctype=="opt" and "atoms to freeze" in x.GetTag():
             b = x.GetValue()
             y = b.replace("[", "")
             z = y.replace("]", "")
@@ -72,22 +83,25 @@ def make_psi_input(mol, label, method, basisset, SPE=False, mem=None):
     inputstring+=('\nset basis %s' % (basisset))
     inputstring+=('\nset freeze_core True')
     # specify command for type of calculation
-    if SPE is False:
+    if calctype=='opt':
         inputstring+=('\noptimize(\'%s\')' % (method))
-    else:
+    elif calctype=='spe':
         inputstring+=('\nenergy(\'%s\')' % (method))
+    elif calctype=='hess':
+        inputstring+=('\nH, wfn = hessian(\'mp2\', return_wfn=True)\nwfn.hessian().print_out()' )
+
     return inputstring
 
 
-def confs2psi(insdf, method, basis, spe=False, memory=None):
+def confs2psi(insdf, method, basis, calctype='opt', memory=None):
     """
     Parameters
     ----------
     insdf:  string - PATH+name of SDF file
     method: string - method. E.g. "mp2"
     basis:  string - basis set. E.g. "def2-sv(p)"
-    spe:    boolean. True for single point energy calcns, False for geom opt.
-            default option is False.
+    calctype: string - one of 'opt','spe','hess' for geometry optimization,
+                       single point energy calculation, or Hessian calculation
     memory: string - memory specification. Psi4 default is 256 Mb. E.g. "1.5 Gb"
 
     """
@@ -115,6 +129,6 @@ def confs2psi(insdf, method, basis, spe=False, memory=None):
                 continue
             label = mol.GetTitle()+'_'+str(i+1)
             ofile = open(os.path.join(subdir,'input.dat'), 'w')
-            ofile.write(make_psi_input( conf, label, method, basis, spe, memory))
+            ofile.write(make_psi_input( conf, label, method, basis, calctype, memory))
             ofile.close()
     ifs.close()

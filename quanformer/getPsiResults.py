@@ -292,6 +292,10 @@ def getPsiResults(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout=
     hdir, fname = os.path.split(origsdf)
     wdir = os.getcwd()
 
+    # check that specified calctype is valid
+    if calctype not in {'opt','spe','hess'}:
+        sys.exit("Specify a valid calculation type.")
+
     # read in sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
@@ -374,6 +378,9 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
        already exists)
 
     """
+    # check that specified calctype is valid
+    if calctype not in {'opt','spe','hess'}:
+        sys.exit("Specify a valid calculation type.")
 
     # Read in SINGLE MOLECULE .sdf file
     ifs = oechem.oemolistream()

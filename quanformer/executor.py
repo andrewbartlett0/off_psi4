@@ -50,17 +50,24 @@ def main(**kwargs):
         print("Getting Psi4 results for %s ..." %(fname))
         method, basisset = getPsiResults.getPsiResults(fullname, osdf, calctype=opt['calctype'])
 
-        # specify method and basis from command line inputs
-        # e.g., you already have results but want to filter redundant conformers
-        if method is None or basisset is None:
+        # only filter structures after optimization calculations
+        # spe/hess should not change geometries
+        if opt['calctype'] == 'opt':
+
+            # if didn't go through getPsiResults (e.g., output file already exists
+            # then look for method from command line call for filtering
+            if None in [method, basisset] and not all(key in opt for key in ['method','basisset']) :
+
+                print("ERROR: no results obtained and no conformers filtered. "
+                      "If you want to filter an already-existing output file, "
+                      "specify method and basis set in command line call with -m [method] -b [basis]"
+                return
+
             method = opt['method']
             basisset = opt['basisset']
 
-        # only filter structures after optimization calculations
-        # spe/hess should not change geometries
-        print("Filtering Psi4 results for %s ..." %(osdf))
-        if opt['calctype'] == 'opt':
             tag = "QM Psi4 Final Opt. Energy (Har) %s/%s" % (method, basisset)
+            print("Filtering Psi4 results for %s ..." %(osdf))
             filterConfs.filterConfs(osdf, tag, suffix)
 
 
@@ -79,9 +86,9 @@ if __name__ == "__main__":
         help=("If True (default=False), process Psi4 output files and filter "
               "conformers."))
     parser.add_argument("-t", "--calctype", default="opt",
-        help=("Specify either \"opt\" for geometry optimizations, \"spe\" for "
-             "single point energy calculations, or \"hess\" for Hessian "
-             "calculations. Default is \"opt\"."))
+        help=("Specify either 'opt' for geometry optimizations, 'spe' for "
+             "single point energy calculations, or 'hess' for Hessian "
+             "calculations. Default is 'opt'."))
 
     # qm job detail
     req.add_argument("-m", "--method",

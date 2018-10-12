@@ -37,6 +37,7 @@ def test_SetSDTags_spe_notfinish():
     assert oechem.OEGetSDData(mol, "QM test-p Single Pt. Runtime (sec) test-m/test-b") == '-1'
     assert oechem.OEHasSDData(mol, "Note on Single Pt. test-m/test-b") == True
     assert oechem.OEGetSDData(mol, "Note on Single Pt. test-m/test-b") == "JOB DID NOT FINISH"
+    ifs.close()
 
 def test_SetSDTags_spe_didfinish():
     mol, ifs = read_mol(os.path.join(mydir,'data_tests','gbi_single.sdf'))
@@ -47,6 +48,7 @@ def test_SetSDTags_spe_didfinish():
     assert oechem.OEGetSDData(mol, "QM test-p Single Pt. Runtime (sec) test-m/test-b") == '-1'
     assert oechem.OEHasSDData(mol, "QM test-p Final Single Pt. Energy (Har) test-m/test-b") == True
     assert oechem.OEGetSDData(mol, "QM test-p Final Single Pt. Energy (Har) test-m/test-b") == '-2'
+    ifs.close()
 
 def test_SetSDTags_opt():
     # TODO
