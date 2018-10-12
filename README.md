@@ -126,43 +126,45 @@ The instructions below describe how to take a set of molecules from their starti
  * Filter out potentially redundant structures
     * Output: `file-222.sdf`
 
-Before starting, you need an input file (here called `file.smi`) with your list of SMILES strings and molecule titles.
-See subsections below on "Naming molecules in the input SMILES file" and "File name limitations".
+-----
 
- 1. Generate conformers, perform quick MM optimization, and create Psi4 input files.
+ 1. Create input file with SMILES strings and names for each molecule. 
+    See subsections below on "Naming molecules in the input SMILES file" and "File name limitations".
+
+ 2. Generate conformers, perform quick MM optimization, and create Psi4 input files.
     * `python executor.py -f file.smi --setup -m 'mp2' -b 'def2-sv(p)'`
 
- 2. Run Psi4 QM calculations.
+ 3. Run Psi4 QM calculations.
     * You can check the geometry during optimization with the `xyzByStep.sh` script in the tools directory.  
       E.g., `xyzByStep.sh 10 output.dat view.xyz`
 
- 3. Get Psi4 results.
+ 4. Get Psi4 results.
     * `python executor.py -f file-200.sdf --results -m 'mp2' -b 'def2-sv(p)'`
 
- 4. In a different directory (e.g., subdirectory), set up Psi4 OPT2 calculations from last results.
+ 5. In a different directory (e.g., subdirectory), set up Psi4 OPT2 calculations from last results.
     * [for stage 2 OPT]  
       `python executor.py -f file-220.sdf --setup -t 'opt' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
     * [for stage 2 SPE]   
       `python executor.py -f file-220.sdf --setup -t 'spe' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
- 5. Run Psi4 jobs.
+ 6. Run Psi4 jobs.
     * You can check the geometry during optimization with the `xyzByStep.sh` script in the tools directory.  
       E.g., `xyzByStep.sh 10 output.dat view.xyz`
 
- 6. Get Psi4 results from second-level calculations.
+ 7. Get Psi4 results from second-level calculations.
     * [for stage 2 OPT]   
       `python executor.py -f file-220.sdf --results -t 'opt' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
     * [for stage 2 SPE]   
       `python executor.py -f file-220.sdf --results -t 'spe' -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
- 7. Combine results from various job types to calculate model uncertainty.
+ 8. Combine results from various job types to calculate model uncertainty.
     * See subsection below on "Creating input file for stitchSpe.py"
     * `python stitchSpe.py -i /path/and/input.dat --barplots`
 
- 8. (opt.) If some mol has a high RMSD, identify the outlying conformer and visualize structure.
+ 9. (opt.) If some mol has a high RMSD, identify the outlying conformer and visualize structure.
     * See `examples` directory.
 
- 9. (opt.) Get wall clock times, num opt steps, relative energies. 
+ 10. (opt.) Get wall clock times, num opt steps, relative energies. 
     * `python avgTimeEne.py --relene -f file.sdf -m 'b3lyp-d3mbj' -b 'def2-tzvp'`
 
 ### A. Chemistry that is NOT currently supported by Quanformer
