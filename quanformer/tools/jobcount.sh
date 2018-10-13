@@ -3,8 +3,8 @@
 # Purpose: This bash script can be used to calculate the number of jobs.
 
 # examples of searching in particular paths
-#ALLJOBS=$(find ./ -mindepth 2  -type d -path "*/testmol1/*")
-#ALLJOBS=$(find ./ -mindepth 2 -path "*/chains/AlkEthOH_c1178/*" -path "*mp2*" -path "*def2-tzvp*" -type f -name "timer.dat")
+#ALL_JOBS=$(find ./ -mindepth 2 -maxdepth 2 -type d -not -path "*/testmol1/*")
+#ALL_JOBS=$(find ./ -mindepth 2 -path "*/chains/AlkEthOH_c1178/*" -path "*mp2*" -path "*def2-tzvp*" -type f -name "timer.dat")
 
 ALL_JOBS=$(find ./ -mindepth 2 -maxdepth 2 -type d)
 ALL_JOBS_ARRAY=($ALL_JOBS)
