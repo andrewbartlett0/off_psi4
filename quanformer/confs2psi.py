@@ -84,11 +84,11 @@ def make_psi_input(mol, label, method, basisset, calctype='opt', mem=None):
     inputstring+=('\nset freeze_core True')
     # specify command for type of calculation
     if calctype=='opt':
-        inputstring+=('\noptimize(\'%s\')' % (method))
+        inputstring+=('\noptimize(\'%s\')\n' % (method))
     elif calctype=='spe':
-        inputstring+=('\nenergy(\'%s\')' % (method))
+        inputstring+=('\nenergy(\'%s\')\n' % (method))
     elif calctype=='hess':
-        inputstring+=('\nH, wfn = hessian(\'mp2\', return_wfn=True)\nwfn.hessian().print_out()' )
+        inputstring+=('\nH, wfn = hessian(\'mp2\', return_wfn=True)\nwfn.hessian().print_out()\n' )
 
     return inputstring
 
