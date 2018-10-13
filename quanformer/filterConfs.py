@@ -64,6 +64,13 @@ def IdentifyMinima(mol,tag,ThresholdE,ThresholdRMSD):
             if tag.lower() in x.GetTag().lower():
                 taglabel = x.GetTag()
 
+        # check that there was a successfully found tag
+        try:
+            taglabel
+        except NameError:
+            print("Unable to filter bc missing SD data based on tag: {}".format(tag))
+            return False
+
         # delete cases that don't have energy (opt not converged; or other)
         if not oechem.OEHasSDData(confRef, taglabel):
             confsToDel.add(confRef.GetIdx())
@@ -143,7 +150,7 @@ def filterConfs(rmsdfile, tag, suffix):
 
     wdir, fname = os.path.split(rmsdfile)
     numConfsF = open(os.path.join(os.getcwd(),"numConfs.txt"), 'a')
-    numConfsF.write(tag+"\n")
+    numConfsF.write("\n{}\n".format(tag))
 
     # Open file to be processed.
     rmsd_ifs = oechem.oemolistream()
