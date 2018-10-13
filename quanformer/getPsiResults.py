@@ -334,10 +334,10 @@ def getPsiResults(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout=
                 continue
 
             # add data to oemol
-            conf = set_conf_data(mol, props, calctype)
+            conf = set_conf_data(conf, props, calctype)
 
             # check mol title
-            conf = check_title(mol, origsdf)
+            conf = check_title(conf, origsdf)
 
             # write output file
             oechem.OEWriteConstMolecule(write_ofs, conf)
