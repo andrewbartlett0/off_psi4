@@ -33,7 +33,7 @@ def main(**kwargs):
 
         # generate Psi4 inputs
         print("\nCreating Psi4 input files for %s..." % base)
-        confs2psi.confs2psi(msdf,opt['method'],opt['basisset'],opt['calctype'],"5.0 Gb")
+        confs2psi.confs2psi(msdf,opt['method'],opt['basisset'],opt['calctype'],opt['mem'])
 
 
     else:  # ========== AFTER QM =========== #
@@ -96,6 +96,8 @@ if __name__ == "__main__":
         help="Name of QM method. Put this in 'quotes'.")
     req.add_argument("-b", "--basisset",
         help="Name of QM basis set. Put this in 'quotes'.")
+    parser.add_argument("--mem", default="5.0 Gb",
+        help="Memory specification for each Psi4 calculation.")
 
     args = parser.parse_args()
     opt = vars(args)
