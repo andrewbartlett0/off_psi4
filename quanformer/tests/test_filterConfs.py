@@ -14,13 +14,11 @@ mydir = os.path.dirname(os.path.abspath(__file__))
 # -----------------------
 
 import pytest
+from helper import *
 
 def test_identify_minima():
-    ifs = oechem.oemolistream()
-    if not ifs.open(os.path.join(mydir,'data_tests','gbi.sdf')):
-        oechem.OEThrow.Fatal("Unable to open gbi.sdf for reading")
-    ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
-    mol = next(ifs.GetOEMols())
+    mols, ifs = read_mol(os.path.join(mydir,'data_tests','gbi.sdf'), True)
+    mol = next(mols)
     assert mol.NumConfs() == 36
     # use same params defined in filterConfs.py script
     assert IdentifyMinima(mol,'MM Szybki SD Energy', 5.E-4, 0.2) is True
@@ -28,11 +26,13 @@ def test_identify_minima():
     ifs.close()
 
 def test_filter_confs():
-    # TODO
-    pass
+    filterConfs(os.path.join(mydir,'data_tests','gbi.sdf'),'MM Szybki SD Energy','x')
+    mols, ifs = read_mol(os.path.join(mydir,'gbi-x.sdf'), True)
+    mol = next(mols)
+    assert mol.NumConfs() == 5
+    os.remove(os.path.join(mydir,'gbi-x.sdf'))
 
 # test manually without pytest
 if 0:
-    test_identify_minima()
     test_filter_confs()
 
