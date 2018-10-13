@@ -56,14 +56,16 @@ def main(**kwargs):
 
             # if didn't go through getPsiResults (e.g., output file already exists
             # then look for method from command line call for filtering
-            if None in [method, basisset] and not all(key in opt for key in ['method','basisset']) :
-                print("ERROR: no results obtained and no conformers filtered. "
-                      "If you want to filter an already-existing output file, "
-                      "specify method and basis set in command line call with -m [method] -b [basis]")
-                return
-
-            method = opt['method']
-            basisset = opt['basisset']
+            if None in [method, basisset]:
+                if None in [opt['method'], opt['basisset']]:
+                    print("\nERROR: no results obtained and no conformers filtered. "
+                          "If you want to filter an already-existing output file, "
+                          "specify method and basis set in command line call with "
+                          "-m [method] -b [basis]\n")
+                    return
+                else:
+                    method = opt['method']
+                    basisset = opt['basisset']
 
             tag = "QM Psi4 Final Opt. Energy (Har) %s/%s" % (method, basisset)
             print("Filtering Psi4 results for %s ..." %(osdf))
