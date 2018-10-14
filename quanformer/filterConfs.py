@@ -8,7 +8,7 @@
 ## in order to roughly filter out duplicate minima and keep unique ones.
 ## Filtered conformers for all molecules are written out in SDF file.
 
-## Import and call filterConfs.filterConfs(rmsdfile, tag, suffix)
+## Import and call filterConfs.filterConfs(rmsdfile, tag, rmsdout)
 
 import re
 import os, sys, glob
@@ -121,7 +121,7 @@ def IdentifyMinima(mol,tag,ThresholdE,ThresholdRMSD):
 
 ### ------------------- Script -------------------
 
-def filterConfs(rmsdfile, tag, suffix):
+def filterConfs(rmsdfile, tag, rmsdout):
     """
     Read in OEMols (and each of their conformers) in 'rmsdfile'.
     For each molecule:
@@ -130,18 +130,16 @@ def filterConfs(rmsdfile, tag, suffix):
 
     Parameters
     ----------
-    rmsdfile: string - PATH+full name of to-be-filtered SDF file.
-        This path will house soon-generated final output sdf file.
-    tag:      string - describing the SD tag with the energy value to rough
-        filter conformers. A very small energy difference is considered
-        to be the same conformer (see thresE). Above this energy difference,
-        RMSD comparison is evaluated to distinguish if two confs are diff.
-        Ex. "QM Psi4 Final Opt. Energy (Har) mp2/def-sv(p)"
-            "QM Psi4 Final Single Pt. Energy (Har) mp2/def-sv(p)"
-    suffix:   string - string appended to the basename of rmsdfile to distinguish
-        that this file has been filtered.
-        Ex. if rmsdfile=/some/dir/basename-210.sdf and suffix=220 then output
-            becomes /some/dir/basename-220.sdf
+    rmsdfile : str
+        Name of SDF file with conformers to be filtered
+    tag : str
+        SD tag name with the energy value to roughly screen conformers before RMSD
+        Screening works by removing conformers of very similar energies, where
+        "similar" is defined by thresE parameter. Examples:
+        - "QM Psi4 Final Opt. Energy (Har) mp2/def-sv(p)"
+        - "QM Psi4 Final Single Pt. Energy (Har) mp2/def-sv(p)"
+    rmsdout : str
+        Name of the output file with filtered conformers
 
     """
     # Parameters for distinguishing cutoff of conformer similarity
@@ -160,7 +158,6 @@ def filterConfs(rmsdfile, tag, suffix):
     rmsd_molecules = rmsd_ifs.GetOEMols()
 
     # Open outstream file.
-    rmsdout = ( "%s-%s.sdf" % (fname.replace('-', '.').split('.')[0], str(suffix)) )
     rmsd_ofs = oechem.oemolostream()
     if os.path.exists(rmsdout):
         print("%s output file already exists in %s. Skip filtering.\n" % (rmsdout, os.getcwd()))

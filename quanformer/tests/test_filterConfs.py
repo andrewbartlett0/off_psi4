@@ -26,11 +26,11 @@ def test_identify_minima():
     ifs.close()
 
 def test_filter_confs():
-    filterConfs(os.path.join(mydir,'data_tests','gbi.sdf'),'MM Szybki SD Energy','x')
-    mols, ifs = read_mol(os.path.join(os.getcwd(),'gbi-x.sdf'), True)
+    filterConfs(os.path.join(mydir,'data_tests','gbi.sdf'),'MM Szybki SD Energy','output.sdf')
+    mols, ifs = read_mol(os.path.join(os.getcwd(),'output.sdf'), True)
     mol = next(mols)
     assert mol.NumConfs() == 5
-    os.remove(os.path.join(os.getcwd(),'gbi-x.sdf'))
+    os.remove(os.path.join(os.getcwd(),'output.sdf'))
     os.remove(os.path.join(os.getcwd(),'numConfs.txt'))
 
 # test manually without pytest
