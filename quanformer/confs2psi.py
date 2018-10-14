@@ -88,7 +88,7 @@ def make_psi_input(mol, label, method, basisset, calctype='opt', mem=None):
     elif calctype=='spe':
         inputstring+=('\nenergy(\'%s\')\n\n' % (method))
     elif calctype=='hess':
-        inputstring+=('\nH, wfn = hessian(\'mp2\', return_wfn=True)\nwfn.hessian().print_out()\n\n' )
+        inputstring+=('\nH, wfn = hessian(\'%s\', return_wfn=True)\nwfn.hessian().print_out()\n\n' % (method) )
 
     return inputstring
 
