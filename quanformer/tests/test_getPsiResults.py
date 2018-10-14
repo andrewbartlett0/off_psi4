@@ -71,30 +71,91 @@ def test_process_psi_out_two():
     # TODO what happens if passed in psi4 output with opt-->hess, or opt-->spe
     pass
 
-#def test_getPsiResults():
-#    infile = os.path.join(mydir,'data_tests','gbi-200.sdf')
-#    outfile = os.path.join(mydir,'data_tests','gbi-210.sdf')
-#    m, b = getPsiResults(infile, outfile, calctype='opt', psiout="output.dat", timeout="timer.dat")
-#    print(m,b)
-#    #os.remove(os.path.join(mydir,'data_tests','gbi-210.sdf'))
-
 def test_getPsiOne():
     infile = os.path.join(mydir,'data_tests','gbi_single.sdf')
     outfile = os.path.join(mydir,'data_tests','gbi_single-210.sdf')
     psiout = os.path.join(mydir,'data_tests','GBI','1','output.dat')
     timeout = os.path.join(mydir,'data_tests','GBI','1','timer.dat')
-    mol = getPsiOne(infile, outfile, 'opt', psiout, timeout)
+    mol, props = getPsiOne(infile, outfile, 'opt', psiout, timeout)
     assert oechem.OEHasSDData(mol, "QM Psi4 Opt. Runtime (sec) mp2/def2-SV(P)") == True
-    assert float(oechem.OEGetSDData(mol, "QM Psi4 Opt. Runtime (sec) mp2/def2-SV(P)")) == 847.0
+    assert oechem.OEGetSDData(mol, "QM Psi4 Opt. Runtime (sec) mp2/def2-SV(P)") == '847.0'
     assert oechem.OEHasSDData(mol, "QM Psi4 Final Opt. Energy (Har) mp2/def2-SV(P)") == True
-    assert float(oechem.OEGetSDData(mol, "QM Psi4 Final Opt. Energy (Har) mp2/def2-SV(P)")) ==  pytest.approx(-582.156839405,0.00000001)
+    assert oechem.OEGetSDData(mol, "QM Psi4 Final Opt. Energy (Har) mp2/def2-SV(P)") ==  '-582.1568394053036'
     assert oechem.OEHasSDData(mol, "QM Psi4 Initial Opt. Energy (Har) mp2/def2-SV(P)") == True
-    assert float(oechem.OEGetSDData(mol, "QM Psi4 Initial Opt. Energy (Har) mp2/def2-SV(P)")) ==  pytest.approx(-582.14892208,0.00000001)
+    assert oechem.OEGetSDData(mol, "QM Psi4 Initial Opt. Energy (Har) mp2/def2-SV(P)") ==  '-582.148922080397'
     assert oechem.OEHasSDData(mol, "QM Psi4 Opt. Steps mp2/def2-SV(P)") == True
-    assert int(oechem.OEGetSDData(mol, "QM Psi4 Opt. Steps mp2/def2-SV(P)")) == 8
-    os.remove(os.path.join(mydir,'data_tests','gbi_single-210.sdf'))
+    assert oechem.OEGetSDData(mol, "QM Psi4 Opt. Steps mp2/def2-SV(P)") == '8'
+    os.remove(outfile)
+
+# TODO
+#def test_getPsiResults_none(capsys):
+#    infile = os.path.join(mydir,'data_tests','gbi-200.sdf')
+#    outfile = os.path.join(mydir,'data_tests','gbi-210.sdf')
+#    with pytest.raises(SystemExit):
+#        m, b = getPsiResults(infile, outfile, calctype='blah', psiout="output.dat", timeout="timer.dat")
+#    out, err = capsys.readouterr()
+#    assert err == "Specify a valid calculation type."
+#    print(out, err)
+
+def test_getPsiResults_spe():
+    # TODO
+    pass
+
+def test_getPsiResults_hess():
+    infile = os.path.join(mydir,'data_tests','carbon-222.sdf')
+    outfile = os.path.join(mydir,'data_tests','carbon_hess-222.sdf')
+    m, b = getPsiResults(infile, outfile, 'hess', "output.dat", "timer.dat")
+    # check the method and basis set returned
+    assert m == 'mp2'
+    assert b == 'def2-tzvp'
+
+    # check tag of Hessian calculation time for one conformer
+    mols, ifs = read_mol(outfile,True)
+    conf = list(next(mols).GetConfs())[0] # only conf of the s1 mol
+    assert oechem.OEGetSDData(conf, 'QM Psi4 Hessian Runtime (sec) mp2/def2-tzvp') == '253.0'
+
+    # check a few values of the Hessian matrix for each conformer
+    hpickle = os.path.join(mydir,'data_tests','carbon_hess-222.hess.pickle')
+    hdict = pickle.load(open(hpickle,'rb'))
+    # mol s1, conf 1, row 10, column 23
+    assert hdict['s1'][1][9][22] == 0.00065859359798
+    # mol t1, conf 1, row 3, column 9
+    assert hdict['t1'][1][2][8] == -0.42670095298438
+
+    # clean up
+    ifs.close()
+    os.remove(outfile)
+    os.remove(hpickle)
+
+
+def test_getPsiResults_opt():
+    infile = os.path.join(mydir,'data_tests','gbi-200.sdf')
+    outfile = os.path.join(mydir,'data_tests','gbi-210.sdf')
+    m, b = getPsiResults(infile, outfile, 'opt', "output.dat", "timer.dat")
+    assert m == 'mp2'
+    assert b == 'def2-SV(P)'
+
+    # read the single mol (from generator) and get its three conformers
+    # confs 2 and 4 failed opt so we should have data from confs 1 3 5
+    mol, ifs = read_mol(outfile,True)
+    confs = list(next(mol).GetConfs())
+    assert len(confs) == 3
+
+    # get one conf and check its tag data
+    conf = confs[1]
+    # handy way to get all tags and data (.GetTag(), .GetValue())
+    #print([x.GetValue() for x in list(oechem.OEGetSDDataPairs(conf))])
+    assert oechem.OEGetSDData(conf, 'QM Psi4 Opt. Runtime (sec) mp2/def2-SV(P)') == '2635.0'
+    assert oechem.OEGetSDData(conf, 'QM Psi4 Final Opt. Energy (Har) mp2/def2-SV(P)') == '-582.1570265488717'
+    assert oechem.OEGetSDData(conf, 'QM Psi4 Opt. Steps mp2/def2-SV(P)') == '21'
+    assert oechem.OEGetSDData(conf, 'QM Psi4 Initial Opt. Energy (Har) mp2/def2-SV(P)') == '-582.146838702714'
+    ifs.close()
+    os.remove(outfile)
+
 
 # test manually without pytest
 if 0:
-    test_getPsiOne()
-    #test_getPsiResults()
+    #test_getPsiOne()
+    #test_getPsiResults_none()
+    test_getPsiResults_hess()
+
