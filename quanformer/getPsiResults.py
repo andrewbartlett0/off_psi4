@@ -9,6 +9,7 @@ Version:    Oct 12 2018
 
 import re
 import os, sys, glob
+import pickle
 import openeye.oechem as oechem
 
 # local testing vs. travis testing
@@ -313,9 +314,16 @@ def getPsiResults(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout=
     if not write_ofs.open(writeout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % writeout)
 
+    # Hessian dictionary, where hdict['molTitle']['confIndex'] has np array
+    if calctype == 'hess':
+        hdict = {}
+
     # for each conformer, process output file and write new data to SDF file
     for mol in molecules:
         print("===== %s =====" % (mol.GetTitle()))
+        if calctype == 'hess':
+            hdict[mol.GetTitle()] = {}
+
         for j, conf in enumerate( mol.GetConfs()):
 
             props = initiate_dict()
@@ -336,12 +344,22 @@ def getPsiResults(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout=
             # add data to oemol
             conf = set_conf_data(conf, props, calctype)
 
+            # if hessian, append to dict bc does not go to SD tag
+            if calctype == 'hess':
+                hdict[mol.GetTitle()][j+1] = props['hessian']
+
             # check mol title
             conf = check_title(conf, origsdf)
 
             # write output file
             oechem.OEWriteConstMolecule(write_ofs, conf)
 
+    # if hessian, write hdict out to separate file
+    if calctype == 'hess':
+        hfile = os.path.join(wdir,os.path.splitext(finsdf)[0]+'.hess.pickle')
+        pickle.dump(hdict, open(hfile,'wb'))
+
+    # close file streams
     ifs.close()
     write_ofs.close()
     try:
@@ -418,7 +436,7 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
     oechem.OEWriteConstMolecule(write_ofs, mol)
     write_ofs.close()
 
-    return mol
+    return mol, props
 
 
 if __name__ == "__main__":
