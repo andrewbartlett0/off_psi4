@@ -8,53 +8,79 @@ import filterConfs
 import confs2psi
 import getPsiResults
 
+def name_manager(infile):
+    curr_dir = os.getcwd()
+
+    # get base name without suffix and without extension
+    inpath, no_path_infile = os.path.split(infile)
+
+    # if inpath does not contain full path, then its path is curr_dir
+    if inpath == '' or inpath is None or inpath == '.':
+        checked_infile = os.path.join(curr_dir,infile)
+    else:
+        checked_infile = infile
+
+    # get extension of .sdf, .smi, etc.
+    _, ext = os.path.splitext(infile)
+
+    # replace - with # and split by # to get basename without suffix/extension
+    prefix = no_path_infile.replace('-', '#').split('#')[0]
+
+    return curr_dir, checked_infile, prefix, ext
+
+
 
 def main(**kwargs):
-    _, extension = os.path.splitext(opt['filename'])
-    adir, fname = os.path.split(opt['filename'])
-    hdir = os.getcwd()
-    if adir == '' or adir is None or adir == '.':
-        fullname = os.path.join(hdir,opt['filename'])
-    else:
-        fullname = opt['filename']
-    base = fname.replace('-', '.').split('.')[0]
+
+    curr_dir, checked_infile, prefix, ext, no_path_infile = name_manager(opt['filename'])
 
     if opt['setup']:
 
-        # MM opt and filter
-        if extension == '.smi':
-            print("\nGenerating and filtering conformers for %s" % opt['filename'])
-            msdf = base + '.sdf'
-            smi2confs.smi2confs(os.path.join(hdir,opt['filename']))
-            filterConfs.filterConfs(os.path.join(hdir, msdf), "MM Szybki SD Energy", suffix='200')
-            msdf = base+'-200.sdf'
+        # default of pipeline uses '200' suffix for MM opt/filtering output
+        if opt['suffix'] is None:
+            suffix = '200'
         else:
-            msdf = fullname
+            suffix = opt['suffix'][0]
+
+        # if input is SMILES file, do MM opt then filter
+        # files are saved to curr_dir but can be changed to input file's dir (inpath)
+        if ext == '.smi':
+            print("\nGenerating and filtering conformers for %s" % opt['filename'])
+            smi2confs.smi2confs(checked_infile)
+            pre_filt = os.path.join(curr_dir,prefix+'.sdf')
+            post_filt = os.path.join(curr_dir,"{}-{}.sdf".format(prefix, suffix))
+            filterConfs.filterConfs(pre_filt, "MM Szybki SD Energy", post_filt)
+        # if input is SDF file, don't generate confs/filter but skip to generating QM inputs
+        else:
+            post_filt = checked_infile
 
         # generate Psi4 inputs
-        print("\nCreating Psi4 input files for %s..." % base)
-        confs2psi.confs2psi(msdf,opt['method'],opt['basisset'],opt['calctype'],opt['mem'])
+        print("\nCreating Psi4 input files for %s..." % prefix)
+        confs2psi.confs2psi(post_filt,opt['method'],opt['basisset'],opt['calctype'],opt['mem'])
 
 
     else:  # ========== AFTER QM =========== #
 
-        # specify output file name
-        if "220" not in fname:
-            osdf = os.path.join(hdir,base + '-210.sdf')
-            suffix = '220'
+        # default of pipeline goes '200' --> '210'/'220' --> '221/'222'
+        if opt['suffix'] is None:
+            if '-200.sdf' in no_path_infile:
+                out_results = os.path.join(curr_dir,prefix+'-210.sdf')
+                out_filter = os.path.join(curr_dir,prefix+'-220.sdf')
+            elif '-220.sdf' in no_path_infile:
+                out_results = os.path.join(curr_dir,prefix+'-221.sdf')
+                out_filter = os.path.join(curr_dir,prefix+'-222.sdf')
         else:
-            osdf = os.path.join(hdir,base + '-221.sdf')
-            suffix = '222'
+            out_results = os.path.join(curr_dir,"{}-{}.sdf".format(prefix, opt['suffix'][0]))
+            out_filter =  os.path.join(curr_dir,"{}-{}.sdf".format(prefix, opt['suffix'][1]))
 
         # get psi4 results
         print("Getting Psi4 results for %s ..." %(fname))
-        method, basisset = getPsiResults.getPsiResults(fullname, osdf, calctype=opt['calctype'])
+        method, basisset = getPsiResults.getPsiResults(checked_infile, out_results, calctype=opt['calctype'])
 
-        # only filter structures after optimization calculations
-        # spe/hess should not change geometries
+        # only filter structures after opts; spe/hess should not change geoms
         if opt['calctype'] == 'opt':
 
-            # if didn't go through getPsiResults (e.g., output file already exists
+            # if didn't go through getPsiResults (e.g., output file already exists)
             # then look for method from command line call for filtering
             if None in [method, basisset]:
                 if None in [opt['method'], opt['basisset']]:
@@ -68,8 +94,8 @@ def main(**kwargs):
                     basisset = opt['basisset']
 
             tag = "QM Psi4 Final Opt. Energy (Har) %s/%s" % (method, basisset)
-            print("Filtering Psi4 results for %s ..." %(osdf))
-            filterConfs.filterConfs(osdf, tag, suffix)
+            print("Filtering Psi4 results for %s ..." % (out_results))
+            filterConfs.filterConfs(out_results, tag, out_filter)
 
 
 if __name__ == "__main__":
@@ -98,6 +124,16 @@ if __name__ == "__main__":
         help="Name of QM basis set. Put this in 'quotes'.")
     parser.add_argument("--mem", default="5.0 Gb",
         help="Memory specification for each Psi4 calculation.")
+
+    # custom suffixes for pipeline outputs
+    parser.add_argument("--suffix", nargs='+',
+        help=("For custom naming of results and filtered files throughout "
+              "pipeline. If called with --setup option, include ONE suffix "
+              "for output of filtered conformers. If suffix is called with "
+              "--results option, include TWO suffixes for (1) output of QM "
+              "calculations and (2) the filtered file of (1)."
+              "Examples: --suffix 'filt'; --suffix 'qm' 'qmfilt' "
+
 
     args = parser.parse_args()
     opt = vars(args)

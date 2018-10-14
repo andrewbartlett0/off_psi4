@@ -156,13 +156,13 @@ The instructions below describe how to take a set of molecules from their starti
 
 ### B. Limitations for file names
 
-Base names (e.g. `basename.smi`, `basename.sdf`) can contain underscores but *no dashes and no dots*.
+Base names (e.g. `basename.smi`, `basename.sdf`) can contain underscores but *no dash (-) and no pound sign (#)*.
   * Dashes should not be used in the base filename because this is a delimiter for the SDF numbering code (see above).
-  * Dots should not be used in the base filename because this is used to extract the file information such as file extension.
+  * Pound signs should not be used in the base filename because this is used to extract the file information such as file extension.
   * Examples:
-    * Good: `basename_set1.smi`
     * Bad:  `basename-set1.smi`
-    * Bad:  `basename.set1.smi`
+    * Bad:  `basename#set1.smi`
+    * Good: `basename_set1.smi`
 
 ### C. Limitations on molecule names
 
