@@ -178,7 +178,7 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
 
             # process output and get dictionary results
             props = process_turb_out(props, spe, cosmo)
-            pt.SetOptSDTags(conf, props, spe)
+            pt.SetSDTags(conf, props, spe)
             oechem.OEWriteConstMolecule(write_ofs, conf)
     ifs.close()
 

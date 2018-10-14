@@ -14,17 +14,14 @@ mydir = os.path.dirname(os.path.abspath(__file__))
 # -----------------------
 
 import pytest
+from helper import *
 
-def read_mol(infile):
-    ifs = oechem.oemolistream()
-    if not ifs.open(infile):
-        oechem.OEThrow.Fatal("Unable to open {} for reading".format(infile))
-    ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
-    mol = oechem.OEGraphMol()
-    oechem.OEReadMolecule(ifs, mol)
-    return mol, ifs
 
-def close_mol(ifs):
+def test_make_hessian():
+    mol, ifs = read_mol(os.path.join(mydir,'data_tests','methane_c2p.sdf'))
+    test_string = make_psi_input(mol,mol.GetTitle(),'mp2','aug-cc-pVTZ','hess')
+    assert "H, wfn = hessian('mp2', return_wfn=True)" in test_string
+    assert "wfn.hessian().print_out()" in test_string
     ifs.close()
 
 def test_make_frozen():
@@ -34,26 +31,26 @@ def test_make_frozen():
     assert "1 xyz" in test_string
     assert "3 xyz" in test_string
     assert "12 xyz" in test_string
-    close_mol(ifs)
+    ifs.close()
 
 def test_make_dfmp2_dunning():
     mol, ifs = read_mol(os.path.join(mydir,'data_tests','methane_c2p.sdf'))
     test_string = make_psi_input(mol,mol.GetTitle(),'mp2','aug-cc-pVTZ')
     assert "df_basis_mp2" not in test_string
-    close_mol(ifs)
+    ifs.close()
 
 def test_make_dfmp2_qzvpd():
     mol, ifs = read_mol(os.path.join(mydir,'data_tests','methane_c2p.sdf'))
     test_string = make_psi_input(mol,mol.GetTitle(),'mp2','def2-qzvpd')
     assert "df_basis_mp2" not in test_string
-    close_mol(ifs)
+    ifs.close()
     return
 
 def test_make_dfmp2_svpp():
     mol, ifs = read_mol(os.path.join(mydir,'data_tests','methane_c2p.sdf'))
     test_string = make_psi_input(mol,mol.GetTitle(),'mp2','def2-sv(p)')
     assert "def2-sv_p_-ri" in test_string
-    close_mol(ifs)
+    ifs.close()
     return
 
 def test_confs2psi():
@@ -61,5 +58,4 @@ def test_confs2psi():
 
 # test manually without pytest
 if 0:
-    test_make_frozen()
-    test_make_dfmp2_dunning()
+    test_make_hessian()
