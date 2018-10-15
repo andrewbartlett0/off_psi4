@@ -26,7 +26,7 @@ def name_manager(infile):
     # replace - with # and split by # to get basename without suffix/extension
     prefix = no_path_infile.replace('-', '#').split('#')[0]
 
-    return curr_dir, checked_infile, prefix, ext
+    return curr_dir, checked_infile, prefix, ext, no_path_infile
 
 
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
               "for output of filtered conformers. If suffix is called with "
               "--results option, include TWO suffixes for (1) output of QM "
               "calculations and (2) the filtered file of (1)."
-              "Examples: --suffix 'filt'; --suffix 'qm' 'qmfilt' "
+              "Examples: --suffix 'filt'; --suffix 'qm' 'qmfilt' "))
 
 
     args = parser.parse_args()
