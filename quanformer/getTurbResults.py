@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
-## Description: Summarize results from Turbomole set of calculations into single SDF file.
-## !! Must manually set cosmo=True to get these values (!!) If set to True but is actually false is ok, just wastes time.
+"""
+Purpose:    Process results from a set of Turbomole QM calculations into a single SDF file.
+By:         Victoria T. Lim
+Version:    Oct 22 2018
+Notes:
+ - May need to load Turbomole first (e.g., module load turbomole/7.1/intel)
+ - Only opt calculations currently supported (not single point energies or hessian calculations)
 
-## TODO: make cosmo boolean a command line arg?
-## TODO: get SPE results
+"""
 
-import os
+import os, sys
 import argparse
 import datetime
 import openeye.oechem as oechem
@@ -16,19 +20,27 @@ import procTags as pt
 ### ------------------- Functions -------------------
 
 
-def GetTime():
+def get_time(jobdir):
     """
     Subtract time from beginning of job.start and job.last files.
+    Note: This does not use the total cpu/wall time at the end of the
+    job.last files bc of discussions with M. Agee on potential inaccuracy.
+
+    Parameters
+    ----------
+    jobdir: string of the calculation directory
 
     Returns
     -------
     time: float of wall-clock time in seconds
 
     """
-    if not (os.path.exists("job.start") and os.path.exists("job.last")):
+    jstart = os.path.join(jobdir,"job.start")
+    jlast = os.path.join(jobdir,"job.last")
+    if not (os.path.exists(jstart) and os.path.exists(jlast)):
         print("job.start or job.last file missing. Appending -1.")
         return -1.
-    fp = open("job.start")
+    fp = open(jstart)
     for i, line in enumerate(fp):
         if i == 1:
             init = line.strip()
@@ -36,7 +48,7 @@ def GetTime():
             break
     fp.close()
 
-    fp = open("job.last")
+    fp = open(jlast)
     for i, line in enumerate(fp):
         if i == 2:
             final = line.strip()
@@ -49,15 +61,15 @@ def GetTime():
     dtime = (d2-d1).total_seconds()
     return dtime
 
-def process_turb_out(Props, spe, cosmo):
+def process_turb_out(Props, calctype, cosmo):
     """
 
-    TO BE UPDATED
-
-    Go through output file and get level of theory (method and basis set),
+    Go through output file to get level of theory (method and basis set),
         number of optimization steps, initial and final energies, and
-        optimized coordinates. Returns all this information in a dictionary
+        optimized coordinates. Return all this information in a dictionary
         that was passed to this function.
+    This function works in the directory of the output files, presumably
+        because one has to be in there anyway to call t2x function later.
 
     Relevant Turbomole output files:
      * GEO_OPT_CONVERGED or GEO_OPT_FAILED
@@ -66,7 +78,8 @@ def process_turb_out(Props, spe, cosmo):
     Parameters
     ----------
     Props: dictionary where all the data will go. Can be empty or not.
-    spe: Boolean - are the Psi4 results of a single point energy calcn?
+    calctype: string; one of 'opt','spe','hess' for geometry optimization,
+        single point energy calculation, or Hessian calculation
 
     Returns
     -------
@@ -118,15 +131,19 @@ def process_turb_out(Props, spe, cosmo):
 
 ### ------------------- Script -------------------
 
-def getTurbResults(origsdf, theory, finsdf, spe=False):
+def getTurbResults(origsdf, theory, finsdf, calctype='opt', cosmo=False):
     """
 
     """
-    wdir = os.getcwd()
+    wdir = os.path.split(origsdf)[0]
     p = sp.call('module load turbomole/7.1/intel', shell=True)
 
     method = theory.split('/')[0]
     basisset = theory.split('/')[1]
+
+    # check that specified calctype is valid
+    if calctype not in {'opt','spe','hess'}:
+        sys.exit("Specify a valid calculation type.")
 
     ### Read in .sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
@@ -156,10 +173,10 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
             subdir = os.path.join(wdir,"%s/%s" % (mol.GetTitle(), i+1))
             if not os.path.isdir(subdir):
                 sys.exit("No subdirectories found, are you in the right dir?")
-            os.chdir(subdir)
+            os.chdir(subdir) # need to change to run t2x
 
             # get time and final coordinates
-            props['time'] = GetTime()
+            props['time'] = get_time(subdir)
             if not os.path.exists('coord'):
                 print("Error: the 'coord' file does not exist!")
                 continue
@@ -177,8 +194,8 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
             xfs.close()
 
             # process output and get dictionary results
-            props = process_turb_out(props, spe, cosmo)
-            pt.SetSDTags(conf, props, spe)
+            props = process_turb_out(props, calctype, cosmo)
+            pt.SetSDTags(conf, props, calctype)
             oechem.OEWriteConstMolecule(write_ofs, conf)
     ifs.close()
 
@@ -193,19 +210,31 @@ def getTurbResults(origsdf, theory, finsdf, spe=False):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='This script takes an input \
- SDF file and updates details after Turbomole optimizations. Data supported \
- includes optimized geometry and final energy (Hartree). TODO: wall time.')
+    parser = argparse.ArgumentParser(description='This script takes an input '
+ 'SDF file and updates details after Turbomole optimizations. Data supported '
+ 'includes optimized geometry and final energy (Hartree). TODO: wall time.')
 
-    parser.add_argument('-i','--infile', help='Input file with mols and confs\
- for each mol. Include the full path with filename.')
+    parser.add_argument('-i','--infile', required=True,
+                        help='Input file with mols and confs for each mol. '
+                             'Include the full path with filename.')
 
-    parser.add_argument('-t','--theory', help='Level of theory used for all\
- calculations for mols/confs in this file. Form of method/basisset,\
- e.g., HF/6-31G*.')
+    parser.add_argument('-t','--theory', required=True,
+                        help='Level of theory used for all calculations for '
+                             'mols/confs in this file. Form of method/basisset, '
+                             'e.g., HF/6-31G*.')
 
-    parser.add_argument('-o','--outfile', help='Output file with mols and confs\
- for each mol. Include the full path with filename.')
+    parser.add_argument('-o','--outfile', required=True,
+                        help="Output file with mols and confs for each mol. "
+                             "Include the full path with filename.")
+
+    parser.add_argument('-c','--calctype', required=True,
+                        help="One of 'opt' 'spe' 'hess' to extract results "
+                             "geometry optimizations, single point energy "
+                             "calculations, or Hessian calculations.")
+
+    parser.add_argument("--cosmo", action="store_true", default=False,
+                        help="Did calculation use COSMO solvation? Default is False")
 
     args = parser.parse_args()
-    getTurbResults(args.infile, args.theory, args.outfile)
+    getTurbResults(args.infile, args.theory, args.outfile, args.calctype, args.cosmo)
+

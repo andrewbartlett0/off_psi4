@@ -1,10 +1,12 @@
 
 # Data sources for testing
-Last updated: Oct 11 2018
+Notes for VTL.  
+Last updated: Oct 22 2018
 
 | filename                       | test script        | source                                                                                       |
 |--------------------------------|--------------------|----------------------------------------------------------------------------------------------|
 | `carbon-222.sdf`,`t1`,`s1`     | `getPsiResults.py` | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/work_hydrocarbons/HESS`                   |
+| `cooh`                         | `getTurbResults.py`| `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/work_coohDirection/02_torsion/03_Turbomole/2_solv-HF` 
 | `freeze.sdf`                   | `confs2psi.py`     | `/data11/home/jmaat/off_nitrogens/sdf_min/sdf_min_mol2/pyrnit_2_constituent_11_improper.sdf` |
 | `GBI`                          | `getPsiResults.py` | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/03_examples/set1/GBI`                     |
 | `gbi-200.sdf`,`gbi_single.sdf` | `getPsiResults.py` | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/03_examples/set1/examples2-200.sdf`       |
