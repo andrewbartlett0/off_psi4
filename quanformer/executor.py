@@ -26,7 +26,7 @@ def name_manager(infile):
     # replace - with # and split by # to get basename without suffix/extension
     prefix = no_path_infile.replace('-', '#').split('#')[0]
 
-    return curr_dir, checked_infile, prefix, ext
+    return curr_dir, checked_infile, prefix, ext, no_path_infile
 
 
 
@@ -69,12 +69,19 @@ def main(**kwargs):
             elif '-220.sdf' in no_path_infile:
                 out_results = os.path.join(curr_dir,prefix+'-221.sdf')
                 out_filter = os.path.join(curr_dir,prefix+'-222.sdf')
+            else:
+                sys.exit("ERROR: Input file does not have usual 200-series "
+                         "suffixes (see README for details).\nPlease specify "
+                         "one suffix if calling setup or if extracting Hessian "
+                         "data, or specify two suffixes if extracting/filtering "
+                         "optimization results.\nSee usage in argparse.")
         else:
             out_results = os.path.join(curr_dir,"{}-{}.sdf".format(prefix, opt['suffix'][0]))
-            out_filter =  os.path.join(curr_dir,"{}-{}.sdf".format(prefix, opt['suffix'][1]))
+            if opt['calctype'] == 'opt':
+                out_filter =  os.path.join(curr_dir,"{}-{}.sdf".format(prefix, opt['suffix'][1]))
 
         # get psi4 results
-        print("Getting Psi4 results for %s ..." %(fname))
+        print("Getting Psi4 results for %s ..." %(checked_infile))
         method, basisset = getPsiResults.getPsiResults(checked_infile, out_results, calctype=opt['calctype'])
 
         # only filter structures after opts; spe/hess should not change geoms
@@ -132,7 +139,7 @@ if __name__ == "__main__":
               "for output of filtered conformers. If suffix is called with "
               "--results option, include TWO suffixes for (1) output of QM "
               "calculations and (2) the filtered file of (1)."
-              "Examples: --suffix 'filt'; --suffix 'qm' 'qmfilt' "
+              "Examples: --suffix 'filt'; --suffix 'qm' 'qmfilt' "))
 
 
     args = parser.parse_args()

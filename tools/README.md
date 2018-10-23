@@ -2,6 +2,8 @@
 # Auxiliary scripts for Quanformer
 Last updated: Oct 12 2018
 
+Also see [this list](http://vergil.chemistry.gatech.edu/resources/utilities.html) from the Sherrill group.  
+
 | Script                | Brief description
 | ----------------------|----------------------------------------------------------------------------------------|
 | `catMols.py`          | concatenates molecules from various files into single output file                      |

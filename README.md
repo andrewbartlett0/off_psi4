@@ -1,6 +1,6 @@
 
 # Quanformer
-README last updated: Oct 12 2018  
+README last updated: Oct 22 2018  
 
 Quanformer is a Python-based pipeline for generating conformers, preparing quantum mechanical (QM) calculations, and processing QM results for a set of input molecules. 
 This pipeline is robust enough to use with hundreds of conformers per molecule and tens or hundreds of molecules.
@@ -52,6 +52,7 @@ Pipeline components and description:
 | `matchPlot.py`       | analysis      | additional plots that can be used from `matchMinima.py` results            |
 | `plotTimes.py`       | analysis      | plot calculation time averaged over the conformers for each molecule       |
 | `procTags.py`        | results       | store QM energies & conformer details as data tags in SDF molecule files   |
+| `quan2modsem.py`     | analysis      | interface with modified Seminario Python code                              |
 | `smi2confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
 | `stitchSpe.py`       | analysis      | calculate relative conformer energies from sets of different SPEs          |
 
