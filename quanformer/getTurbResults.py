@@ -15,7 +15,12 @@ import argparse
 import datetime
 import openeye.oechem as oechem
 import subprocess as sp
-import procTags as pt
+
+# local testing vs. travis testing
+try:
+    import quanformer.procTags as pt
+except ModuleNotFoundError:
+    import procTags as pt # VTL temporary bc travis fails to import
 
 ### ------------------- Functions -------------------
 
