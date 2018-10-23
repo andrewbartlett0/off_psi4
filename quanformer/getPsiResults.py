@@ -301,8 +301,7 @@ def getPsiResults(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout=
     ifs = oechem.oemolistream()
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     if not ifs.open(origsdf):
-        oechem.OEThrow.Warning("Unable to open %s for reading" % origsdf)
-        quit()
+        sys.exit("Unable to open %s for reading" % origsdf)
     molecules = ifs.GetOEMols()
 
     # open outstream file
@@ -404,8 +403,7 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
     ifs = oechem.oemolistream()
     mol = oechem.OEGraphMol()
     if not ifs.open(infile):
-        oechem.OEThrow.Warning("Unable to open %s for reading" % origsdf)
-        quit()
+        sys.exit("Unable to open %s for reading" % origsdf)
     oechem.OEReadMolecule(ifs,mol)
 
     # Open outstream file.
@@ -424,10 +422,15 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
     # if output was missing or are missing calculation details
     # move on to next conformer
     if props['missing'] or (calctype=='opt' and not all(key in props for key in ['numSteps','finalEnergy','coords'])):
-        sys.exit("ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n".format(outfile))
+        sys.exit("ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n".format(psiout))
 
     # add data to oemol
     mol = set_conf_data(mol, props, calctype)
+
+    # if hessian, write hdict out to separate file
+    if calctype == 'hess':
+        hfile = os.path.join(os.path.splitext(outfile)[0]+'.hess.pickle')
+        pickle.dump(props['hessian'], open(hfile,'wb'))
 
     # check mol title
     mol = check_title(mol, infile)
