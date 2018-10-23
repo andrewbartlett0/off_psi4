@@ -59,7 +59,7 @@ def GetSDList(mol, datum, Package='Psi4', Method=None, Basisset=None):
     for j, conf in enumerate( mol.GetConfs() ):
         for x in oechem.OEGetSDDataPairs(conf):
             # Case: opt did not finish --> append nan
-            if "Note on Opt." in x.GetTag() and "DID NOT FINISH" in x.GetValue():
+            if "note on opt." in x.GetTag().lower() and "did not finish" in x.GetValue().lower():
                 SDList.append('nan')
                 break
             # Case: want energy value OR want original index number

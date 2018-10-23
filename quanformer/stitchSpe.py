@@ -1,8 +1,12 @@
 
-## DONE: make so that cc-pVTZ == cc-pvtz == whatever else
-## DONE: edit writer so that it goes in main, and format file
-##   to have file header, mol header, mol columns (conf, ref, spe1, spe2, ...)
-## DONE: plot: read in mol title, plot like with other case, large dots
+"""
+Purpose:
+Version:    Apr 25 2018
+By:         Victoria T. Lim
+
+"""
+
+## TODO: Add line plotting functionality for specified molecules.
 ## TODO: check to make sure all confNumsare the same, at leats the same length?
 
 # Note: If you see error: "ValueError: could not convert string to float:"
@@ -112,13 +116,13 @@ def calcRelEne(dict1, dict2):
     compEnes = []
 
     for imol in mols1:
-        jmol = mols2.next()
+        jmol = next(mols2)
 
         # Get absolute energies from the SD tags
-        #print dict2['fromspe'],tag2, dict2['method'],dict2['basisset'] # for debugging
-        #print pt.GetSDList(jmol, tag2, dict2['method'],dict2['basisset']) # for debugging
-        iabs = np.array(map(float, pt.GetSDList(imol, tag1, dict1['method'],dict1['basisset'])))
-        jabs = np.array(map(float, pt.GetSDList(jmol, tag2, dict2['method'],dict2['basisset'])))
+        #print(dict2['fromspe'],tag2, dict2['method'],dict2['basisset']) # for debugging
+        #print(pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset'])) # for debugging
+        iabs = np.array(list(map(float, pt.GetSDList(imol, tag1, 'Psi4', dict1['method'],dict1['basisset']))))
+        jabs = np.array(list(map(float, pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset']))))
 
         # Get omega conformer number of first, for reference info
         # whole list can be used for matching purposes
@@ -127,7 +131,6 @@ def calcRelEne(dict1, dict2):
 
 
         # exclude conformers for which job did not finish (nan)
-        # check for file1
         nanIndices = np.argwhere(np.isnan(iabs))
         iabs = np.delete(iabs,nanIndices)
         jabs = np.delete(jabs,nanIndices)
@@ -236,7 +239,7 @@ def main(wholedict, verbose=False,outfn='relene-rmsd.dat', plotbars=False):
 
         # extract part of dictionary using list comprehension
         subset = np.array([[(wholedict[fd][key]) for key in\
-('ftitle','titleMols','rmsds')] for fd in wholedict.keys()[1:]], dtype=object).T
+('ftitle','titleMols','rmsds')] for fd in list(wholedict.keys())[1:]], dtype=object).T
 
         # build plot list
         plotlist = []
@@ -270,32 +273,33 @@ def main(wholedict, verbose=False,outfn='relene-rmsd.dat', plotbars=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--input",
-        help="Required argument on name of text file with information on\
-              file(s) and levels of theory to process.\
-              See README file or examples for more details. TODO")
+    parser.add_argument("-i", "--input", required=True,
+        help="Name of text file with information on file(s) and SD tag info on "
+             "the level of theory to process.")
 
     parser.add_argument("--verbose", action="store_true", default=False,
-        help="If specified, write out relative energies in kcal/mol for \
-              all conformers of all mols for all files.")
+        help="If specified, write out relative energies in kcal/mol for "
+             "all conformers, of all mols, for all files.")
 
-    # TODO
-    parser.add_argument("-l", "--lineplot",
-        help="Optional argument, name of text file with molecule name(s)\
-              for which line plots will be generated of relative energies\
-              of all compared quantities.\
-              See README file or examples for more details. TODO")
+    parser.add_argument("--reffile", default=None,
+        help="If specified, write out relative energies in kcal/mol for "
+             "all conformers, of all mols, for all files.")
+
+#    parser.add_argument("-l", "--lineplot",
+#        help=("Optional, list of molecule name(s) for which line plots will be "
+#              "generated. Each molecule's line plots shows relative energies "
+#              "for each file.")
 
     parser.add_argument("--plotbars", action="store_true", default=False,
-        help="If specified, generate bar plots of each comparison file wrt \
-              reference file (first entry of input file).")
+        help="If specified, generate bar plots of each comparison file wrt "
+             "reference file (first entry of input file).")
 
     args = parser.parse_args()
     opt = vars(args)
     if not os.path.exists(opt['input']):
         raise parser.error("Input file %s does not exist." % opt['filename'])
 
-    # Read input file and store each file's information in an overarching set.
+    # Read input file into an ordered dictionary.
     # http://stackoverflow.com/questions/25924244/creating-2d-dictionary-in-python
     linecount = 0
     wholedict = collections.OrderedDict()
