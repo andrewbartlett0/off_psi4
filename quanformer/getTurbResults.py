@@ -140,7 +140,8 @@ def getTurbResults(origsdf, theory, finsdf, calctype='opt', cosmo=False):
     """
 
     """
-    wdir = os.path.split(origsdf)[0]
+    #wdir = os.path.split(origsdf)[0]
+    wdir = os.getcwd() # parent sdf outside of main dir
     p = sp.call('module load turbomole/7.1/intel', shell=True)
 
     method = theory.split('/')[0]
