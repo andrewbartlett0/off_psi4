@@ -1,16 +1,14 @@
+#!/usr/bin/env python
 
 """
-Purpose:
-Version:    Apr 25 2018
+Purpose:    Compare energies from different methods of single point energy calculations on the same molecule set.
+Version:    Oct 23 2018
 By:         Victoria T. Lim
 
 """
 
 ## TODO: Add line plotting functionality for specified molecules.
-## TODO: check to make sure all confNumsare the same, at leats the same length?
 
-# Note: If you see error: "ValueError: could not convert string to float:"
-#   check to make sure that the value for SDF tag is correct.
 import os
 import openeye.oechem as oechem
 import numpy as np
@@ -22,9 +20,10 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import operator as o
 
-def barplot(ax, dpoints):
+
+def barplot(ax, dpoints, ptitle=""):
     '''
-    This function written by Peter Kerpedjiev.
+    Function modified from Peter Kerpedjiev.
     http://emptypipes.org/2013/11/09/matplotlib-multicategory-barchart/
 
     Create a barchart for data across different categories with
@@ -69,46 +68,97 @@ def barplot(ax, dpoints):
 
     # Add the axis labels
     ax.set_ylabel("energy (kcal/mol)")
-    ax.set_title("RMSDs of relative conformer energies")
+    ax.set_title(ptitle)
 
     # Add a legend
     handles, labels = ax.get_legend_handles_labels()
     ax.legend(handles[::-1], labels[::-1], loc='upper left')
 
 
-def calcRelEne(dict1, dict2):
+def arrange_and_plot(wholedict, ptitle):
+    # fill in dictionary for ref file for list comprehension later
+    wholedict[0]['titleMols'] = np.full(len(wholedict[1]['titleMols']), np.nan)
+    wholedict[0]['rmsds'] = np.full(len(wholedict[1]['rmsds']), np.nan)
+
+    # extract part of dictionary using list comprehension
+    subset = np.array([[(wholedict[fd][key]) for key in\
+('ftitle','titleMols','rmsds')] for fd in list(wholedict.keys())[1:]], dtype=object).T
+
+    # build plot list
+    plotlist = []
+    for m in range(len(wholedict[1]['titleMols'])):
+        for f in range(len(wholedict)-1):
+            temp = []
+            #temp.append(subset[0][f].split('/')[-1].split('.')[0])
+            temp.append(subset[0][f])
+            temp.append(subset[1][f][m])
+            temp.append(subset[2][f][m])
+            plotlist.append(temp)
+    plotlist = np.array(plotlist)
+
+    # generate plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    barplot(ax, plotlist, ptitle)
+    plt.savefig('barchart.png',bbox_inches='tight')
+    plt.show()
+
+
+def extract_and_rmsd(dict1, dict2):
     """
 
-    WORDS
+    From the files in input dictionaries, read in molecules, extract information
+    from SD tags, compute relative conformer energies wrt to the first conformer
+    per molecule, then calculate RMSD of energies wrt reference data.
 
-    Parameters--------UPDATE ME
+    Parameters
     ----------
-    sdf1 | str | path+name of SDF file with times for all confs of all mols
-    sdf2 | str | should have same mols/confs as sdf1, likely diff coords/tags
-    tag1 | str | data in this tag from sdf1 to be compared to sdf2
-    tag2 | str | data in this tag from sdf2 to be compared to sdf1
-    m1/b1| str | method/basis from sdf1. If m2/b2 is None, use same from m1/b1.
+    dict1 : OrderedDict
+        REFERENCE dictionary from which to calculate energy RMSDs
+        ordered dictionary of input files and information to extract from SD tags
+        keys are: 'ftitle' 'fname' 'calctype' 'method' 'basisset'
+    dict2 : OrderedDict
+        ordered dictionary of input files and information to extract from SD tags
+        keys are: 'ftitle' 'fname' 'calctype' 'method' 'basisset'
 
-    For tags, see options in GetSDList function.
+    Returns
+    -------
+    titleMols : list of strings
+        names of all molecules in the SDF file
+    rmsds : list of floats
+    confNums : list of ints
+        conformer index numbers, not including those with nans in either dict1/dict2 comparison
+        e.g.,  if dict1 mol1 has confs of 0 1 2 3 5
+              and dict2 mol1 has confs of 0 2 3 4 5
+                     then output would be 0 2 3 5
+    refEnes : list of numpy arrays
+        relative conformer energies of the reference file (kcal/mol)
+    compEnes : list of numpy arrays
+        relative conformer energies of the compared file (kcal/mol)
 
     """
 
-    def prelim(sdfRef,spe):
+    def prelim(insdf,calctype):
+
+        if calctype not in {'opt','spe'}:
+            sys.exit("Specify a valid calculation type for {}.".format(insdf))
+
         # Open file.
         ifs1 = oechem.oemolistream()
         ifs1.SetConfTest( oechem.OEAbsoluteConfTest() )
-        if not ifs1.open(sdfRef):
-            oechem.OEThrow.Fatal("Unable to open %s for reading" % sdfRef)
+        if not ifs1.open(insdf):
+            oechem.OEThrow.Fatal("Unable to open %s for reading" % insdf)
         mols = ifs1.GetOEMols()
 
         # Determine SD tag from which to obtain energy.
-        if spe.lower()=='true': tagword = "QM spe"
-        else: tagword = "QM opt energy"
+        if calctype.lower()=='spe':
+            tagword = "QM spe"
+        else:
+            tagword = "QM opt energy"
         return mols, tagword
 
-    mols1, tag1 = prelim(dict1['fname'],dict1['fromspe'])
-    mols2, tag2 = prelim(dict2['fname'],dict2['fromspe'])
-    headerMols = []
+    mols1, tag1 = prelim(dict1['fname'],dict1['calctype'])
+    mols2, tag2 = prelim(dict2['fname'],dict2['calctype'])
     titleMols = []
     rmsds = []
     confNums = []
@@ -118,8 +168,13 @@ def calcRelEne(dict1, dict2):
     for imol in mols1:
         jmol = next(mols2)
 
+        # check that both mols match by comparing titles and numconfs
+        if (imol.NumConfs() != jmol.NumConfs()) or (imol.GetTitle() != jmol.GetTitle()):
+            sys.exit("ERROR: Either titles or number of conformers differ for mol {} in the files: "
+                     "{}\n{}".format(imol.GetTitle(),dict1['fname'],dict2['fname']))
+
         # Get absolute energies from the SD tags
-        #print(dict2['fromspe'],tag2, dict2['method'],dict2['basisset']) # for debugging
+        #print(dict2['calctype'],tag2, dict2['method'],dict2['basisset']) # for debugging
         #print(pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset'])) # for debugging
         iabs = np.array(list(map(float, pt.GetSDList(imol, tag1, 'Psi4', dict1['method'],dict1['basisset']))))
         jabs = np.array(list(map(float, pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset']))))
@@ -147,7 +202,6 @@ def calcRelEne(dict1, dict2):
         irel = iabs - iabs[0]
         jrel = jabs - jabs[0]
 
-
         # take RMSD of conformer energies for this particular mol
         dev = irel - jrel
         sqd = np.square(dev)
@@ -158,47 +212,60 @@ def calcRelEne(dict1, dict2):
         irel = 627.5095*irel
         jrel = 627.5095*jrel
 
-        header = ("\n# Mol %s, RMSD = %.5f kcal/mol\n" % (imol.GetTitle(), rt))
-        header += ("# Energies relative to omega conf #%s\n" % (originum[0]))
-        headerMols.append(header)
         titleMols.append(imol.GetTitle())
         rmsds.append(rt)
         confNums.append(originum)
         refEnes.append(irel)
         compEnes.append(jrel)
 
-    return headerMols, titleMols, rmsds, confNums, refEnes, compEnes
+    return titleMols, rmsds, confNums, refEnes, compEnes
 
 
 
 ### ------------------- Script -------------------
 
-def main(wholedict, verbose=False,outfn='relene-rmsd.dat', plotbars=False):
+def stitch_with_ref(wholedict, ref_index, outfn='relene-rmsd.dat'):
     """
+    Compute RMSD of relative conformer energies with respect to the data
+    in ref_index spot. The relative energies by conformer are computed first,
+    then the RMSD is calculated with respect to reference.
+
     Parameters
     ----------
-    wholedict
+    wholedict : OrderedDict
+        ordered dictionary of input files and information to extract from SD tags
+        keys are: 'ftitle' 'fname' 'calctype' 'method' 'basisset'
+    ref_index : int
+        integer to specify reference file of wholedict[ref_index]
+    outfn : str
+        name of the output file with RMSDs of energies
+
+    Returns
+    -------
+    wholedict : OrderedDict
+        same as input wholedict with additional keys:
+        'titleMols' 'rmsds' 'confNums' 'refEnes' 'compEnes'
+
     """
 
     sdfRef = wholedict[0]['fname']
     print("Using reference file: %s " % sdfRef)
 
     # Write description in output file.
-    compF = open(os.path.join(os.path.dirname(wholedict[0]['fname']),outfn), 'w')
-    compF.write("# RMSD of relative energies (kcal/mol):\n")
+    compF = open(outfn, 'w')
+    compF.write("# RMSD of relative energies (kcal/mol) wrt file 0\n")
 
     for i, d in enumerate(wholedict.values()):
         compF.write("# File %d: %s\n" % (i, d['fname']))
-        compF.write("#   using %s/%s energy, SPE=%s\n" % (d['method'],d['basisset'], d['fromspe']))
+        compF.write("#   calc=%s, %s/%s\n" % (d['calctype'],d['method'],d['basisset']))
 
     for i in range(1,len(wholedict)):
         compfile = wholedict[i]['fname']
         print("Starting comparison on file: %s" % compfile)
 
         # each of the four returned vars is (file) list of (mols) lists
-        headerMols, titleMols, rmsds,confNums, refEnes, compEnes =\
-               calcRelEne(wholedict[0], wholedict[i])
-        wholedict[i]['headerMols'] = headerMols
+        titleMols, rmsds,confNums, refEnes, compEnes =\
+            extract_and_rmsd(wholedict[ref_index], wholedict[i])
         wholedict[i]['titleMols'] = titleMols
         wholedict[i]['rmsds'] = rmsds
         wholedict[i]['confNums'] = confNums
@@ -214,12 +281,8 @@ def main(wholedict, verbose=False,outfn='relene-rmsd.dat', plotbars=False):
         for i in range(1,len(wholedict)):
             line += (str(wholedict[i]['rmsds'][m])+'\t')
         compF.write(line)
-        if not verbose:
-            continue
-
         compF.write('\n# ==================================================================')
         compF.write('\n# conf\trel. enes. in column order by file (listed at top)')
-
 
         # for this mol, write the compEnes from each file by columns
         for c in range(len(wholedict[1]['confNums'][m])):
@@ -231,40 +294,12 @@ def main(wholedict, verbose=False,outfn='relene-rmsd.dat', plotbars=False):
 
     compF.close()
 
+    return wholedict
 
-    if plotbars:
-        # fill in dictionary for ref file for list comprehension later
-        wholedict[0]['titleMols'] = np.full(len(wholedict[1]['titleMols']), np.nan)
-        wholedict[0]['rmsds'] = np.full(len(wholedict[1]['rmsds']), np.nan)
 
-        # extract part of dictionary using list comprehension
-        subset = np.array([[(wholedict[fd][key]) for key in\
-('ftitle','titleMols','rmsds')] for fd in list(wholedict.keys())[1:]], dtype=object).T
+def stitch_spe(wholedict, outfn='relene.dat'):
+    pass
 
-        # build plot list
-        plotlist = []
-        for m in range(len(wholedict[1]['titleMols'])):
-            for f in range(len(wholedict)-1):
-                temp = []
-                #temp.append(subset[0][f].split('/')[-1].split('.')[0])
-                temp.append(subset[0][f])
-                temp.append(subset[1][f][m])
-                temp.append(subset[2][f][m])
-                plotlist.append(temp)
-        plotlist = np.array(plotlist)
-
-        # generate plot
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        barplot(ax, plotlist)
-        plt.savefig('barchart.png',bbox_inches='tight')
-        plt.show()
-
-    #print np.array([[(wholedict[fd]['fname'],wholedict[fd][key]) for key in ('titleMols','rmsds')] for fd in wholedict.keys()[1:]], dtype=object)
-    #print np.array([[wholedict[fd][key] for key in ('titleMols','rmsds')] for fd in wholedict.keys()[1:]]).T
-    #print np.array([(wholedict[fd]['rmsds']) for fd in wholedict.keys()])
-    #print np.array([(wholedict[fd]['titleMols'], wholedict[fd]['rmsds']) for fd in wholedict.keys()])
-    return
 
 
 
@@ -273,17 +308,14 @@ def main(wholedict, verbose=False,outfn='relene-rmsd.dat', plotbars=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-i", "--input", required=True,
+    parser.add_argument("-i", "--infile", required=True,
         help="Name of text file with information on file(s) and SD tag info on "
              "the level of theory to process.")
 
-    parser.add_argument("--verbose", action="store_true", default=False,
-        help="If specified, write out relative energies in kcal/mol for "
-             "all conformers, of all mols, for all files.")
-
     parser.add_argument("--reffile", default=None,
-        help="If specified, write out relative energies in kcal/mol for "
-             "all conformers, of all mols, for all files.")
+        help="If specified, treat the specified file as a reference file from which "
+             "to compute RMSD of energies. If not, write out avgs/stdevs for "
+             "each conformer's relative energies in kcal/mol.")
 
 #    parser.add_argument("-l", "--lineplot",
 #        help=("Optional, list of molecule name(s) for which line plots will be "
@@ -295,20 +327,31 @@ if __name__ == "__main__":
              "reference file (first entry of input file).")
 
     args = parser.parse_args()
-    opt = vars(args)
-    if not os.path.exists(opt['input']):
-        raise parser.error("Input file %s does not exist." % opt['filename'])
+    if not os.path.exists(args.infile):
+        raise parser.error("Input file %s does not exist." % args.infile)
 
     # Read input file into an ordered dictionary.
     # http://stackoverflow.com/questions/25924244/creating-2d-dictionary-in-python
     linecount = 0
     wholedict = collections.OrderedDict()
-    with open(opt['input']) as f:
+    with open(args.infile) as f:
         for line in f:
             if line.startswith('#'):
                 continue
+            if args.reffile is not None and args.reffile in line:
+                ref_index = linecount
             dataline = [x.strip() for x in line.split(',')]
-            wholedict[linecount] = {'ftitle':dataline[0],'fname':dataline[1], 'fromspe':dataline[2], 'method':dataline[3], 'basisset':dataline[4]}
+            wholedict[linecount] = {'ftitle':dataline[0],'fname':dataline[1], 'calctype':dataline[2], 'method':dataline[3], 'basisset':dataline[4]}
             linecount += 1
 
-    main(wholedict, opt['verbose'],plotbars=opt['plotbars'])
+    if args.reffile is not None:
+        wholedict = stitch_with_ref(wholedict, ref_index)
+        if args.plotbars:
+            arrange_and_plot(wholedict, "RMSDs of relative conformer energies")
+    else:
+        print('still working on this')
+        wholedict = stitch_spe(wholedict)
+        #if args.plotbars:
+        #    arrange_and_plot(wholedict, "RMSDs of relative conformer energies")
+
+
