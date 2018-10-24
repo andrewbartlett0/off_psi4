@@ -86,7 +86,7 @@ if __name__ == "__main__":
     if not os.path.exists(opt['input']):
         raise parser.error("Input file %s does not exist." % opt['filename'])
 
-    # Read input file and store each file's information in an overarching set.
+    # Read input file and store each file's information in an ordered dictionary.
     # http://stackoverflow.com/questions/25924244/creating-2d-dictionary-in-python
     linecount = 0
     wholedict = collections.OrderedDict()

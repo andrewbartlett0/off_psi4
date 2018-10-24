@@ -1,7 +1,14 @@
-# Generate conformers with specific atoms restrained
+# Work with conformers having specific atoms restrained
+Version: Oct 23 2018  
 
+The key is the SD tag of "Index list of atoms to freeze" in the molecule SDF file.  
+The SD tag can be added to the initial Quanformer-generated SDF file before running QM calculations.  
+(Not shown here but can be easily done/provided.)  
 This can be applied to conduct a QM torsion scan or similar.  
-Version: Oct 4 2018  
+
+An example script is provided to call the `confs2psi.py` script with the given SDF file.  
+This approach is equivalent to running: `python executor.py -f example.sdf --setup -t opt -m 'mp2' -b 'def2-SV(P)'`
+
 
 ## Instructions
 
