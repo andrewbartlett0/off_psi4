@@ -80,20 +80,19 @@ The modified Seminario method is a way to obtain force field parameters (force c
  * SDF file with structures of all Hessian calculations
  * Pickle file with extracted Hessian data (from calling results with `executor.py`)
 
-**Instructions**
+**Instructions**    
 Follow the three steps of preparing the modified Seminario code detailed at the top of `quan2modsem.py`.  
 Then call the code. Example:
  *  python quan2modsem.py -i carbon-hess.sdf -p carbon-hess.hess.pickle
 
-**Output**
+**Output**   
 Each conformer's directory will have the three files:
  * `Modified_Seminario_Angle`
  * `Modified_Seminario_Bonds`
  * `MSM_log`
 
 **References**
-
-* [Modified Seminario method theory](10.1021/acs.jctc.7b00785)
+* [Modified Seminario method theory](https://pubs.acs.org/doi/10.1021/acs.jctc.7b00785)
 * [Modified Seminario method code](https://github.com/aa840/ModSeminario_Py)
 
 

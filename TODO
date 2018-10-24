@@ -1,21 +1,19 @@
 
 TODO general
  * fill details on analysis.md
- * close the old pull request
+ * close the old pull request from magee
  * address all TODO items listed in README (2x)
 
 TODO all scripts
  * check docstrings (and remove need for fullpath)
  * check argparse description
- * remove imported modules that are not used
- * write tests
 
 TODO for specific scripts
  * avgTimeEne: check that this script still works
- * stitchSpe: something about confNums checking
+ * stitchSpe: line plots for each molecule, stitch without reference
  * diffSpeOpt: check that works with just one input file, WRITE DESCRIPTION
 
 TODO longer term
- * getTurbResults: get SPE results; opt wall time
+ * getTurbResults: get SPE results
 
 
