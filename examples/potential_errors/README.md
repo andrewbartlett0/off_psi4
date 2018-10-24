@@ -3,6 +3,7 @@
 
 Errors thrown by Quanformer/Python:
  * `KeyError` from processing results. Did you remember to specify `spe` for single point calculations?
+ * `ValueError` from `stitchSpe.py`. Did you specify the right keywords to extract the right SD tag? 
 
 Errors thrown by Psi4:
  * `namingErr.dat`          Bad molecule name specification for Psi4. Avoid underscores.
