@@ -164,8 +164,7 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
     ### Open output file to write molecules.
     ofs = oechem.oemolostream()
     if os.path.exists(sdfout):
-        #sys.exit("Output .sdf file already exists. Exiting.\n")
-        print("Output .sdf file already exists. Exiting.\n")
+        print("Output .sdf file already exists. Exiting smi2confs.\n{}\n".format(os.path.abspath(sdfout)))
         return
     if not ofs.open(sdfout):
         oechem.OEThrow.Fatal("Unable to open %s for writing" % sdfout)

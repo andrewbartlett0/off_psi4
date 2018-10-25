@@ -30,10 +30,9 @@ def test_set_conf_data():
     pass
 
 def test_check_title():
-    mol, ifs = read_mol(os.path.join(mydir,'data_tests','methane_title-1.0.sdf'))
+    mol = read_mol(os.path.join(mydir,'data_tests','methane_title-1.0.sdf'))
     mol = check_title(mol, os.path.join(mydir,'data_tests','methane_title-1.0.sdf'))
     assert mol.GetTitle() == 'methane_title10'
-    ifs.close()
 
 def test_get_psi_time():
     time = get_psi_time(os.path.join(mydir,'data_tests','timer.dat'))
@@ -110,7 +109,7 @@ def test_getPsiResults_hess():
     assert b == 'def2-tzvp'
 
     # check tag of Hessian calculation time for one conformer
-    mols, ifs = read_mol(outfile,True)
+    mols = read_mol(outfile,True)
     conf = list(next(mols).GetConfs())[0] # only conf of the s1 mol
     assert oechem.OEGetSDData(conf, 'QM Psi4 Hessian Runtime (sec) mp2/def2-tzvp') == '253.0'
 
@@ -123,7 +122,6 @@ def test_getPsiResults_hess():
     assert hdict['t1'][1][2][8] == -0.42670095298438
 
     # clean up
-    ifs.close()
     os.remove(outfile)
     os.remove(hpickle)
 
@@ -137,7 +135,7 @@ def test_getPsiResults_opt():
 
     # read the single mol (from generator) and get its three conformers
     # confs 2 and 4 failed opt so we should have data from confs 1 3 5
-    mol, ifs = read_mol(outfile,True)
+    mol = read_mol(outfile,True)
     confs = list(next(mol).GetConfs())
     assert len(confs) == 3
 
@@ -149,7 +147,6 @@ def test_getPsiResults_opt():
     assert oechem.OEGetSDData(conf, 'QM Psi4 Final Opt. Energy (Har) mp2/def2-SV(P)') == '-582.1570265488717'
     assert oechem.OEGetSDData(conf, 'QM Psi4 Opt. Steps mp2/def2-SV(P)') == '21'
     assert oechem.OEGetSDData(conf, 'QM Psi4 Initial Opt. Energy (Har) mp2/def2-SV(P)') == '-582.146838702714'
-    ifs.close()
     os.remove(outfile)
 
 

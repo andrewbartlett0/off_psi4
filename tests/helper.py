@@ -13,8 +13,9 @@ def read_mol(infile, many=False):
         oechem.OEThrow.Fatal("Unable to open {} for reading".format(infile))
     ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
     if many:
-        return ifs.GetOEMols(), ifs
+        return ifs.GetOEMols()
     mol = oechem.OEGraphMol()
     oechem.OEReadMolecule(ifs, mol)
-    return mol, ifs
+    ifs.close()
+    return mol
 

@@ -42,9 +42,8 @@ def test_getTurbResults_out_spe():
 #    infile = os.path.join(mydir,'data_tests','cooh','fromVMD.sdf')
 #    outfile = os.path.join(mydir,'data_tests','cooh','hfsolv.sdf')
 #    getTurbResults(infile, 'HF/6-31G*', outfile, calctype='opt', cosmo=True)
-#    mols, ifs = helper.read_mol(outfile,True)
+#    mols = helper.read_mol(outfile,True)
 #    assert len(list(mols)) == 2
-#    ifs.close()
 #    os.remove(outfile)
 
 # test manually without pytest
