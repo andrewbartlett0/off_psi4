@@ -4,7 +4,7 @@ Last updated: Oct 12 2018
 
 Also see [this list](http://vergil.chemistry.gatech.edu/resources/utilities.html) from the Sherrill group.  
 
-| Script                | Brief description
+| Script                | Description
 | ----------------------|----------------------------------------------------------------------------------------|
 | `catMols.py`          | concatenates molecules from various files into single output file                      |
 | `cleanfromvmd.py`     | clean molecules that were filtered ad hoc through VMD                                  |
@@ -15,6 +15,7 @@ Also see [this list](http://vergil.chemistry.gatech.edu/resources/utilities.html
 | `matchTwoMols.py`     | read in a molecule from two distinct files and match their atom indices                |
 | `selectConfs.tcl`     | script for VMD to further filter molecule set, e.g., by some internal distance         |
 | `viewer.ipynb`        | visualize molecules in iPython notebook                                                |
+| `write_first_confs.py`| write out first conformers of all molecules                                            |
 | `writeOneMol.py`      | write out single mol and all its conformers OR single conformer of specified mol       |
 | `xyzByStep.sh`        | simple Bash processing of Psi4 output file to see geometries throughout optimization   |
 
