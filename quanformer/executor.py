@@ -11,20 +11,17 @@ import getPsiResults
 def name_manager(infile):
     curr_dir = os.getcwd()
 
-    # get base name without suffix and without extension
-    inpath, no_path_infile = os.path.split(infile)
-
     # if inpath does not contain full path, then its path is curr_dir
-    if inpath == '' or inpath is None or inpath == '.':
-        checked_infile = os.path.join(curr_dir,infile)
-    else:
-        checked_infile = infile
+    checked_infile = os.path.abspath(infile)
+
+    # get base name without suffix and without extension
+    inpath, no_path_infile = os.path.split(checked_infile)
 
     # get extension of .sdf, .smi, etc.
-    _, ext = os.path.splitext(infile)
+    all_but_ext, ext = os.path.splitext(checked_infile)
 
     # replace - with # and split by # to get basename without suffix/extension
-    prefix = no_path_infile.replace('-', '#').split('#')[0]
+    prefix = os.path.basename(all_but_ext).replace('-', '#').split('#')[0]
 
     return curr_dir, checked_infile, prefix, ext, no_path_infile
 
