@@ -221,4 +221,5 @@ Pertaining to basis set:
 * Chris Bayly (OpenEye)
 * Caitlin Bannan (UCI)
 * Jessica Maat (UCI)
+* David Mobley (UCI)
 
