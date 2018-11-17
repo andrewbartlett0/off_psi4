@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
 """
-Purpose:    Compare energies from different methods of single point energy calculations on the same molecule set.
-Version:    Oct 23 2018
+Purpose:    Compare energies from different methods of single point energy
+            calculations on the same molecule set. If a reference file is
+            provided, then the RMSD in relative energies is computed for each
+            comparison file. If a reference file is NOT provided, then [TODO]
+
+Version:    Nov 16 2018
 By:         Victoria T. Lim
 
 """
 
+## TODO: Histogram the deviations of relative energies.
 ## TODO: Add line plotting functionality for specified molecules.
 
 import os
@@ -22,16 +27,20 @@ import operator as o
 
 
 def barplot(ax, dpoints, ptitle=""):
-    '''
+    """
     Function modified from Peter Kerpedjiev.
     http://emptypipes.org/2013/11/09/matplotlib-multicategory-barchart/
 
     Create a barchart for data across different categories with
     multiple conditions for each category.
 
-    @param ax: The plotting axes from matplotlib.
-    @param dpoints: The data set as an (n, 3) numpy array
-    '''
+    Parameters
+    ----------
+    ax: The plotting axes from matplotlib.
+    dpoints: The data set as an (n, 3) numpy array
+    ptitle: String title for plot
+
+    """
 
     # Aggregate the conditions and the categories according to their
     # mean values
@@ -76,6 +85,18 @@ def barplot(ax, dpoints, ptitle=""):
 
 
 def arrange_and_plot(wholedict, ptitle):
+    """
+    Organize and plot data.
+
+    Parameters
+    ----------
+    wholedict : OrderedDict
+        dictionary of information to be plotted, ordered by input file
+        required keys are 'ftitle' 'titleMols' 'rmsds'
+    ptitle : string
+        Title on plot
+
+    """
     # fill in dictionary for ref file for list comprehension later
     wholedict[0]['titleMols'] = np.full(len(wholedict[1]['titleMols']), np.nan)
     wholedict[0]['rmsds'] = np.full(len(wholedict[1]['rmsds']), np.nan)
@@ -104,8 +125,213 @@ def arrange_and_plot(wholedict, ptitle):
     plt.show()
 
 
+def read_mols_tag(insdf,calctype):
+
+    if calctype not in {'opt','spe'}:
+        sys.exit("Specify a valid calculation type for {}.".format(insdf))
+
+    # Open file.
+    ifs1 = oechem.oemolistream()
+    ifs1.SetConfTest( oechem.OEAbsoluteConfTest() )
+    if not ifs1.open(insdf):
+        oechem.OEThrow.Fatal("Unable to open %s for reading" % insdf)
+    mols = ifs1.GetOEMols()
+
+    # Determine SD tag from which to obtain energy.
+    if calctype.lower()=='spe':
+        tagword = "QM spe"
+    else:
+        tagword = "QM opt energy"
+    return mols, tagword
+
+
+def extract_enes(dict1):
+    """
+
+    From the files in input dictionaries, read in molecules, extract information
+    from SD tags for conformer energies and indices.
+
+    Parameters
+    ----------
+    dict1 : dict
+        dictionary of input files and information to extract from SD tags
+        keys are: 'ftitle' 'fname' 'calctype' 'method' 'basisset'
+
+    Returns
+    -------
+    titleMols : list of strings
+        names of all molecules in the SDF file
+    confNums : list of ints
+        conformer index numbers
+    compEnes : list of numpy arrays
+        conformer energies of the compared file (kcal/mol)
+
+    """
+
+    mols1, tag1 = read_mols_tag(dict1['fname'],dict1['calctype'])
+    titleMols = []
+    rmsds = []
+    confNums = []
+    compEnes = []
+    confNans = []
+
+    for imol in mols1:
+
+
+        # Get absolute energies from the SD tags
+        #print(dict2['calctype'],tag2, dict2['method'],dict2['basisset']) # for debugging
+        #print(pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset'])) # for debugging
+        iabs = np.array(list(map(float, pt.GetSDList(imol, tag1, 'Psi4', dict1['method'],dict1['basisset']))))
+
+        # Get omega conformer number of first, for reference info
+        # whole list can be used for matching purposes
+        originum = pt.GetSDList(imol, "original index")
+
+        # find conformers for which job did not finish (nan)
+        nanIndices = np.argwhere(np.isnan(iabs))
+
+        # convert energies from Hartrees to kcal/mol
+        iabs = 627.5095*iabs
+
+        titleMols.append(imol.GetTitle())
+        confNans.append(nanIndices)
+        confNums.append(originum)
+        compEnes.append(iabs)
+
+    return titleMols, confNums, compEnes, confNans
+
+
+def remove_dead_conformers(enelist, idxlist, nanlist):
+    # enelist[i][j] is for file i, mol j
+
+    # reshape list for that i goes to mol and j goes to file
+    enelist = np.array(enelist).T
+    idxlist = np.array(idxlist).T
+    nanlist = np.array(nanlist).T
+
+    for i, mols_nan in enumerate(nanlist):
+        for file_mols_nan in mols_nan:
+            mols_ene = enelist[i]
+            mols_idx = idxlist[i]
+            for j, (file_mols_ene, file_mols_idx) in enumerate(zip(mols_ene,mols_idx)):
+                enelist[i][j] = np.delete(file_mols_ene, file_mols_nan)
+                idxlist[i][j] = np.delete(file_mols_idx, file_mols_nan)
+
+    return idxlist.T, enelist.T
+
+
+def relative_energies(enelist):
+    # enelist[i][j] is for file i, mol j
+
+    rel_enes = []
+    for i, file_ene in enumerate(enelist):
+        rel_enes.append([])
+        for mol_ene in file_ene:
+            rel = mol_ene - mol_ene[0]
+            rel_enes[i].append(rel)
+    return rel_enes
+
+
+def avg_of_stdev(enelist):
+    """
+    For the relative energies of a single conformer, compute coefficient of
+    variation (cv) across methods. Then average the CVs across all conformers
+    for each molecule.
+
+    Parameters
+    ----------
+    TODO
+
+    Returns
+    -------
+    TODO
+
+    Notes
+    -----
+    * This takes population stdevs, as opposed to sample stdevs.
+    * Validated for single conformer, and for three conformers.
+
+    """
+    # enelist[i][j] is for file i, mol j
+    # spread_by_mol is 1D list of len(num_mols)
+    spread_by_mol = []
+
+    # reshape list for that i goes to mol and j goes to file
+    enelist = np.array(enelist).T
+    for i, mols_ene in enumerate(enelist):
+        sdlist = []
+
+        # number of files is mols_ene.shape[0]
+        for j in range(mols_ene[0].shape[0]):
+            confs_ene = [mols_ene[k][j] for k in range(mols_ene.shape[0])]
+            sd = np.std(confs_ene)/np.average(confs_ene)
+            #sd = np.std(confs_ene)
+            sdlist.append(sd)
+
+        ## check that first element is 0. bc energies relative to first conf
+        #if sdlist[0] != 0:
+        #    print("WARNING: Something wrong with input avg_of_stdev function. "
+        #          "First conformers of each mol should have zero relative "
+        #          "energies and thus zero standard deviation across files.")
+        #    return
+
+        sdlist = np.delete(sdlist,0)
+        spread_by_mol.append(np.average(sdlist))
+
+    return spread_by_mol
+
+
+def norm_and_dev(enelist):
+    """
+    For the relative energies of each conformer of some molecule,
+    subtract the average energy for the different methods, then
+    take the standard deviation of all conformers of all methods.
+
+    Parameters
+    ----------
+    TODO
+
+    Returns
+    -------
+    TODO
+
+    Notes
+    -----
+    * This takes population stdevs, as opposed to sample stdevs.
+    * Validated for single conformer, and for three conformers.
+    * sd and sdlist would be more accurately named cv and cvlist
+
+    """
+
+
+    # enelist[i][j] is for file i, mol j
+    # spread_by_mol is 1D list of len(num_mols)
+    spread_by_mol = []
+
+    # reshape list for that i goes to mol and j goes to file
+    enelist = np.array(enelist).T
+    for i, mols_ene in enumerate(enelist):
+        mollist = []
+
+        # number of files is mols_ene.shape[0]
+        for j in range(1,mols_ene[0].shape[0]):
+            confs_ene = [mols_ene[k][j] for k in range(mols_ene.shape[0])]
+
+            # subtract the average of methods for the conformer
+            # note: not subtracting the average conformer energy for each method
+            # bc that would give us estimate of spread conformer energies as
+            # opposed to estimating spread of method energies
+            confs_ene = confs_ene-np.average(confs_ene)
+            mollist.append(confs_ene)
+
+        spread_by_mol.append(np.std(mollist))
+
+    return spread_by_mol
+
+
 def extract_and_rmsd(dict1, dict2):
     """
+    TODO: this can probably be rewritten or removed now to use extract_enes, remove_dead_conformers, relative_energies
 
     From the files in input dictionaries, read in molecules, extract information
     from SD tags, compute relative conformer energies wrt to the first conformer
@@ -113,12 +339,12 @@ def extract_and_rmsd(dict1, dict2):
 
     Parameters
     ----------
-    dict1 : OrderedDict
+    dict1 : dict
         REFERENCE dictionary from which to calculate energy RMSDs
-        ordered dictionary of input files and information to extract from SD tags
+        dictionary of input files and information to extract from SD tags
         keys are: 'ftitle' 'fname' 'calctype' 'method' 'basisset'
-    dict2 : OrderedDict
-        ordered dictionary of input files and information to extract from SD tags
+    dict2 : dict
+        dictionary of input files and information to extract from SD tags
         keys are: 'ftitle' 'fname' 'calctype' 'method' 'basisset'
 
     Returns
@@ -138,27 +364,8 @@ def extract_and_rmsd(dict1, dict2):
 
     """
 
-    def prelim(insdf,calctype):
-
-        if calctype not in {'opt','spe'}:
-            sys.exit("Specify a valid calculation type for {}.".format(insdf))
-
-        # Open file.
-        ifs1 = oechem.oemolistream()
-        ifs1.SetConfTest( oechem.OEAbsoluteConfTest() )
-        if not ifs1.open(insdf):
-            oechem.OEThrow.Fatal("Unable to open %s for reading" % insdf)
-        mols = ifs1.GetOEMols()
-
-        # Determine SD tag from which to obtain energy.
-        if calctype.lower()=='spe':
-            tagword = "QM spe"
-        else:
-            tagword = "QM opt energy"
-        return mols, tagword
-
-    mols1, tag1 = prelim(dict1['fname'],dict1['calctype'])
-    mols2, tag2 = prelim(dict2['fname'],dict2['calctype'])
+    mols1, tag1 = read_mols_tag(dict1['fname'],dict1['calctype'])
+    mols2, tag2 = read_mols_tag(dict2['fname'],dict2['calctype'])
     titleMols = []
     rmsds = []
     confNums = []
@@ -260,8 +467,7 @@ def stitch_with_ref(wholedict, ref_index, outfn='relene-rmsd.dat'):
         compF.write("#   calc=%s, %s/%s\n" % (d['calctype'],d['method'],d['basisset']))
 
     for i in range(1,len(wholedict)):
-        compfile = wholedict[i]['fname']
-        print("Starting comparison on file: %s" % compfile)
+        print("Starting comparison on file: %s" % wholedict[i]['fname'])
 
         # each of the four returned vars is (file) list of (mols) lists
         titleMols, rmsds,confNums, refEnes, compEnes =\
@@ -298,7 +504,76 @@ def stitch_with_ref(wholedict, ref_index, outfn='relene-rmsd.dat'):
 
 
 def stitch_spe(wholedict, outfn='relene.dat'):
-    pass
+    """
+    TODO
+
+    Parameters
+    ----------
+    wholedict : OrderedDict
+        ordered dictionary of input files and information to extract from SD tags
+        keys are: 'ftitle' 'fname' 'calctype' 'method' 'basisset'
+    outfn : str
+        name of the output file with RMSDs of energies
+
+    Returns
+    -------
+    wholedict : OrderedDict
+        same as input wholedict with additional keys:
+        'titleMols' 'stdevs' 'confNums' 'compEnes'
+
+    """
+
+    # Write description in output file.
+    compF = open(outfn, 'w')
+    compF.write("# Spread of relative energies (kcal/mol) over diff QM methods averaged over conformers\n")
+    for i, d in enumerate(wholedict.values()):
+        compF.write("# File %d: %s\n" % (i, d['fname']))
+        compF.write("#   calc=%s, %s/%s\n" % (d['calctype'],d['method'],d['basisset']))
+
+    enelist = []
+    idxlist = []
+    nanlist = []
+    for i in range(len(wholedict)):
+
+        print("Extracting data for file: %s" % wholedict[i]['fname'])
+        titleMols, confNums, compEnes, confNans = extract_enes(wholedict[i])
+        enelist.append(compEnes)
+        idxlist.append(confNums)
+        nanlist.append(confNans)
+        wholedict[i]['titleMols'] = titleMols
+
+    print("Removing un-finished conformers and computing relative energies...")
+    idxlist, enelist = remove_dead_conformers(enelist, idxlist, nanlist)
+    relenelist = relative_energies(enelist)
+    for i in range(len(wholedict)):
+        wholedict[i]['compEnes'] = relenelist[i]
+        wholedict[i]['confNums'] = idxlist[i]
+
+    # estimate spread of data
+    spreadlist = avg_of_stdev(relenelist)
+    #spreadlist = norm_and_dev(relenelist)
+
+
+    # loop over each mol and write energies from wholedict by column
+    for m in range(len(wholedict[1]['titleMols'])):
+        compF.write('\n\n# Mol '+wholedict[1]['titleMols'][m])
+
+        # for this mol, write the rmsd from each file side by side
+        line = ' Spread: {}'.format(spreadlist[m])
+        compF.write(line)
+        compF.write('\n# ==================================================================')
+        compF.write('\n# conf\trel. enes. in column order by file (listed at top)')
+
+        # for this mol, write the compEnes from each file by columns
+        for c in range(len(wholedict[1]['confNums'][m])):
+            line = '\n'+str(wholedict[1]['confNums'][m][c])+'\t'
+            for i in range(len(wholedict)):
+                line += (str(wholedict[i]['compEnes'][m][c])+'\t')
+            compF.write(line)
+
+    compF.close()
+
+    return wholedict
 
 
 
@@ -349,9 +624,9 @@ if __name__ == "__main__":
         if args.plotbars:
             arrange_and_plot(wholedict, "RMSDs of relative conformer energies")
     else:
-        print('still working on this')
         wholedict = stitch_spe(wholedict)
-        #if args.plotbars:
+        if args.plotbars:
+            print('still working on this')
         #    arrange_and_plot(wholedict, "RMSDs of relative conformer energies")
 
 
