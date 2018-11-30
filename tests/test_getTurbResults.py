@@ -4,7 +4,7 @@ try:
     from quanformer.getTurbResults import *
 except ModuleNotFoundError:
     import sys
-    sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
+    sys.path.insert(0, '/home/limvt/Documents/off_psi4/quanformer')
     from getTurbResults import *
 
 # define location of input files for testing

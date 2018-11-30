@@ -4,7 +4,7 @@ try:
     from quanformer.smi2confs import *
 except ModuleNotFoundError:
     import sys
-    sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
+    sys.path.insert(0, '/home/limvt/Documents/off_psi4/quanformer')
     from smi2confs import *
 
 # define location of input files for testing
