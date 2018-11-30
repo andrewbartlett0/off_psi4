@@ -3,18 +3,33 @@
 
 # Analyzing Quanformer Results
 
-Document last updated: Oct 23 2018   
+Document last updated: Nov 30 2018   
 This file describes and guides the user through various analyses that can be conducted from different implementations of Quanformer.
 
 
 ## Comparing sets of geometry optimizations
 
-**Prerequisites**
- * TODO
+**`matchMinima.py` prerequisites**
+ * SDF files for all methods, where each SDF file has all mols and confs for one particular method
+ * input text file listing these SDF files and associated level of theory
+
+**`matchMinima.py` output**
+ * .dat file with summarized RMS errors by level of theory (one dat file per reference method)
+ * bar plot with conformer averaged wall times for all methods (one plot per molecule)
+ * line plot with conformer relative energies for all methods (one plot per molecule)
+
+**`match_plot.py` prerequisites**
+ * .dat files from `matchMinima.py` with summarized RMS errors by level of theory (one dat file per reference method)
+ * input text file listing these .dat files and associated reference level of theory
+ * (optional) input file can be a single .dat file if only wanting a single scatter plot
+
+**`match_plot.py` output**
+ * heat map of root mean square errors of all methods compared to each other (one plot)
+ * heat map of relative times (log ratios) of all methods compared to each other (one plot)
+ * scatter plot of log ratio of relative times vs rmse (one plot per reference method)
 
 **Instructions**
- 1. `matchMinima.py` -- [TODO write instructions]
- 1. `matchPlot.py` -- [TODO write instructions]
+See README.md file in `examples/matchMinima/` in this repo.
 
 
 --------------------------------------------------------------------------------

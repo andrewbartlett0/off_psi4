@@ -23,10 +23,18 @@ Last updated: 12-08-2017
 
 To continue onto the next section, redo the above, but switching the order of the input file. The first line in the input file is the reference, i.e., all other conformers are compared to this file. Have each reference comparison a new directory.
 
-## How to use `matchPlot.py` script
-1. If you have multiple molecules, create directories for each, such as `mol0`, `mol1`, `mol2`, etc. (only single mol in this example)
+## How to use `match_plot.py` script
+Further analyze matchMinima results by using `match_plot.py` which can generate three kinds of plots:
+(1) RMSE heat plots of all methods compared to all methods,
+(2) time heat plots of all methods compared to all methods, and 
+(3) scatter plots of (log) ratio of wall time vs. RMSE using each method as reference.
+
+1. If you have multiple molecules, create directories for each, such as `mol0`, `mol1`, `mol2`, etc.
+    * Only one mol in this example.
 2. Generate input file similar to the `matchMinima` input file except that it uses the `dat` files that were output from the `matchMinima.py` script.
-   Doesn't require SPE/OPT specification.
-3. Execute this command for each mol, specifying the molecule name in command line arguments for plot labels.
-   `python ../../../matchPlot.py -i heat.in --theatplot test_mol --eheatplot test_mol --etscatter test_mol`
+    * There should be one input file for each molecule.
+    * Doesn't require SPE/OPT specification.
+3. Call Python command for each mol. Specify molecule name for plot title and figure name.
+    * `python ../../../match_plot.py -i heat.in -t test_mol --theatplot --eheatplot --etscatter`
+    * Each one can be called individually (either `--theatplot` or `--eheatplot` or `--etscatter`).
 
