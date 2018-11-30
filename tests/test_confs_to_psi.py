@@ -1,11 +1,11 @@
 
 # local testing vs. travis testing
 try:
-    from quanformer.confs2psi import *
+    from quanformer.confs_to_psi import *
 except ModuleNotFoundError:
     import sys
-    sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
-    from confs2psi import *
+    sys.path.insert(0, '/home/limvt/Documents/off_psi4/quanformer')
+    from confs_to_psi import *
 
 # define location of input files for testing
 import os
@@ -48,7 +48,7 @@ def test_make_dfmp2_svpp():
     assert "def2-sv_p_-ri" in test_string
     return
 
-def test_confs2psi():
+def test_confs_to_psi():
     return
 
 # test manually without pytest

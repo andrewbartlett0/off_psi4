@@ -93,7 +93,7 @@ def make_psi_input(mol, label, method, basisset, calctype='opt', mem=None):
     return inputstring
 
 
-def confs2psi(insdf, method, basis, calctype='opt', memory=None):
+def confs_to_psi(insdf, method, basis, calctype='opt', memory=None):
     """
     Parameters
     ----------

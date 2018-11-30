@@ -3,7 +3,7 @@
 ## By: Victoria T. Lim
 
 ## Usage: python confs2turb.py -i /path/and/filename.sdf
-## Different from confs2psi.py since method, basisset, calc type, mem
+## Different from confs_to_psi.py since method, basisset, calc type, mem
 ##    should be specified in the templateOptions file of Turbomole setup.
 
 

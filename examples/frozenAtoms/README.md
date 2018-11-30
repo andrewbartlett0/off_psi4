@@ -6,7 +6,7 @@ The SD tag can be added to the initial Quanformer-generated SDF file before runn
 (Not shown here but can be easily done/provided.)  
 This can be applied to conduct a QM torsion scan or similar.  
 
-An example script is provided to call the `confs2psi.py` script with the given SDF file.  
+An example script is provided to call the `confs_to_psi.py` script with the given SDF file.  
 This approach is equivalent to running: `python executor.py -f example.sdf --setup -t opt -m 'mp2' -b 'def2-SV(P)'`
 
 

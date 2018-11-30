@@ -5,7 +5,7 @@ import argparse
 
 import smi2confs
 import filterConfs
-import confs2psi
+import confs_to_psi
 import get_psi_results
 
 def name_manager(infile):
@@ -53,7 +53,7 @@ def main(**kwargs):
 
         # generate Psi4 inputs
         print("\nCreating Psi4 input files for %s..." % prefix)
-        confs2psi.confs2psi(post_filt,opt['method'],opt['basisset'],opt['calctype'],opt['mem'])
+        confs_to_psi.confs_to_psi(post_filt,opt['method'],opt['basisset'],opt['calctype'],opt['mem'])
 
 
     else:  # ========== AFTER QM =========== #
