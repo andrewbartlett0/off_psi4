@@ -27,9 +27,9 @@ Last updated: Nov 30 2018
 ## Instructions for using `match_plot.py`
 
 Further analyze matchMinima results by using `match_plot.py` which can generate three kinds of plots:  
-(1) RMSE heat plots of all methods compared to all methods,  
-(2) time heat plots of all methods compared to all methods, and  
-(3) scatter plots of (log) ratio of wall time vs. RMSE using each method as reference.  
+(1) **RMSE heat plots** of all methods compared to all methods,  
+(2) **time heat plots** of all methods compared to all methods, and  
+(3) **scatter plots** of (log) ratio of wall time vs. RMSE using each method as reference.  
 
 1. If you have multiple molecules, create directories for each, such as `mol0`, `mol1`, `mol2`, etc.
     * Only one mol in this example.
@@ -39,4 +39,5 @@ Further analyze matchMinima results by using `match_plot.py` which can generate 
 3. Call Python command for each mol. Specify molecule name for plot title and figure name.
     * `python ../../../match_plot.py -i heat.in -t test_mol --theatplot --eheatplot --etscatter`
     * Each one can be called individually (either `--theatplot` or `--eheatplot` or `--etscatter`).
+    * To generate a single scatter plot, example: `python match_plot.py -i ../ref07/relene_Div_5.dat -t Div_5_fancy --onescatter`
 
