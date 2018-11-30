@@ -28,10 +28,12 @@ Instructions are provided below for following this example workflow.
 
 ## I. Python Dependencies
 
-  * [OEChem Python Toolkit](https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html)
-  * [Psi4 QM software package](http://www.psicode.org/)
-     * [Conda install](http://www.psicode.org/psi4manual/master/conda.html) of Psi4 recommended
-     * [Conda install of dftd3](http://www.psicode.org/psi4manual/master/dftd3.html)
+* Anaconda or Miniconda Python
+* [OEChem Python Toolkit](https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html)
+* [Psi4 QM software package](http://www.psicode.org/)
+   * [Conda install of Psi4](http://www.psicode.org/psi4manual/master/conda.html#detailed-installation-of-psifour)
+   * [Conda install of dftd3](http://www.psicode.org/psi4manual/master/dftd3.html)
+   * [(optional) Conda install of gcp](http://www.psicode.org/psi4manual/master/gcp.html)
 
 
 ## II. Repository contents
@@ -46,7 +48,7 @@ Pipeline components and description:
 | `diffSpeOpt.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
 | `executor.py`        | N/A           | main interface connecting "setup" and "results" scripts for Psi4           |
 | `filterConfs.py`     | setup/results | remover conformers of molecules that may be same structure                 |
-| `getPsiResults.py`   | results       | get job results from Psi4                                                  |
+| `get_psi_results.py` | results       | get job results from Psi4                                                  |
 | `getTurbResults.py`  | results       | get job results from Turbomole                                             |
 | `matchMinima.py`     | analysis      | match conformers from sets of different optimizations                      |
 | `match_plot.py`      | analysis      | additional plots that can be used from `matchMinima.py` results            |

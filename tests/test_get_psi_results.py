@@ -1,11 +1,11 @@
 
 # local testing vs. travis testing
 try:
-    from quanformer.getPsiResults import *
+    from quanformer.get_psi_results import *
 except ModuleNotFoundError:
     import sys
     sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
-    from getPsiResults import *
+    from get_psi_results import *
 
 # define location of input files for testing
 import os
@@ -87,23 +87,23 @@ def test_getPsiOne():
     os.remove(outfile)
 
 # TODO
-#def test_getPsiResults_none(capsys):
+#def test_get_psi_results_none(capsys):
 #    infile = os.path.join(mydir,'data_tests','gbi-200.sdf')
 #    outfile = os.path.join(mydir,'data_tests','gbi-210.sdf')
 #    with pytest.raises(SystemExit):
-#        m, b = getPsiResults(infile, outfile, calctype='blah', psiout="output.dat", timeout="timer.dat")
+#        m, b = get_psi_results(infile, outfile, calctype='blah', psiout="output.dat", timeout="timer.dat")
 #    out, err = capsys.readouterr()
 #    assert err == "Specify a valid calculation type."
 #    print(out, err)
 
-def test_getPsiResults_spe():
+def test_get_psi_results_spe():
     # TODO
     pass
 
-def test_getPsiResults_hess():
+def test_get_psi_results_hess():
     infile = os.path.join(mydir,'data_tests','carbon-222.sdf')
     outfile = os.path.join(mydir,'data_tests','carbon_hess-222.sdf')
-    m, b = getPsiResults(infile, outfile, 'hess', "output.dat", "timer.dat")
+    m, b = get_psi_results(infile, outfile, 'hess', "output.dat", "timer.dat")
     # check the method and basis set returned
     assert m == 'mp2'
     assert b == 'def2-tzvp'
@@ -126,10 +126,10 @@ def test_getPsiResults_hess():
     os.remove(hpickle)
 
 
-def test_getPsiResults_opt():
+def test_get_psi_results_opt():
     infile = os.path.join(mydir,'data_tests','gbi-200.sdf')
     outfile = os.path.join(mydir,'data_tests','gbi-210.sdf')
-    m, b = getPsiResults(infile, outfile, 'opt', "output.dat", "timer.dat")
+    m, b = get_psi_results(infile, outfile, 'opt', "output.dat", "timer.dat")
     assert m == 'mp2'
     assert b == 'def2-SV(P)'
 
@@ -153,6 +153,6 @@ def test_getPsiResults_opt():
 # test manually without pytest
 if 0:
     #test_getPsiOne()
-    #test_getPsiResults_none()
-    test_getPsiResults_hess()
+    #test_get_psi_results_none()
+    test_get_psi_results_hess()
 
