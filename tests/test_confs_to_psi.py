@@ -49,8 +49,13 @@ def test_make_dfmp2_svpp():
     return
 
 def test_confs_to_psi():
+    confs_to_psi(os.path.join(mydir,'data_tests','methane_c2p.sdf'),'mp2','def2-sv(p)')
+    # check file byte size (this line should be updated if confs_to_psi changes)
+    assert os.path.getsize(os.path.join(mydir,'methane','1','input.dat')) == 327
+    shutil.rmtree('methane')
     return
+
 
 # test manually without pytest
 if 0:
-    test_make_hessian()
+    test_confs_to_psi()
