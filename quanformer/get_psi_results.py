@@ -262,7 +262,7 @@ def process_psi_out(filename, properties, calctype='opt'):
 
 ### ------------------- Script -------------------
 
-def getPsiResults(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout="timer.dat"):
+def get_psi_results(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout="timer.dat"):
 
     """
     Read in OEMols (and each of their conformers) in origsdf file,
@@ -443,5 +443,5 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
 
 
 if __name__ == "__main__":
-    getPsiResults(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+    get_psi_results(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 

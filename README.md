@@ -19,7 +19,7 @@ Analysis scripts are provided for comparing conformer energies from different QM
  * Consider questions such as, "What is the spread of the conformer energies for molecule _x_?", "How does method _a_ compare to method _b_ for this molecule?", etc.
 
 In concept, this example would look like:   
-`smi2confs.py` &rarr; `confs2psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
+`smi2confs.py` &rarr; `confs_to_psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
 
 In practice, the `executor.py` code provides the interface for the various stages and components. 
 That being said, each component was written to be able to run independently of the others so variations of this pipeline can be conducted. 
@@ -28,10 +28,12 @@ Instructions are provided below for following this example workflow.
 
 ## I. Python Dependencies
 
-  * [OEChem Python Toolkit](https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html)
-  * [Psi4 QM software package](http://www.psicode.org/)
-     * [Conda install](http://www.psicode.org/psi4manual/master/conda.html) of Psi4 recommended
-     * [Conda install of dftd3](http://www.psicode.org/psi4manual/master/dftd3.html)
+* Anaconda or Miniconda Python
+* [OEChem Python Toolkit](https://docs.eyesopen.com/toolkits/python/quickstart-python/install.html)
+* [Psi4 QM software package](http://www.psicode.org/)
+   * [Conda install of Psi4](http://www.psicode.org/psi4manual/master/conda.html#detailed-installation-of-psifour)
+   * [Conda install of dftd3](http://www.psicode.org/psi4manual/master/dftd3.html)
+   * [(optional) Conda install of gcp](http://www.psicode.org/psi4manual/master/gcp.html)
 
 
 ## II. Repository contents
@@ -41,12 +43,12 @@ Pipeline components and description:
 | Script               | Stage         | Brief description                                                          |
 | ---------------------|---------------|----------------------------------------------------------------------------|
 | `avgTimeEne.py`      | analysis      | analyze calculation stats and relative energies for a single batch of mols |
-| `confs2psi.py`       | setup         | generate Psi4 input files for each conformer/molecule                      |
+| `confs_to_psi.py`    | setup         | generate Psi4 input files for each conformer/molecule                      |
 | `confs2turb.py`      | setup         | generate Turbomole input files for each conformer/molecule                 |
 | `diffSpeOpt.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
 | `executor.py`        | N/A           | main interface connecting "setup" and "results" scripts for Psi4           |
 | `filterConfs.py`     | setup/results | remover conformers of molecules that may be same structure                 |
-| `getPsiResults.py`   | results       | get job results from Psi4                                                  |
+| `get_psi_results.py` | results       | get job results from Psi4                                                  |
 | `getTurbResults.py`  | results       | get job results from Turbomole                                             |
 | `matchMinima.py`     | analysis      | match conformers from sets of different optimizations                      |
 | `match_plot.py`      | analysis      | additional plots that can be used from `matchMinima.py` results            |

@@ -5,8 +5,8 @@ import argparse
 
 import smi2confs
 import filterConfs
-import confs2psi
-import getPsiResults
+import confs_to_psi
+import get_psi_results
 
 def name_manager(infile):
     curr_dir = os.getcwd()
@@ -53,7 +53,7 @@ def main(**kwargs):
 
         # generate Psi4 inputs
         print("\nCreating Psi4 input files for %s..." % prefix)
-        confs2psi.confs2psi(post_filt,opt['method'],opt['basisset'],opt['calctype'],opt['mem'])
+        confs_to_psi.confs_to_psi(post_filt,opt['method'],opt['basisset'],opt['calctype'],opt['mem'])
 
 
     else:  # ========== AFTER QM =========== #
@@ -79,12 +79,12 @@ def main(**kwargs):
 
         # get psi4 results
         print("Getting Psi4 results for %s ..." %(checked_infile))
-        method, basisset = getPsiResults.getPsiResults(checked_infile, out_results, calctype=opt['calctype'])
+        method, basisset = get_psi_results.get_psi_results(checked_infile, out_results, calctype=opt['calctype'])
 
         # only filter structures after opts; spe/hess should not change geoms
         if opt['calctype'] == 'opt':
 
-            # if didn't go through getPsiResults (e.g., output file already exists)
+            # if didn't go through get_psi_results (e.g., output file already exists)
             # then look for method from command line call for filtering
             if None in [method, basisset]:
                 if None in [opt['method'], opt['basisset']]:

@@ -1,11 +1,11 @@
 
 # local testing vs. travis testing
 try:
-    from quanformer.confs2psi import *
+    from quanformer.confs_to_psi import *
 except ModuleNotFoundError:
     import sys
-    sys.path.insert(0, '/beegfs/DATA/mobley/limvt/openforcefield/pipeline/github/quanformer')
-    from confs2psi import *
+    sys.path.insert(0, '/home/limvt/Documents/off_psi4/quanformer')
+    from confs_to_psi import *
 
 # define location of input files for testing
 import os
@@ -48,9 +48,21 @@ def test_make_dfmp2_svpp():
     assert "def2-sv_p_-ri" in test_string
     return
 
-def test_confs2psi():
+def test_confs_to_psi():
+    confs_to_psi(os.path.join(mydir,'data_tests','methane_c2p.sdf'),'mp2','def2-sv(p)')
+    # check file byte size (this line should be updated if confs_to_psi changes)
+    assert os.path.getsize(os.path.join('methane','1','input.dat')) == 327
+    shutil.rmtree('methane')
+    return
+
+def test_confs_to_psi_json():
+    confs_to_psi(os.path.join(mydir,'data_tests','methane_c2p.sdf'),
+                'mp2','def2-sv(p)',calctype='spe',via_json=True)
+    # check file byte size (this line should be updated if confs_to_psi changes)
+    assert os.path.getsize(os.path.join('methane','1','input.py')) == 1032
+    #shutil.rmtree('methane')
     return
 
 # test manually without pytest
 if 0:
-    test_make_hessian()
+    test_confs_to_psi_json()

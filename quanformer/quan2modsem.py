@@ -116,7 +116,7 @@ def quan2modsem(infile, pfile):
             # set file locations; dir for modsem needs / at end of string
             datadir = os.path.join(hdir,"%s/%s/" % (mol.GetTitle(),j+1))
 
-            # extract hessian from the quanformer-generated dictionary (getPsiResults)
+            # extract hessian from the quanformer-generated dictionary (get_psi_results)
             hessian = hdict[mol.GetTitle()][j+1]
 
             # run modsem
