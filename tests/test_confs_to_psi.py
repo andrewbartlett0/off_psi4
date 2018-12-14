@@ -51,7 +51,7 @@ def test_make_dfmp2_svpp():
 def test_confs_to_psi():
     confs_to_psi(os.path.join(mydir,'data_tests','methane_c2p.sdf'),'mp2','def2-sv(p)')
     # check file byte size (this line should be updated if confs_to_psi changes)
-    assert os.path.getsize(os.path.join('methane','1','input.dat')) == 327
+    assert os.path.getsize(os.path.join('methane','1','input.dat')) == 358
     shutil.rmtree('methane')
     return
 
@@ -60,9 +60,9 @@ def test_confs_to_psi_json():
                 'mp2','def2-sv(p)',calctype='spe',via_json=True)
     # check file byte size (this line should be updated if confs_to_psi changes)
     assert os.path.getsize(os.path.join('methane','1','input.py')) == 1032
-    #shutil.rmtree('methane')
+    shutil.rmtree('methane')
     return
 
 # test manually without pytest
 if 0:
-    test_confs_to_psi_json()
+    test_confs_to_psi()

@@ -85,9 +85,15 @@ def make_psi_input(mol, label, method, basisset, calctype='opt', mem=None):
                 "consecutive_backsteps = 2\nset optking intrafrag_step_limit = "
                 "0.1\nset optking interfrag_step_limit = 0.1\n")
 
-    # explicitly specify MP2 RI-auxiliary basis for Ahlrichs basis set
+    # best practices for scf calculations
+    # http://www.psicode.org/psi4manual/master/scf.html#recommendations
+    # http://www.psicode.org/psi4manual/master/dft.html#recommendations
+    inputstring+='\n\nset scf_type df'
+    inputstring+='\nset guess sad'
+
+    # explicitly specify MP2 RI-auxiliary basis for [Ahlrichs] basis set
     # http://www.psicode.org/psi4manual/master/basissets_byfamily.html
-    # DFMP2 *should* get MP2 aux sets fine for Pople/Dunning
+    # DFMP2 *should* get MP2 aux sets fine for [Pople and Dunning] sets
     # http://www.psicode.org/psi4manual/master/dfmp2.html
     if method.lower()=='mp2' and 'def2' in basisset:
         if basisset.lower()=='def2-sv(p)':
