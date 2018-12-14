@@ -278,7 +278,7 @@ def confs_to_psi(insdf, method, basis, calctype='opt', memory=None, via_json=Fal
             if not os.path.isdir(subdir):
                 os.makedirs(subdir)
             if os.path.exists(os.path.join(subdir,'input.dat')):
-                print("Input file (\"input.dat\") already exists. Skipping.\n")
+                print("Input file already exists. Skipping.\n{}\n".format(os.path.join(subdir,'input.dat')))
                 continue
             label = mol.GetTitle()+'_'+str(i+1)
             if via_json:
