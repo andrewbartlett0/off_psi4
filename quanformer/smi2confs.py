@@ -146,15 +146,21 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
 
     Parameters
     ----------
-    smiles: str - PATH+name of the smiles file.
-    resClash: boolean - Resolve steric clashes or not.
-    quickOpt: boolean - QuickOpt or not.
+    smiles : string
+        Name of the input molecule file. Note: this isn't strictly limited
+        to SMILES files, can also work with SDF, MOL2, etc. The file can be in
+        a different location than the directory of which this function is
+        called. The output SDF and txt files will be placed in the directory
+        of which the function is called.
+    resClash : Boolean
+        True to resolve steric clashes by geometry optimization using OESzybki
+    quickOpt : Boolean
+        True to run quick geometry optimization using OESzybki with MMFF94S
+        force field and Sheffield solvent model
 
     """
-    wdir, fname = os.path.split(smiles)
-    base, extension = os.path.splitext(fname)
+    base, extension = os.path.splitext(os.path.basename(smiles))
     sdfout = base + '.sdf'
-    os.chdir(wdir)
 
     ### Read in smiles file.
     ifs = oechem.oemolistream()
