@@ -154,8 +154,10 @@ The instructions below describe how to take a set of molecules from their starti
     * See file `analysis.md`
 
 
-### A. Chemistry that is NOT currently supported by Quanformer
-* Molecules with spin multiplicity not equal to one (i.e., having unpaired electrons)
+### A. Quanformer assumptions
+* Input molecules have spin multiplicity equal to one (i.e., no unpaired electrons)
+* SCF algorithm is density-fitted (DF)
+    * There exists -JKFIT auxiliary set for your orbital basis/atom type
 
 ### B. Limitations for file names
 

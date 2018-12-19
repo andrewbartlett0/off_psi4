@@ -1,6 +1,6 @@
 
 # Auxiliary scripts for Quanformer
-Last updated: Oct 12 2018
+Last updated: Dec 19 2018
 
 Also see [this list](http://vergil.chemistry.gatech.edu/resources/utilities.html) from the Sherrill group.  
 
@@ -18,4 +18,8 @@ Also see [this list](http://vergil.chemistry.gatech.edu/resources/utilities.html
 | `write_first_confs.py`| write out first conformers of all molecules                                            |
 | `writeOneMol.py`      | write out single mol and all its conformers OR single conformer of specified mol       |
 | `xyzByStep.sh`        | simple Bash processing of Psi4 output file to see geometries throughout optimization   |
+
+Other helpful scripts:
+ * [This list](http://vergil.chemistry.gatech.edu/resources/utilities.html) from the Sherrill group
+ * [OpenEye script](https://docs.eyesopen.com/toolkits/python/oechemtk/oechem_examples/oechem_example_molextract.html) to extract molecules by title
 
