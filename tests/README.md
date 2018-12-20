@@ -18,4 +18,5 @@ Last updated: Dec 19 2018
 | `output_hess.dat`              | `get_psi_results.py` | `/beegfs/DATA/mobley/limvt/openforcefield/hessian/sandbox_benzene/benzene/output.dat`        |
 | `output_opt.dat`, `timer.dat`  | `get_psi_results.py` | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/03_examples/set1/GBI/1/`                  |
 | `output_spe.dat`               | `get_psi_results.py` | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/set1_01_main/SPE1/AlkEthOH_c1178/1/output.dat` |
+| `steric_clash.smi`             | `smi2confs.py`       | `/DFS-L/old_beegfs_data/mobley/limvt/openforcefield/pipeline/set1_01_main/set1_01_main.smi`  |
 

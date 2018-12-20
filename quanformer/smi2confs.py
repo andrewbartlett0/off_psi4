@@ -20,20 +20,20 @@ import openeye.oeszybki as oeszybki
 
 ### ------------------- Functions -------------------
 
-def GenerateConfs(Mol):
+def generate_confs(mol):
     """
     Generate conformers of molecule from its SMILES string.
 
     Parameters
     ----------
-    Mol:          OEChem molecule
+    mol : OEChem molecule
 
     Returns
     -------
-    molWithConfs: OEChem molecule with omega-generated conformers
+    molWithConfs : OEChem molecule with omega-generated conformers
 
     """
-    molWithConfs = oechem.OEMol(Mol)
+    molWithConfs = oechem.OEMol(mol)
     omega = oeomega.OEOmega()
     maxConfs = 0
     omega.SetMaxConfs(maxConfs)
@@ -46,18 +46,20 @@ def GenerateConfs(Mol):
     else:
         return molWithConfs
 
-def ResolveBadClashes(Mol, Cfile):
+def resolve_clashes(mol, clashfile):
     """
     Minimize conformers with severe steric interaction.
 
     Parameters
     ----------
-    Mol:        single OEChem molecule (aka single conformer)
-    Cfile:      string name of file to write output
+    mol : single OEChem molecule (single conformer)
+    clashfile : string
+        name of file to write output
 
     Returns
     -------
-    boolean: True if completed successfully, False otherwise.
+    boolean
+        True if completed successfully, False otherwise.
 
     """
 
@@ -79,7 +81,7 @@ def ResolveBadClashes(Mol, Cfile):
     # construct a results object to contain the results of a szybki calculation
     szResults = oeszybki.OESzybkiResults()
     # work on a copy of the molecule
-    tmpmol = oechem.OEMol( Mol)
+    tmpmol = oechem.OEMol( mol)
     if not szSP(tmpmol, szResults):
         print( 'szybki run failed for %s' %  tmpmol.GetTitle() )
         return False
@@ -91,16 +93,16 @@ def ResolveBadClashes(Mol, Cfile):
             return False
         Etot = szResults.GetTotalEnergy()
         Evdw = szResults.GetEnergyTerm(oeszybki.OEPotentialTerms_MMFFVdW)
-        wfile = open(Cfile,'a')
+        wfile = open(clashfile,'a')
         wfile.write( '%s resolved bad clash: initial vdW: %.4f ; '
                    'resolved EvdW: %.4f\n' % (tmpmol.GetTitle(),Evdwsp,Evdw) )
         wfile.close()
-        Mol.SetCoords( tmpmol.GetCoords() )
-    oechem.OESetSDData(Mol, oechem.OESDDataPair('MM Szybki Single Point Energy'\
+        mol.SetCoords( tmpmol.GetCoords() )
+    oechem.OESetSDData(mol, oechem.OESDDataPair('MM Szybki Single Point Energy'\
 , "%.12f" % szResults.GetTotalEnergy()))
     return True
 
-def QuickOpt( Mol):
+def quick_opt( mol):
     """
     Fast MM optimization to whittle down number of conformers before QM.
     Default Szybki OEOptType type set to steepest descent (SD) based on
@@ -108,11 +110,12 @@ def QuickOpt( Mol):
 
     Parameters
     ----------
-    Mol:        single OEChem molecule (aka single conformer)
+    mol : single OEChem molecule (single conformer)
 
     Returns
     -------
-    boolean: True if completed successfully, False otherwise.
+    boolean
+        True if completed successfully, False otherwise.
 
     """
     # set general energy options along with the run type specification
@@ -127,12 +130,12 @@ def QuickOpt( Mol):
     # construct a results object to contain the results of a szybki calculation
     szResults = oeszybki.OESzybkiResults()
     # work on a copy of the molecule
-    tmpmol = oechem.OEMol( Mol)
+    tmpmol = oechem.OEMol( mol)
     if not szOpt(tmpmol, szResults):
         print( 'szybki run failed for %s' %  tmpmol.GetTitle() )
         return False
-    Mol.SetCoords( tmpmol.GetCoords() )
-    oechem.OESetSDData(Mol, oechem.OESDDataPair(taglabel, "%.12f" \
+    mol.SetCoords( tmpmol.GetCoords() )
+    oechem.OESetSDData(mol, oechem.OESDDataPair(taglabel, "%.12f" \
         % szResults.GetTotalEnergy()))
     return True
 
@@ -160,6 +163,8 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
 
     """
     base, extension = os.path.splitext(os.path.basename(smiles))
+    if extension == '.sdf':
+        base = base+'_quanformer'
     sdfout = base + '.sdf'
 
     ### Read in smiles file.
@@ -184,7 +189,9 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
     for smimol in ifs.GetOEMols():
         oechem.OETriposAtomNames(smimol)
         oechem.OEAddExplicitHydrogens(smimol)
-        mol = GenerateConfs(smimol)
+        mol = generate_confs(smimol)
+        if mol is None:
+            continue
         conffile.write( "%s\t%s\n" % (mol.GetTitle(), mol.NumConfs()) )
 
         for i, conf in enumerate( mol.GetConfs()):
@@ -192,14 +199,14 @@ def smi2confs(smiles, resClash=True, quickOpt=True):
             ### Resolve bad clashes.
             if resClash:
                 print("Resolving bad clashes...")
-                if not ResolveBadClashes( conf, "numClashes.txt" ):
+                if not resolve_clashes( conf, "numClashes.txt" ):
                     print('Resolving bad clashes failed for molecule %s \
 conformer %d:' % (mol.GetTitle(),i+1) )
                     continue
             ### MM optimization.
             if quickOpt:
                 print("Doing a quick MM (SD) optimization...")
-                if not QuickOpt( conf):
+                if not quick_opt( conf):
                     print('Quick optimization failed for molecule %s \
 conformer %d:' % (mol.GetTitle(),i+1) )
                     continue
