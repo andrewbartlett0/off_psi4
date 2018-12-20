@@ -25,7 +25,7 @@ def test_resolve_clashes():
     mol = read_mol(os.path.join(mydir,'data_tests','steric_clash.smi'))
     mol = generate_confs(mol)
     for conf in mol.GetConfs():
-        resolve_clashes(conf, 'clashes.out')
+        resolve_clashes(conf, os.path.join(mydir,'clashes.out'))
     statinfo = os.stat(os.path.join(mydir,'clashes.out'))
     assert statinfo.st_size == 405
     os.remove(os.path.join(mydir,'clashes.out'))
