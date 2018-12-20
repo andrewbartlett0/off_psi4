@@ -35,6 +35,7 @@ def test_quick_opt():
     pass
 
 def test_smi2confs():
+    os.chdir(mydir)
     smi2confs(os.path.join(mydir,'data_tests','methane.smi'))
     statinfo = os.stat(os.path.join(mydir,'methane.sdf'))
     assert statinfo.st_size == 612
