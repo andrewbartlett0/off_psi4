@@ -22,4 +22,5 @@ Also see [this list](http://vergil.chemistry.gatech.edu/resources/utilities.html
 Other helpful scripts:
  * [This list](http://vergil.chemistry.gatech.edu/resources/utilities.html) from the Sherrill group
  * [OpenEye script](https://docs.eyesopen.com/toolkits/python/oechemtk/oechem_examples/oechem_example_molextract.html) to extract molecules by title
+ * [OpenEye script](https://docs.eyesopen.com/toolkits/cookbook/python/_downloads/ecdfcd69f00dc4e2d4e0f826e749b6b0/moldb_titlesort.py) to sort molecules by title
 
