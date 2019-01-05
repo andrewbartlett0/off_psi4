@@ -46,7 +46,7 @@ def get_sd_list(mol, datum, Package='Psi4', Method=None, Basisset=None):
                                                               Basisset)
     if datum == "QM spe":
         taglabel = "QM %s Single Pt. Energy (Har) %s/%s" % (Package, Method,
-
+                                                              Basisset)
     if datum == "QM spe scs":
         taglabel = "QM %s Single Pt. Energy (Har) SCS-%s/%s" % (Package, Method,
                                                             Basisset)
