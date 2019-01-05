@@ -19,7 +19,7 @@ import os
 import openeye.oechem as oechem
 import numpy as np
 import argparse
-import procTags as pt
+import proc_tags as pt
 import collections  # ordered dictionary
 
 import matplotlib.pyplot as plt
@@ -180,17 +180,17 @@ def extract_enes(dict1):
 
         # Get absolute energies from the SD tags
         #print(dict2['calctype'],tag2, dict2['method'],dict2['basisset']) # for debugging
-        #print(pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset'])) # for debugging
+        #print(pt.get_sd_list(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset'])) # for debugging
         iabs = np.array(
             list(
                 map(
                     float,
-                    pt.GetSDList(imol, tag1, 'Psi4', dict1['method'],
+                    pt.get_sd_list(imol, tag1, 'Psi4', dict1['method'],
                                  dict1['basisset']))))
 
         # Get omega conformer number of first, for reference info
         # whole list can be used for matching purposes
-        originum = pt.GetSDList(imol, "original index")
+        originum = pt.get_sd_list(imol, "original index")
 
         # find conformers for which job did not finish (nan)
         nanIndices = np.argwhere(np.isnan(iabs))
@@ -390,24 +390,24 @@ def extract_and_rmsd(dict1, dict2):
 
         # Get absolute energies from the SD tags
         #print(dict2['calctype'],tag2, dict2['method'],dict2['basisset']) # for debugging
-        #print(pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset'])) # for debugging
+        #print(pt.get_sd_list(jmol, tag2, 'Psi4', dict2['method'],dict2['basisset'])) # for debugging
         iabs = np.array(
             list(
                 map(
                     float,
-                    pt.GetSDList(imol, tag1, 'Psi4', dict1['method'],
+                    pt.get_sd_list(imol, tag1, 'Psi4', dict1['method'],
                                  dict1['basisset']))))
         jabs = np.array(
             list(
                 map(
                     float,
-                    pt.GetSDList(jmol, tag2, 'Psi4', dict2['method'],
+                    pt.get_sd_list(jmol, tag2, 'Psi4', dict2['method'],
                                  dict2['basisset']))))
 
         # Get omega conformer number of first, for reference info
         # whole list can be used for matching purposes
-        originum = pt.GetSDList(imol, "original index")
-        origjnum = pt.GetSDList(jmol, "original index")
+        originum = pt.get_sd_list(imol, "original index")
+        origjnum = pt.get_sd_list(jmol, "original index")
 
         # exclude conformers for which job did not finish (nan)
         nanIndices = np.argwhere(np.isnan(iabs))

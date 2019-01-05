@@ -1,15 +1,22 @@
 #!/usr/bin/env python
+"""
+proc_tags.py
 
-## By: Victoria T. Lim
+This script parses output of Psi4 calculations and writes data in SD tags.
 
-## This script parses output of Psi4 calculations and writes data in SD tags.
-## Usage: import procTags as pt, then call pt.SetSDTags(args)
+Usage:
+- import proc_Tags as pt
+- pt.set_sd_tags(args)
+
+By: Victoria T. Lim
+
+"""
 
 import openeye.oechem as oechem
 import sys
 
 
-def GetSDList(mol, datum, Package='Psi4', Method=None, Basisset=None):
+def get_sd_list(mol, datum, Package='Psi4', Method=None, Basisset=None):
     """
     Get list of specified SD tag for all confs in mol.
 
@@ -28,38 +35,46 @@ def GetSDList(mol, datum, Package='Psi4', Method=None, Basisset=None):
     """
 
     # TODO: dictionary
-    if datum=="QM opt energy":
-        taglabel = "QM %s Final Opt. Energy (Har) %s/%s" % (Package, Method, Basisset)
+    if datum == "QM opt energy":
+        taglabel = "QM %s Final Opt. Energy (Har) %s/%s" % (Package, Method,
+                                                            Basisset)
 
-    if datum=="QM opt energy initial":
-        taglabel = "QM %s Initial Opt. Energy (Har) %s/%s" % (Package, Method, Basisset)
+    if datum == "QM opt energy initial":
+        taglabel = "QM %s Initial Opt. Energy (Har) %s/%s" % (Package, Method,
+                                                              Basisset)
 
-    if datum=="QM spe":
-        taglabel = "QM %s Single Pt. Energy (Har) %s/%s" % (Package, Method, Basisset)
+    if datum == "QM spe":
+        taglabel = "QM %s Single Pt. Energy (Har) %s/%s" % (Package, Method,
+                                                            Basisset)
 
-    if datum=="MM opt energy":
+    if datum == "MM opt energy":
         taglabel = "MM Szybki Newton Energy"
 
-    if datum=="original index":
+    if datum == "original index":
         taglabel = "Original omega conformer number"
 
-    if datum=="opt runtime":
-        taglabel = "QM %s Opt. Runtime (sec) %s/%s" % (Package, Method, Basisset)
+    if datum == "opt runtime":
+        taglabel = "QM %s Opt. Runtime (sec) %s/%s" % (Package, Method,
+                                                       Basisset)
 
-    if datum=="spe runtime":
-        taglabel = "QM %s Single Pt. Runtime (sec) %s/%s" % (Package, Method, Basisset)
+    if datum == "spe runtime":
+        taglabel = "QM %s Single Pt. Runtime (sec) %s/%s" % (Package, Method,
+                                                             Basisset)
 
-    if datum=="opt step":
+    if datum == "opt step":
         taglabel = "QM %s Opt. Steps %s/%s" % (Package, Method, Basisset)
 
-    try: taglabel
-    except UnboundLocalError as e: sys.exit("Error in input tag of extracting SD data.")
+    try:
+        taglabel
+    except UnboundLocalError as e:
+        sys.exit("Error in input tag of extracting SD data.")
 
     SDList = []
-    for j, conf in enumerate( mol.GetConfs() ):
+    for j, conf in enumerate(mol.GetConfs()):
         for x in oechem.OEGetSDDataPairs(conf):
             # Case: opt did not finish --> append nan
-            if "note on opt." in x.GetTag().lower() and "did not finish" in x.GetValue().lower():
+            if "note on opt." in x.GetTag().lower(
+            ) and "did not finish" in x.GetValue().lower():
                 SDList.append('nan')
                 break
             # Case: want energy value OR want original index number
@@ -69,7 +84,7 @@ def GetSDList(mol, datum, Package='Psi4', Method=None, Basisset=None):
     return SDList
 
 
-def SetSDTags(Conf, Props, calctype):
+def set_sd_tags(Conf, Props, calctype):
     """
     For one particular conformer, set all available SD tags based on data
     in Props dictionary.
@@ -101,14 +116,15 @@ def SetSDTags(Conf, Props, calctype):
 
     # turn parameters into tag descriptions
     full_method = "{}/{}".format(method, basisset)
-    cdict = {'spe':'Single Pt.', 'opt':'Opt.', 'hess':'Hessian'}
+    cdict = {'spe': 'Single Pt.', 'opt': 'Opt.', 'hess': 'Hessian'}
 
     # time info can be set for all cases
-    taglabel = "QM {} {} Runtime (sec) {}".format(pkg, cdict[calctype], full_method)
+    taglabel = "QM {} {} Runtime (sec) {}".format(pkg, cdict[calctype],
+                                                  full_method)
     oechem.OEAddSDData(Conf, taglabel, str(Props['time']))
 
     # hessian has no other info for sd tag
-    if calctype=='hess':
+    if calctype == 'hess':
         return
 
     # check that finalEnergy is there. if not, opt probably did not finish
@@ -119,19 +135,23 @@ def SetSDTags(Conf, Props, calctype):
         return
 
     # Set new SD tag for conformer's final energy
-    taglabel = "QM {} Final {} Energy (Har) {}".format(pkg, cdict[calctype], full_method)
+    taglabel = "QM {} Final {} Energy (Har) {}".format(pkg, cdict[calctype],
+                                                       full_method)
     oechem.OEAddSDData(Conf, taglabel, str(Props['finalEnergy']))
 
     # Add COSMO energy with outlying charge correction. Turbomole only!
     if 'ocEnergy' in Props:
-        if calctype=='spe':
-            print("Extraction of COSMO OC energy from Turbomole not yet supported for SPE calcns")
-        elif calctype=='opt':
-            taglabel = "QM {} Final {} Energy with OC correction (Har) {}".format(pkg, cdict[calctype], full_method)
+        if calctype == 'spe':
+            print(
+                "Extraction of COSMO OC energy from Turbomole not yet supported for SPE calcns"
+            )
+        elif calctype == 'opt':
+            taglabel = "QM {} Final {} Energy with OC correction (Har) {}".format(
+                pkg, cdict[calctype], full_method)
             oechem.OEAddSDData(Conf, taglabel, str(Props['ocEnergy']))
 
     # spe has no other relevant info for sd tag
-    if calctype=='spe':
+    if calctype == 'spe':
         return
 
     # Set new SD tag for original conformer number if not existing
@@ -140,15 +160,15 @@ def SetSDTags(Conf, Props, calctype):
     if not oechem.OEHasSDData(Conf, taglabel):
         # if not working with confs, will have no GetIdx
         try:
-            oechem.OEAddSDData(Conf, taglabel, str(Conf.GetIdx()+1))
+            oechem.OEAddSDData(Conf, taglabel, str(Conf.GetIdx() + 1))
         except AttributeError as err:
             pass
     # if tag exists, append new conformer ID after the old one
     else:
         try:
             oldid = oechem.OEGetSDData(Conf, taglabel)
-            newid = str(Conf.GetIdx()+1)
-            totid = "{}, {}".format(oldid,newid)
+            newid = str(Conf.GetIdx() + 1)
+            totid = "{}, {}".format(oldid, newid)
             oechem.OESetSDData(Conf, taglabel, totid)
         except AttributeError as err:
             pass
@@ -158,11 +178,12 @@ def SetSDTags(Conf, Props, calctype):
     oechem.OEAddSDData(Conf, taglabel, str(Props['numSteps']))
 
     # Set new SD tag for conformer's initial energy
-    taglabel = "QM {} Initial {} Energy (Har) {}".format(pkg, cdict[calctype], full_method)
+    taglabel = "QM {} Initial {} Energy (Har) {}".format(
+        pkg, cdict[calctype], full_method)
     oechem.OEAddSDData(Conf, taglabel, str(Props['initEnergy']))
 
 
-def DeleteTag(mol,tag):
+def delete_tag(mol, tag):
     """
     Delete specified SD tag from all conformers of mol.
 
@@ -172,5 +193,5 @@ def DeleteTag(mol,tag):
     tag:        exact string label of the data to delete
 
     """
-    for j, conf in enumerate( mol.GetConfs() ):
+    for j, conf in enumerate(mol.GetConfs()):
         oechem.OEDeleteSDData(conf, tag)

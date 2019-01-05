@@ -53,7 +53,7 @@ Pipeline components and description:
 | `matchMinima.py`     | analysis      | match conformers from sets of different optimizations                      |
 | `match_plot.py`      | analysis      | additional plots that can be used from `matchMinima.py` results            |
 | `plotTimes.py`       | analysis      | plot calculation time averaged over the conformers for each molecule       |
-| `procTags.py`        | results       | store QM energies & conformer details as data tags in SDF molecule files   |
+| `proc_tags.py`       | results       | store QM energies & conformer details as data tags in SDF molecule files   |
 | `quan2modsem.py`     | analysis      | interface with modified Seminario Python code                              |
 | `initialize_confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
 | `stitchSpe.py`       | analysis      | calculate relative conformer energies from sets of different SPEs          |

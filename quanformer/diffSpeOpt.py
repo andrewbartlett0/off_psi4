@@ -13,7 +13,7 @@ import os
 import sys
 import openeye.oechem as oechem
 import numpy as np
-import procTags as pt
+import proc_tags as pt
 import math
 from collections import defaultdict
 
@@ -121,8 +121,8 @@ def getRMSD(sdfRef, theory, rmsdict, package='Psi4'):
     # Grab energies, perform RMSD calculation, write data to txt files.
     for rmol in molsRef:
         molName = rmol.GetTitle()
-        tmol = np.asarray(pt.GetSDList(rmol, 'QM opt energy', 'Psi4', method, basis), dtype = float)
-        imol = np.asarray(pt.GetSDList(rmol, 'QM opt energy initial', 'Psi4', method, basis), dtype = float)
+        tmol = np.asarray(pt.get_sd_list(rmol, 'QM opt energy', 'Psi4', method, basis), dtype = float)
+        imol = np.asarray(pt.get_sd_list(rmol, 'QM opt energy initial', 'Psi4', method, basis), dtype = float)
         final = tmol.copy()
         initial = imol.copy()
 
@@ -155,7 +155,7 @@ stored in tags. Exiting.".format(rmol.GetTitle(), method, basis))
         energies.write("\n#%s\n#%s\n#RMSD = %.5f(y)\t\t(x=Hartree, y=kcal/mol)\n#conf. init. Energy(x)  \t final Energy(x) \t diff.(x)\tdiff. (y) \n" %(theory, molName, average ))
 
         # get list of conformer indices to identify high RMSD ones
-        conflist = pt.GetSDList(rmol, "original index", package, method, basis)
+        conflist = pt.get_sd_list(rmol, "original index", package, method, basis)
         conformer = []
         for item in conflist: conformer.append(item.split(',')[0]) # append orig conf
         conformer = np.asarray(conformer, dtype=int)

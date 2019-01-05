@@ -11,7 +11,7 @@ import pickle
 import itertools
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import procTags as pt           # for GetSDList
+import proc_tags as pt           # for get_sd_list
 
 
 ### ------------------- Functions -------------------
@@ -243,7 +243,7 @@ def matchMinima(sdfList, thryList, *tags):
             # get data from tags
             for t in tags:
                 if t not in moldict[name]: moldict[name][t] = []
-                moldict[name][t].append(list(map(float, pt.GetSDList(qmol, t,'Psi4', qmethod, qbasis))))
+                moldict[name][t].append(list(map(float, pt.get_sd_list(qmol, t,'Psi4', qmethod, qbasis))))
 
             # Skip minmatch if this query file is same as reference file;
             #    before skip, get data for elists, refNumConfs, allIndices.
