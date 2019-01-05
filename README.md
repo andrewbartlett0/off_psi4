@@ -19,7 +19,7 @@ Analysis scripts are provided for comparing conformer energies from different QM
  * Consider questions such as, "What is the spread of the conformer energies for molecule _x_?", "How does method _a_ compare to method _b_ for this molecule?", etc.
 
 In concept, this example would look like:   
-`smi2confs.py` &rarr; `confs_to_psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
+`initialize_confs.py` &rarr; `confs_to_psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
 
 In practice, the `executor.py` code provides the interface for the various stages and components. 
 That being said, each component was written to be able to run independently of the others so variations of this pipeline can be conducted. 
@@ -55,7 +55,7 @@ Pipeline components and description:
 | `plotTimes.py`       | analysis      | plot calculation time averaged over the conformers for each molecule       |
 | `procTags.py`        | results       | store QM energies & conformer details as data tags in SDF molecule files   |
 | `quan2modsem.py`     | analysis      | interface with modified Seminario Python code                              |
-| `smi2confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
+| `initialize_confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
 | `stitchSpe.py`       | analysis      | calculate relative conformer energies from sets of different SPEs          |
 
 There are other scripts in this repository that are not integral to the pipeline. These are found in the `tools` directory. See the README file there.
@@ -192,8 +192,8 @@ If you try a non-SDF file, do check that the *molecule name* and the *total char
 
 This pipeline uses some preset parameters, which can be modified in the function calls of `executor.py` or in the parent code.
 Descriptions coming soon. [TODO]
- * `smi2confs.py`: resClash=True, for ...
- * `smi2confs.py`: quickOpt=True, for ...
+ * `initialize_confs.py`: `resolve_clash=True`, for resolving steric clashes
+ * `initialize_confs.py`: `do_opt=True`, for performing quick steepest descent optimization
 
 
 ## V. Some terms and references

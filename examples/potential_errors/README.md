@@ -3,7 +3,7 @@
 
 Errors thrown by Quanformer/Python:
  * `Input file already exists. Skipping.` Make sure each molecule has a unique name which is used to name directories.
- * `Output .sdf file already exists. Exiting smi2confs.` Make sure the SMILES file is in the same location as output location.
+ * `Output .sdf file already exists. Exiting initialize_confs.` Make sure the SMILES file is in the same location as output location.
    Can also use symbolic link (`ln -s source sink`).
  * `KeyError` from processing results. Did you remember to specify `spe` for single point calculations?
  * `ValueError` from `stitchSpe.py`. Did you specify the right keywords to extract the right SD tag? 

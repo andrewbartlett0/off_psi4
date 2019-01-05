@@ -1,11 +1,11 @@
 
 # local testing vs. travis testing
 try:
-    from quanformer.smi2confs import *
+    from quanformer.initialize_confs import *
 except ModuleNotFoundError:
     import sys
     sys.path.insert(0, '/home/limvt/Documents/off_psi4/quanformer')
-    from smi2confs import *
+    from initialize_confs import *
 
 # define location of input files for testing
 import os
@@ -34,16 +34,16 @@ def test_quick_opt():
     # TODO
     pass
 
-def test_smi2confs():
+def test_initialize_confs():
     os.chdir(mydir)
-    smi2confs(os.path.join(mydir,'data_tests','methane.smi'))
+    initialize_confs(os.path.join(mydir,'data_tests','methane.smi'))
     statinfo = os.stat(os.path.join(mydir,'methane.sdf'))
     assert statinfo.st_size == 612
     os.remove(os.path.join(mydir,'methane.sdf'))
     os.remove(os.path.join(mydir,'numConfs.txt'))
 
-def test_smi2confs_rename():
-    smi2confs(os.path.join(mydir,'data_tests','gbi_single.sdf'))
+def test_initialize_confs_rename():
+    initialize_confs(os.path.join(mydir,'data_tests','gbi_single.sdf'))
     statinfo = os.stat(os.path.join(mydir,'gbi_single_quanformer.sdf'))
     assert statinfo.st_size == 87408
     os.remove(os.path.join(mydir,'gbi_single_quanformer.sdf'))
@@ -54,6 +54,6 @@ if 1:
     test_generate_confs()
     test_resolve_clashes()
     test_quick_opt()
-    test_smi2confs()
-    test_smi2confs_rename()
+    test_initialize_confs()
+    test_initialize_confs_rename()
 

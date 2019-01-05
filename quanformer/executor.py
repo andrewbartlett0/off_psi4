@@ -3,7 +3,7 @@
 import os, sys
 import argparse
 
-import smi2confs
+import initialize_confs
 import filterConfs
 import confs_to_psi
 import get_psi_results
@@ -43,7 +43,7 @@ def main(**kwargs):
         # files are saved to curr_dir but can be changed to input file's dir (inpath)
         if ext == '.smi':
             print("\nGenerating and filtering conformers for %s" % opt['filename'])
-            smi2confs.smi2confs(checked_infile)
+            initialize_confs.initialize_confs(checked_infile)
             pre_filt = os.path.join(curr_dir,prefix+'.sdf')
             post_filt = os.path.join(curr_dir,"{}-{}.sdf".format(prefix, suffix))
             filterConfs.filterConfs(pre_filt, "MM Szybki SD Energy", post_filt)
