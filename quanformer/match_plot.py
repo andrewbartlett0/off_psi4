@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """
+match_plot.py
+
 Purpose:    Generate heat plots, scatter plots, and 3D plots from output of matchMinima.py.
             This extends analysis capabilities of matchMinima.py, which
             generates simple bar plots (for average compute times) and
