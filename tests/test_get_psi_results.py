@@ -58,11 +58,13 @@ def test_process_psi_out_opt():
     opt_dict = process_psi_out(os.path.join(mydir,'data_tests','output_opt.dat'), {}, 'opt')
     # initial energy: -582.148922080397
     # final energy: -582.1568394053036
+    # scs final: -582.0904465352028865
     assert opt_dict['basis'] == 'def2-SV(P)'
     assert opt_dict['method'] == 'mp2'
     assert opt_dict['numSteps'] == '8'
     assert opt_dict['initEnergy'] == pytest.approx(-582.148922080397, 0.000000000001)
     assert opt_dict['finalEnergy'] == pytest.approx(-582.1568394053036, 0.000000000001)
+    assert opt_dict['finalSCSEnergy'] == pytest.approx(-582.0904465352028865, 0.000000000001)
     assert opt_dict['coords'][0] == -0.0238533448
     assert len(opt_dict['coords']) == 69
 

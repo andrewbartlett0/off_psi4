@@ -160,7 +160,7 @@ def get_scs_mp2(lines):
 
     """
     matching = [s for s in lines if "SCS Total Energy" in s]
-    ene = matching[-1].split()[4]
+    ene = float(matching[-1].split()[4])
     return ene
 
 

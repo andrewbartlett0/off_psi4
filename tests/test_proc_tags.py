@@ -48,11 +48,19 @@ def test_set_sd_tags_spe_didfinish():
     assert oechem.OEHasSDData(mol, "QM test-p Final Single Pt. Energy (Har) test-m/test-b") == True
     assert oechem.OEGetSDData(mol, "QM test-p Final Single Pt. Energy (Har) test-m/test-b") == '-2'
 
+def test_set_sd_tags_spe_scs():
+    # TODO
+    pass
+
 def test_set_sd_tags_opt():
     # TODO
     pass
 
-def test_DeleteTag():
+def test_set_sd_tags_opt_scs():
+    # TODO
+    pass
+
+def test_delete_tag():
     # TODO
     pass
 
