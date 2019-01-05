@@ -13,6 +13,8 @@ To use this script as an imported module:
 - import initialize_confs
 - initialize_confs.initialize_confs('filename', resolve_clash=True, do_opt=True)
 
+By: Christopher I. Bayly, Victoria T. Lim
+
 """
 
 import os, sys
