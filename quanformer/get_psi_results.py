@@ -5,6 +5,12 @@ Purpose:    Process results from a Psi4 QM calculation.
 By:         Victoria T. Lim
 Version:    Oct 12 2018
 
+NOTE:       Psi4 results are obtained by parsing output text file.
+            Not sure if this is most efficient.
+            JSON wrapper has some limitations though (as of Dec 2018).
+            Also, not sure best way of parsing: via iterator (current
+            approach) or by using some sort of find or regex command?
+
 """
 
 import re
@@ -14,9 +20,9 @@ import openeye.oechem as oechem
 
 # local testing vs. travis testing
 try:
-    import quanformer.procTags as pt
+    import quanformer.proc_tags as pt
 except ModuleNotFoundError:
-    import procTags as pt # VTL temporary bc travis fails to import
+    import proc_tags as pt # VTL temporary bc travis fails to import
 
 
 ### ------------------- Functions -------------------
@@ -66,7 +72,7 @@ def set_conf_data(mol, props, calctype):
         mol.SetCoords(oechem.OEFloatArray(props['coords']))
 
     # Set SD tags for this molecule
-    pt.SetSDTags(mol, props, calctype)
+    pt.set_sd_tags(mol, props, calctype)
 
     return mol
 
@@ -128,6 +134,36 @@ def get_psi_time(filename):
     return time
 
 
+def get_scs_mp2(lines):
+    """
+    Get final SCS MP2 energy from output file. This is handled a little
+    differently, outside of iterator because (1) have to do for both SPE
+    and OPT, (2) SCS-MP2 may be listed multiple times, not just at end of file,
+    so must be able to get the last one directly ideally without storing them
+    all in a list first, (3) checking the qm method for each line seems silly,
+    since SCS-MP2 energies would only be sought when method is mp2.
+
+    This function called by the process_psi_out function.
+
+    Note: MP2 Hessian output also has this but not sure if should be extracted
+    since am not extracting optimized energies.
+
+    Parameters
+    ----------
+    lines : list
+        list of lines of Psi4 output file from Python readlines function
+
+    Returns
+    -------
+    scs_ene : float
+        value of the final SCS-MP2 total energy in original units of Psi4 (Har)
+
+    """
+    matching = [s for s in lines if "SCS Total Energy" in s]
+    ene = matching[-1].split()[4]
+    return ene
+
+
 def process_psi_out(filename, properties, calctype='opt'):
     """
     Go through output file and get level of theory (method and basis set),
@@ -169,8 +205,15 @@ def process_psi_out(filename, properties, calctype='opt'):
                 properties['basis'] = line.split()[2]
             if "energy(" in line:
                 properties['method'] = line.split('\'')[1]
+            # this line should only show up once for spe
             if "Total Energy =" in line:
                 properties['finalEnergy'] = float(line.split()[3])
+
+        # check for scs-mp2 energy if applicable
+        if properties['method'].lower() == 'mp2':
+            scs_ene = get_scs_mp2(lines)
+            properties['finalSCSEnergy'] = scs_ene
+
         return properties
 
     # process results for Hessian calculation
@@ -251,6 +294,11 @@ def process_psi_out(filename, properties, calctype='opt'):
             while "Saving final" not in line:
                 rough.append(line.split()[1:4])
                 line = next(it)
+
+    # check for scs-mp2 energy if applicable
+    if properties['method'].lower() == 'mp2':
+        scs_ene = get_scs_mp2(lines)
+        properties['finalSCSEnergy'] = scs_ene
 
     # convert the 2D (3xN) coordinates to 1D list of length 3N (N atoms)
     for atomi in rough:
