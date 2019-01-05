@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-
 """
+get_psi_results.py
+
 Purpose:    Process results from a Psi4 QM calculation.
 By:         Victoria T. Lim
 Version:    Oct 12 2018
@@ -22,8 +23,7 @@ import openeye.oechem as oechem
 try:
     import quanformer.proc_tags as pt
 except ModuleNotFoundError:
-    import proc_tags as pt # VTL temporary bc travis fails to import
-
+    import proc_tags as pt  # VTL temporary bc travis fails to import
 
 ### ------------------- Functions -------------------
 
@@ -68,7 +68,7 @@ def get_conf_data(props, calctype, timeout, psiout):
 def set_conf_data(mol, props, calctype):
 
     # Set last coordinates from optimization. skip if missing.
-    if 'coords' in props and len(props['coords']) != 0 :
+    if 'coords' in props and len(props['coords']) != 0:
         mol.SetCoords(oechem.OEFloatArray(props['coords']))
 
     # Set SD tags for this molecule
@@ -194,12 +194,12 @@ def process_psi_out(filename, properties, calctype='opt'):
         return properties
 
     # open and read file
-    f = open(filename,"r")
+    f = open(filename, "r")
     lines = f.readlines()
     it = iter(lines)
 
     # process results for single point energy calculation
-    if calctype=='spe':
+    if calctype == 'spe':
         for line in it:
             if "set basis" in line:
                 properties['basis'] = line.split()[2]
@@ -217,20 +217,20 @@ def process_psi_out(filename, properties, calctype='opt'):
         return properties
 
     # process results for Hessian calculation
-    elif calctype=='hess':
+    elif calctype == 'hess':
         import math
         import numpy as np
         hess = []
         for line in it:
             if "set basis" in line:
                 properties['basis'] = line.split()[2]
-            if "=hessian(" in ''.join(line.split()): # remove any spaces around eql
+            if "=hessian(" in ''.join(line.split()):  # rm spaces around eql
                 properties['method'] = line.split('\'')[1]
             if "## Hessian" in line:
-                line = next(it) # "Irrep:"
-                line = next(it) # blank line
-                line = next(it) # column index labels
-                line = next(it) # blank line
+                line = next(it)  # "Irrep:"
+                line = next(it)  # blank line
+                line = next(it)  # column index labels
+                line = next(it)  # blank line
 
                 # convert the rest of file/iterator to list
                 rough = list(it)
@@ -239,30 +239,31 @@ def process_psi_out(filename, properties, calctype='opt'):
                 # convert strings to floats
                 rough = [[float(i) for i in line.split()] for line in rough]
                 # find blank sublists
-                empty_indices = [i for i,x in enumerate(rough) if not x]
+                empty_indices = [i for i, x in enumerate(rough) if not x]
                 # blank sublists are organized in groups of three lines:
                 # (1) blank (2) column labels (3) blank. empty_ind has (1) and (3)
                 # delete in reverse to maintain index consistency
-                num_chunks = 1 # how many chunks psi4 printed the Hessian into
-                for i in reversed(range(0,len(empty_indices),2)):
-                    del rough[empty_indices[i+1]] # (3)
-                    del rough[empty_indices[i]+1] # (2)
-                    del rough[empty_indices[i]]   # (1)
+                num_chunks = 1  # how many chunks psi4 printed the Hessian into
+                for i in reversed(range(0, len(empty_indices), 2)):
+                    del rough[empty_indices[i + 1]]  # (3)
+                    del rough[empty_indices[i] + 1]  # (2)
+                    del rough[empty_indices[i]]  # (1)
                     num_chunks += 1
                 # now remove first element of every list of row label
-                _ = [ l.pop(0) for l in rough ]
+                _ = [l.pop(0) for l in rough]
                 # get dimension of Hessian (3N for 3Nx3N matrix)
                 three_n = int(len(rough) / num_chunks)
                 # concatenate the chunks
-                hess = np.array([]).reshape(three_n,0)
+                hess = np.array([]).reshape(three_n, 0)
                 for i in range(num_chunks):
-                    beg_ind = i*three_n
-                    end_ind = (i+1)*three_n
+                    beg_ind = i * three_n
+                    end_ind = (i + 1) * three_n
                     chunk_i = np.array(rough[beg_ind:end_ind])
-                    hess = np.concatenate((hess,chunk_i), axis=1)
+                    hess = np.concatenate((hess, chunk_i), axis=1)
                 # check that final matrix is symmetric
                 if not np.allclose(hess, hess.T, atol=0):
-                    print("ERROR: Hessian read from Psi4 output file not symmetric")
+                    print("ERROR: Quanformer did not read symmetric Hessian "
+                          "from Psi4 output file")
                     properties['hessian'] = "Hessian not found in output file"
                     return properties
                 properties['hessian'] = hess
@@ -288,9 +289,9 @@ def process_psi_out(filename, properties, calctype='opt'):
             properties['initEnergy'] = float(line.split()[1])
         if "Final energy" in line:
             properties['finalEnergy'] = float(line.split()[3])
-            line = next(it) # "Final (previous) structure:"
-            line = next(it) # "Cartesian Geometry (in Angstrom)"
-            line = next(it) # Start of optimized geometry
+            line = next(it)  # "Final (previous) structure:"
+            line = next(it)  # "Cartesian Geometry (in Angstrom)"
+            line = next(it)  # Start of optimized geometry
             while "Saving final" not in line:
                 rough.append(line.split()[1:4])
                 line = next(it)
@@ -310,8 +311,12 @@ def process_psi_out(filename, properties, calctype='opt'):
 
 ### ------------------- Script -------------------
 
-def get_psi_results(origsdf, finsdf, calctype='opt', psiout="output.dat", timeout="timer.dat"):
 
+def get_psi_results(origsdf,
+                    finsdf,
+                    calctype='opt',
+                    psiout="output.dat",
+                    timeout="timer.dat"):
     """
     Read in OEMols (and each of their conformers) in origsdf file,
         get results from Psi4 calculations in the same directory as origsdf,
@@ -342,18 +347,18 @@ def get_psi_results(origsdf, finsdf, calctype='opt', psiout="output.dat", timeou
     wdir = os.getcwd()
 
     # check that specified calctype is valid
-    if calctype not in {'opt','spe','hess'}:
+    if calctype not in {'opt', 'spe', 'hess'}:
         sys.exit("Specify a valid calculation type.")
 
     # read in sdf file and distinguish each molecule's conformers
     ifs = oechem.oemolistream()
-    ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
+    ifs.SetConfTest(oechem.OEAbsoluteConfTest())
     if not ifs.open(origsdf):
         sys.exit("Unable to open %s for reading" % origsdf)
     molecules = ifs.GetOEMols()
 
     # open outstream file
-    writeout = os.path.join(wdir,finsdf)
+    writeout = os.path.join(wdir, finsdf)
     write_ofs = oechem.oemolostream()
     if os.path.exists(writeout):
         print("File already exists: %s. Skip getting results.\n" % (finsdf))
@@ -371,21 +376,27 @@ def get_psi_results(origsdf, finsdf, calctype='opt', psiout="output.dat", timeou
         if calctype == 'hess':
             hdict[mol.GetTitle()] = {}
 
-        for j, conf in enumerate( mol.GetConfs()):
+        for j, conf in enumerate(mol.GetConfs()):
 
             props = initiate_dict()
 
             # set file locations
-            timef = os.path.join(hdir,"%s/%s/%s" % (mol.GetTitle(),j+1,timeout))
-            outf = os.path.join(hdir,"%s/%s/%s" % (mol.GetTitle(),j+1,psiout))
+            timef = os.path.join(hdir,
+                                 "%s/%s/%s" % (mol.GetTitle(), j + 1, timeout))
+            outf = os.path.join(hdir,
+                                "%s/%s/%s" % (mol.GetTitle(), j + 1, psiout))
 
             # process output and get dictionary results
             props = get_conf_data(props, calctype, timef, outf)
 
             # if output was missing or are missing calculation details
             # move on to next conformer
-            if props['missing'] or (calctype=='opt' and not all(key in props for key in ['numSteps','finalEnergy','coords'])):
-                print("ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n".format(outf))
+            if props['missing'] or (calctype == 'opt' and not all(
+                    key in props
+                    for key in ['numSteps', 'finalEnergy', 'coords'])):
+                print(
+                    "ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n"
+                    .format(outf))
                 continue
 
             # add data to oemol
@@ -393,7 +404,7 @@ def get_psi_results(origsdf, finsdf, calctype='opt', psiout="output.dat", timeou
 
             # if hessian, append to dict bc does not go to SD tag
             if calctype == 'hess':
-                hdict[mol.GetTitle()][j+1] = props['hessian']
+                hdict[mol.GetTitle()][j + 1] = props['hessian']
 
             # check mol title
             conf = check_title(conf, origsdf)
@@ -403,8 +414,9 @@ def get_psi_results(origsdf, finsdf, calctype='opt', psiout="output.dat", timeou
 
     # if hessian, write hdict out to separate file
     if calctype == 'hess':
-        hfile = os.path.join(wdir,os.path.splitext(finsdf)[0]+'.hess.pickle')
-        pickle.dump(hdict, open(hfile,'wb'))
+        hfile = os.path.join(wdir,
+                             os.path.splitext(finsdf)[0] + '.hess.pickle')
+        pickle.dump(hdict, open(hfile, 'wb'))
 
     # close file streams
     ifs.close()
@@ -415,8 +427,11 @@ def get_psi_results(origsdf, finsdf, calctype='opt', psiout="output.dat", timeou
         return None, None
 
 
-def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="timer.dat"):
-
+def getPsiOne(infile,
+              outfile,
+              calctype='opt',
+              psiout="output.dat",
+              timeout="timer.dat"):
     """
     Write out Psi4 optimized geometry details into a new OEMol.
 
@@ -444,7 +459,7 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
 
     """
     # check that specified calctype is valid
-    if calctype not in {'opt','spe','hess'}:
+    if calctype not in {'opt', 'spe', 'hess'}:
         sys.exit("Specify a valid calculation type.")
 
     # Read in SINGLE MOLECULE .sdf file
@@ -452,7 +467,7 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
     mol = oechem.OEGraphMol()
     if not ifs.open(infile):
         sys.exit("Unable to open %s for reading" % origsdf)
-    oechem.OEReadMolecule(ifs,mol)
+    oechem.OEReadMolecule(ifs, mol)
 
     # Open outstream file.
     write_ofs = oechem.oemolostream()
@@ -469,16 +484,19 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
 
     # if output was missing or are missing calculation details
     # move on to next conformer
-    if props['missing'] or (calctype=='opt' and not all(key in props for key in ['numSteps','finalEnergy','coords'])):
-        sys.exit("ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n".format(psiout))
+    if props['missing'] or (calctype == 'opt' and not all(
+            key in props for key in ['numSteps', 'finalEnergy', 'coords'])):
+        sys.exit(
+            "ERROR reading {}\nEither Psi4 job was incomplete OR wrong calctype specified\n"
+            .format(psiout))
 
     # add data to oemol
     mol = set_conf_data(mol, props, calctype)
 
     # if hessian, write hdict out to separate file
     if calctype == 'hess':
-        hfile = os.path.join(os.path.splitext(outfile)[0]+'.hess.pickle')
-        pickle.dump(props['hessian'], open(hfile,'wb'))
+        hfile = os.path.join(os.path.splitext(outfile)[0] + '.hess.pickle')
+        pickle.dump(props['hessian'], open(hfile, 'wb'))
 
     # check mol title
     mol = check_title(mol, infile)
@@ -491,5 +509,5 @@ def getPsiOne(infile, outfile, calctype='opt', psiout="output.dat", timeout="tim
 
 
 if __name__ == "__main__":
-    get_psi_results(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
-
+    get_psi_results(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
+                    sys.argv[5])
