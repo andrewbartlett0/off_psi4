@@ -41,10 +41,12 @@ def test_get_psi_time():
 def test_process_psi_out_spe():
     spe_dict = process_psi_out(os.path.join(mydir,'data_tests','output_spe.dat'), {}, 'spe')
     # {'basis': 'def2-tzvp', 'method': 'b3lyp-d3mbj', 'finalEnergy': -466.37497616456733}
-    # actual energy: -466.3749761645673289
-    assert spe_dict['basis'] == 'def2-tzvp'
-    assert spe_dict['method'] == 'b3lyp-d3mbj'
-    assert spe_dict['finalEnergy'] == pytest.approx(-466.37497616456733, 0.000000000001)
+    # actual energy: -463.3016772141738784
+    # scs final: -465.1942227292489633
+    assert spe_dict['basis'] == 'cc-pVTZ'
+    assert spe_dict['method'] == 'mp2'
+    assert spe_dict['finalEnergy'] == pytest.approx(-463.3016772141738784, 0.000000000001)
+    assert spe_dict['finalSCSEnergy'] == pytest.approx(-465.1942227292489633, 0.000000000001)
 
 def test_process_psi_out_hess():
     hess_dict = process_psi_out(os.path.join(mydir,'data_tests','output_hess.dat'), {}, 'hess')
