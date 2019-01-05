@@ -39,17 +39,17 @@ def get_sd_list(mol, datum, Package='Psi4', Method=None, Basisset=None):
         taglabel = "QM %s Final Opt. Energy (Har) %s/%s" % (Package, Method,
                                                             Basisset)
     if datum == "QM opt energy scs":
-        taglabel = "QM %s Final Opt. Energy (Har) SCS-%s/%s" % (Package, Method,
-                                                            Basisset)
+        taglabel = "QM %s Final Opt. Energy (Har) SCS-%s/%s" % (
+            Package, Method, Basisset)
     if datum == "QM opt energy initial":
         taglabel = "QM %s Initial Opt. Energy (Har) %s/%s" % (Package, Method,
                                                               Basisset)
     if datum == "QM spe":
         taglabel = "QM %s Single Pt. Energy (Har) %s/%s" % (Package, Method,
-                                                              Basisset)
-    if datum == "QM spe scs":
-        taglabel = "QM %s Single Pt. Energy (Har) SCS-%s/%s" % (Package, Method,
                                                             Basisset)
+    if datum == "QM spe scs":
+        taglabel = "QM %s Single Pt. Energy (Har) SCS-%s/%s" % (
+            Package, Method, Basisset)
     if datum == "MM opt energy":
         taglabel = "MM Szybki Newton Energy"
 
@@ -143,7 +143,7 @@ def set_sd_tags(Conf, Props, calctype):
     # Set new SD tag for final SCS-MP2 energy if method is MP2
     if method.lower() == 'mp2':
         taglabel = "QM {} Final SCS-{} Energy (Har) {}".format(
-                                    pkg, cdict[calctype], full_method)
+            pkg, cdict[calctype], full_method)
         oechem.OEAddSDData(Conf, taglabel, str(Props['finalSCSEnergy']))
 
     # Add COSMO energy with outlying charge correction. Turbomole only!
@@ -188,7 +188,6 @@ def set_sd_tags(Conf, Props, calctype):
     taglabel = "QM {} Initial {} Energy (Har) {}".format(
         pkg, cdict[calctype], full_method)
     oechem.OEAddSDData(Conf, taglabel, str(Props['initEnergy']))
-
 
 
 def delete_tag(mol, tag):
