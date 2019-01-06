@@ -11,7 +11,7 @@ Last updated: Dec 19 2018
 | `GBI`                          | `get_psi_results.py` | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/03_examples/set1/GBI`                     |
 | `gbi-200.sdf`,`gbi_single.sdf` | `get_psi_results.py` | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/03_examples/set1/examples2-200.sdf`       |
 | `gbi_single.sdf`               | `initialize_confs.py`| see above (same file)                                                                        |
-| `gbi.sdf`                      | `filterConfs.py`     | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/03_examples/set1/examples2.sdf`           |
+| `gbi.sdf`                      | `filter_confs.py`    | `/beegfs/DATA/mobley/limvt/openforcefield/pipeline/03_examples/set1/examples2.sdf`           |
 | `methane.smi`                  | `initialize_confs.py`| self-generated                                                                               |
 | `methane_c2p.sdf`              | `confs_to_psi.py`    | `test_initialize_confs()`                                                                           |
 | `methane_title-1.0.sdf`        | `get_psi_results.py` | edited copy of `methane_c2p.sdf`                                                             |

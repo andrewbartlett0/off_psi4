@@ -8,7 +8,7 @@
 ## in order to roughly filter out duplicate minima and keep unique ones.
 ## Filtered conformers for all molecules are written out in SDF file.
 
-## Import and call filterConfs.filterConfs(rmsdfile, tag, rmsdout)
+## Import and call filter_confs.filter_confs(rmsdfile, tag, rmsdout)
 
 import re
 import os, sys, glob
@@ -17,7 +17,7 @@ import openeye.oechem as oechem
 ### ------------------- Functions -------------------
 
 
-def IdentifyMinima(mol, tag, ThresholdE, ThresholdRMSD):
+def identify_minima(mol, tag, ThresholdE, ThresholdRMSD):
     """
     For a molecule's set of conformers computed with some level of theory,
         whittle down unique conformers based on energy and RMSD.
@@ -127,7 +127,7 @@ def IdentifyMinima(mol, tag, ThresholdE, ThresholdRMSD):
 ### ------------------- Script -------------------
 
 
-def filterConfs(rmsdfile, tag, rmsdout):
+def filter_confs(rmsdfile, tag, rmsdout):
     """
     Read in OEMols (and each of their conformers) in 'rmsdfile'.
     For each molecule:
@@ -174,7 +174,7 @@ def filterConfs(rmsdfile, tag, rmsdout):
 
     # Identify minima and write output file.
     for mol in rmsd_molecules:
-        if IdentifyMinima(mol, tag, thresE, thresRMSD):
+        if identify_minima(mol, tag, thresE, thresRMSD):
             numConfsF.write("%s\t%s\n" % (mol.GetTitle(), mol.NumConfs()))
             oechem.OEWriteConstMolecule(rmsd_ofs, mol)
         else:

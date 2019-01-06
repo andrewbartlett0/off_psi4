@@ -4,7 +4,7 @@ import os, sys
 import argparse
 
 import initialize_confs
-import filterConfs
+import filter_confs
 import confs_to_psi
 import get_psi_results
 
@@ -46,7 +46,7 @@ def main(**kwargs):
             initialize_confs.initialize_confs(checked_infile)
             pre_filt = os.path.join(curr_dir,prefix+'.sdf')
             post_filt = os.path.join(curr_dir,"{}-{}.sdf".format(prefix, suffix))
-            filterConfs.filterConfs(pre_filt, "MM Szybki SD Energy", post_filt)
+            filter_confs.filter_confs(pre_filt, "MM Szybki SD Energy", post_filt)
         # if input is SDF file, don't generate confs/filter but skip to generating QM inputs
         else:
             post_filt = checked_infile
@@ -99,7 +99,7 @@ def main(**kwargs):
 
             tag = "QM Psi4 Final Opt. Energy (Har) %s/%s" % (method, basisset)
             print("Filtering Psi4 results for %s ..." % (out_results))
-            filterConfs.filterConfs(out_results, tag, out_filter)
+            filter_confs.filter_confs(out_results, tag, out_filter)
 
 
 if __name__ == "__main__":

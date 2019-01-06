@@ -19,7 +19,7 @@ Analysis scripts are provided for comparing conformer energies from different QM
  * Consider questions such as, "What is the spread of the conformer energies for molecule _x_?", "How does method _a_ compare to method _b_ for this molecule?", etc.
 
 In concept, this example would look like:   
-`initialize_confs.py` &rarr; `confs_to_psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
+`initialize_confs.py` &rarr; `confs_to_psi.py` &rarr; `filter_confs.py` &rarr; \[QM jobs\] &rarr; `filter_confs.py` &rarr; analysis
 
 In practice, the `executor.py` code provides the interface for the various stages and components. 
 That being said, each component was written to be able to run independently of the others so variations of this pipeline can be conducted. 
@@ -47,7 +47,7 @@ Pipeline components and description:
 | `confs2turb.py`      | setup         | generate Turbomole input files for each conformer/molecule                 |
 | `diffSpeOpt.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
 | `executor.py`        | N/A           | main interface connecting "setup" and "results" scripts for Psi4           |
-| `filterConfs.py`     | setup/results | remover conformers of molecules that may be same structure                 |
+| `filter_confs.py`    | setup/results | remover conformers of molecules that may be same structure                 |
 | `get_psi_results.py` | results       | get job results from Psi4                                                  |
 | `getTurbResults.py`  | results       | get job results from Turbomole                                             |
 | `matchMinima.py`     | analysis      | match conformers from sets of different optimizations                      |
