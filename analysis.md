@@ -78,7 +78,7 @@ This section is closely related to the one above of comparing sets of geometry o
 ## Comparing energies before and after a set of geometry optimizations
 
 **Prerequisites**
- 1. `diffSpeOpt.py` -- [TODO write instructions]
+ 1. `opt_vs_spe.py` -- [TODO write instructions]
 
 **Instructions**
  * TODO

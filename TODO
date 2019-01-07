@@ -11,7 +11,7 @@ TODO all scripts
 TODO for specific scripts
  * avgTimeEne: check that this script still works
  * stitchSpe: line plots for each molecule, stitch without reference
- * diffSpeOpt: check that works with just one input file, WRITE DESCRIPTION
+ * opt_vs_spe: check that works with just one input file, WRITE DESCRIPTION
 
 TODO longer term
  * getTurbResults: get SPE results

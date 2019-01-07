@@ -45,7 +45,7 @@ Pipeline components and description:
 | `avgTimeEne.py`      | analysis      | analyze calculation stats and relative energies for a single batch of mols |
 | `confs_to_psi.py`    | setup         | generate Psi4 input files for each conformer/molecule                      |
 | `confs2turb.py`      | setup         | generate Turbomole input files for each conformer/molecule                 |
-| `diffSpeOpt.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
+| `opt_vs_spe.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
 | `executor.py`        | N/A           | main interface connecting "setup" and "results" scripts for Psi4           |
 | `filter_confs.py`    | setup/results | remover conformers of molecules that may be same structure                 |
 | `get_psi_results.py` | results       | get job results from Psi4                                                  |
