@@ -2,8 +2,8 @@
 """
 match_plot.py
 
-Purpose:    Generate heat plots, scatter plots, and 3D plots from output of matchMinima.py.
-            This extends analysis capabilities of matchMinima.py, which
+Purpose:    Generate heat plots, scatter plots, and 3D plots from output of match_minima.py.
+            This extends analysis capabilities of match_minima.py, which
             generates simple bar plots (for average compute times) and
             line plots (for relative conformer energies).
 
@@ -251,9 +251,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--infile", required=True,
-        help=("Input text file with info on dat files (from matchMinima.py) "
+        help=("Input text file with info on dat files (from match_minima.py) "
               "and associated levels of theory. This file is analogous to the "
-              "input file from matchMinima.py except that the files should "
+              "input file from match_minima.py except that the files should "
               "point to the relative energies .dat files instead of to the "
               "molecule SDF files. Also don't need to have True/False for "
               "SPE/OPT. *** The number of entries in this input file MUST MATCH "
@@ -279,8 +279,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--onescatter", action="store_true", default=False,
         help=("Generate single scatter plot from one of the .dat files of "
-              "matchMinima.py. This may be desired when a mol of some method "
-              "failed to optimize. In that case, matchMinima will have a column "
+              "match_minima.py. This may be desired when a mol of some method "
+              "failed to optimize. In that case, match_minima will have a column "
               "of nan's for the RMS errors of that method. Since that method "
               "does not have a .dat file for that mol, heat plots will not "
               "be aligned, and scatter plots will not be accurate unless that "

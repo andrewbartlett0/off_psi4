@@ -3,7 +3,7 @@
 
 Version: Oct 5 2018
 
-This is an example application of the `matchTwoMols.py` script in the `tools` subdirectory.
+This is an example application of the `align_two_mols.py` script in the `tools` subdirectory.
 We have a force field structure (`DrugBank_d3670.mol2`) and want to compare that to the QM structure (`DrugBank_d3670-220.sdf`).
 However, the atom indices do not match. For example C3 in the mol2 file goes with C10 in sdf file.
 
@@ -13,7 +13,7 @@ Contents:
 * `output.mol2` - Adjusted QM coordinates with atom indices renumbered in accordance with mol2
 
 Command:
-* `python matchTwoMols.py DrugBank_d3670.mol2 DrugBank_d3670-220.sdf output.mol2`
+* `python align_two_mols.py DrugBank_d3670.mol2 DrugBank_d3670-220.sdf output.mol2`
 
 **Caveat**: As noted in the header of the script, this is not a perfect alignment.
 In this case, the heavy atoms are mostly correct but C8 and C10 should probably be switched.

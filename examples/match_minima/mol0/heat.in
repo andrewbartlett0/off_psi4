@@ -1,4 +1,4 @@
-# input for heat map plot for matchMinima.py
+# input for heat map plot for match_minima.py
 B3LYP-D3MBJ/def2-TZVP,	../refA/relene_AlkEthOH_c1178.dat
 MP2/def2-TZVP,			../refB/relene_AlkEthOH_c1178.dat
 MP2/aug-cc-pVTZ,		../refC/relene_AlkEthOH_c1178.dat

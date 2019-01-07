@@ -50,8 +50,8 @@ Pipeline components and description:
 | `filter_confs.py`    | setup/results | remover conformers of molecules that may be same structure                 |
 | `get_psi_results.py` | results       | get job results from Psi4                                                  |
 | `getTurbResults.py`  | results       | get job results from Turbomole                                             |
-| `matchMinima.py`     | analysis      | match conformers from sets of different optimizations                      |
-| `match_plot.py`      | analysis      | additional plots that can be used from `matchMinima.py` results            |
+| `match_minima.py`    | analysis      | match conformers from sets of different optimizations                      |
+| `match_plot.py`      | analysis      | additional plots that can be used from `match_minima.py` results            |
 | `plotTimes.py`       | analysis      | plot calculation time averaged over the conformers for each molecule       |
 | `proc_tags.py`       | results       | store QM energies & conformer details as data tags in SDF molecule files   |
 | `quan2modsem.py`     | analysis      | interface with modified Seminario Python code                              |

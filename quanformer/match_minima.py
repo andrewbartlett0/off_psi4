@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+"""
+match_minima.py
 
-# By: Victoria T. Lim
+By:     Victoria T. Lim
+""""
 
 import os
 import sys
@@ -18,7 +21,7 @@ import proc_tags as pt           # for get_sd_list
 
 
 
-def compare2Mols(rmol, qmol):
+def compare_two_mols(rmol, qmol):
     """
     For two identical molecules, with varying conformers,
         make an M by N comparison to match the M minima of
@@ -65,7 +68,7 @@ def compare2Mols(rmol, qmol):
     return molIndices
 
 
-def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
+def plot_mol_minima(molName, minimaE, xticklabels, selected=None,stag=False):
     '''
 
     selected: list of indexes for methods to be plotted. 0-based index.
@@ -150,7 +153,7 @@ def plotMolMinima(molName, minimaE, xticklabels, selected=None,stag=False):
 #    plt.show()
     plt.clf()
 
-def plotAvgTimes(molName, avgTimes, sdTimes, xticklabels):
+def plot_avg_times(molName, avgTimes, sdTimes, xticklabels):
     plttitle="Conformer-Averaged Wall Times\nfor %s" % (molName)
     plttitle+="\nGeometry Optimization in Psi4"
     ylabel="time (s)"
@@ -172,7 +175,7 @@ def plotAvgTimes(molName, avgTimes, sdTimes, xticklabels):
 
 
 
-def matchMinima(sdfList, thryList, *tags):
+def match_minima(sdfList, thryList, *tags):
     """
     For list of SDF files, match the conformer minima to those of the reference
        SDF file. Ex. Conf G of reference file matches with conf R of file3.
@@ -193,7 +196,7 @@ def matchMinima(sdfList, thryList, *tags):
         Second-level keys are from tags variable.
 
     """
-    def loadFile(fname):
+    def load_file(fname):
         ifs = oechem.oemolistream()
         ifs.SetConfTest( oechem.OEAbsoluteConfTest() )
         if not ifs.open(fname):
@@ -211,10 +214,10 @@ def matchMinima(sdfList, thryList, *tags):
         qbasis = qthry.split('/')[1].strip()
 
         print("\n\nOpening reference file %s" % sdfRef)
-        molsRef = loadFile(sdfRef)
+        molsRef = load_file(sdfRef)
 
         print("Opening query file %s, and using [ %s ] energies" % (sdfQuery, qthry))
-        molsQuery = loadFile(sdfQuery)
+        molsQuery = load_file(sdfQuery)
 
         # loop over each molecule in reference file and in query file
         for rmol in molsRef:
@@ -237,7 +240,7 @@ def matchMinima(sdfList, thryList, *tags):
                     moldict[name][t].append([nan]*rmol.NumConfs())
                 print("No %s molecule found in %s" % (rmol.GetTitle(), sdfQuery))
                 # reset molsQuery generator
-                molsQuery = loadFile(sdfQuery)
+                molsQuery = load_file(sdfQuery)
                 continue
 
             # get data from tags
@@ -254,15 +257,15 @@ def matchMinima(sdfList, thryList, *tags):
                 continue
 
             # get indices of qmol conformers that match rmol conformers
-            molIndices = compare2Mols(rmol, qmol)
+            molIndices = compare_two_mols(rmol, qmol)
             moldict[name]['indices'].append(molIndices)
 
     return moldict
 
 
-def calcRMSError(trimE, zeroes):
+def calc_rms_error(trimE, zeroes):
     """
-    From relative energies with respect to some conformer from calcRelEne,
+    From relative energies with respect to some conformer from calc_rel_ene,
        calculate the root mean square error with respect to the relative
        conformer energies of the first (reference) file.
 
@@ -294,7 +297,7 @@ def calcRMSError(trimE, zeroes):
     return relByFile
 
 
-def getRatioTimes(allMolTimes, zeroes):
+def get_ratio_times(allMolTimes, zeroes):
     """
     From all molecule times, calculate relative time ratios for matched minima.
        If a conf has nan or is not matched, that time is not considered.
@@ -331,13 +334,13 @@ def getRatioTimes(allMolTimes, zeroes):
         sdByFile.append(molStds)
     return relByFile, sdByFile
 
-def calcRelEne(minimaE):
+def calc_rel_ene(minimaE):
     """
     Calculate the relative energy. For each file, take conformer energy
        relative to minimum X. The conformer minimum is chosen from
        the first conformer for which all files have an energy value.
        Note that relative energies are taken with a file's conformers,
-       not subtracting one file from another (see calcRMSError).
+       not subtracting one file from another (see calc_rms_error).
 
     Parameters
     ----------
@@ -388,7 +391,7 @@ def calcRelEne(minimaE):
 
     return trimE, zeroes
 
-def writeRelEne(molName, rmse, relEnes, zero, thryList, prefix='relene'):
+def write_rel_ene(molName, rmse, relEnes, zero, thryList, prefix='relene'):
     """
 
     """
@@ -424,7 +427,7 @@ def writeRelEne(molName, rmse, relEnes, zero, thryList, prefix='relene'):
         compF.write(thisline)
     compF.close()
 
-def extractMatches(moldict, *tags):
+def extract_matches(moldict, *tags):
     """
     This function checks if minima is matched, using indices lists inside dict.
         If there is no match, the value (energy, time, etc) listed in the dict
@@ -541,22 +544,22 @@ if __name__ == "__main__":
 
     # run the workhorse, unless reading in from pickle file
     if not opt['readpickle']:
-        moldict = matchMinima(sdfList, thryList, 'QM opt energy', 'opt runtime', 'opt step')
+        moldict = match_minima(sdfList, thryList, 'QM opt energy', 'opt runtime', 'opt step')
         pickle.dump(moldict, open('match.pickle', 'wb'))
     else:
         moldict = pickle.load(open('match.pickle', 'rb'))
 
     # process dictionary to match the data values by RMSD-matched conformers
     numMols = len(moldict)
-    #moldict = extractMatches(moldict, 'QM opt energy', 'opt runtime', 'opt step')
-    moldict = extractMatches(moldict, 'QM opt energy', 'opt runtime')
+    #moldict = extract_matches(moldict, 'QM opt energy', 'opt runtime', 'opt step')
+    moldict = extract_matches(moldict, 'QM opt energy', 'opt runtime')
     minimaE = []
     for m in moldict:
         minimaE.append(moldict[m]['QM opt energy_matched'])
 
     # with matched energies, calculate relative values and RMS error
-    trimE, zeroes = calcRelEne(minimaE)
-    rmselist = calcRMSError(trimE, zeroes)
+    trimE, zeroes = calc_rel_ene(minimaE)
+    rmselist = calc_rms_error(trimE, zeroes)
 
     # =========================================================================
 
@@ -564,17 +567,17 @@ if __name__ == "__main__":
     if opt['verbose']:
         for i, mn in enumerate(molNames):
             try:
-                writeRelEne(mn, rmselist[i],trimE[i],zeroes[i],thryList)
+                write_rel_ene(mn, rmselist[i],trimE[i],zeroes[i],thryList)
             except IndexError:
                 zeroes.append(nan)
-                writeRelEne(mn, [nan]*len(thryList),elists[i],zeroes[i],thryList)
+                write_rel_ene(mn, [nan]*len(thryList),elists[i],zeroes[i],thryList)
 
 
     if opt['tplot']:
         timesByMol = []
         for m in moldict:
             timesByMol.append(moldict[m]['opt runtime_matched'])
-        relTimes, sdTimes = getRatioTimes(timesByMol, zeroes)
+        relTimes, sdTimes = get_ratio_times(timesByMol, zeroes)
 
         allFileTimes = [[] for i in range(numMols)]
         allFileStds = [[] for i in range(numMols)]
@@ -593,38 +596,7 @@ if __name__ == "__main__":
             fileTimes_i = [element for i, element in enumerate(fileTimes) if i not in to_exclude]
             stdevs_i = [element for i, element in enumerate(stdevs) if i not in to_exclude]
             thryList_i = [element for i, element in enumerate(thryList) if i not in to_exclude]
-            plotAvgTimes(name, fileTimes_i, stdevs_i, thryList_i)
-
-#        if opt['combineAll']: pass # TODO
-            # reognize allFileTimes, allFileStds to group by opt-type, not mol
-            #plotAllBars()
-# def plotAllBars( thryList):
-#
-#     # horizonal range
-#     x = np.arange(len(titles))
-#     width = 1./(len(x))
-#     # loop over all the SDF files
-#     coeff = 0
-# #    colors = mpl.cm.rainbow(np.linspace(0, 1, len(x)))
-#     for y, s in zip(timeplot, stdplot):
-#         plt.bar(x+coeff*width, y, yerr=s, alpha=1-0.5*coeff) # alpha:opacity
-#         print(1-0.5*coeff)
-#         coeff += 1
-#
-#     ### Label figure. Label xticks before plot for better spacing.
-# #    plttitle="Average Wall-Clock Times for %s" % (basename)
-# #    plttitle+="\nGeometry Optimization in Psi4"
-# #    plt.title(plttitle,fontsize=20)
-# #    plt.ylabel("time (s)",fontsize=18)
-# #    plt.xticks(x,xticklabels,fontsize=14,rotation=30, ha='left')
-# #    plt.yticks(fontsize=14)
-#     plt.legend(thryList)
-#
-#     plt.savefig('rename_me.png',bbox_inches='tight')
-#     plt.show()
-
-
-
+            plot_avg_times(name, fileTimes_i, stdevs_i, thryList_i)
 
         if opt['verbose']: # append time to relative energies file
             for i, name in enumerate(molNames):
@@ -648,6 +620,6 @@ if __name__ == "__main__":
     if opt['eplot']:
         for i, m in enumerate(moldict):
 #            if m != 'AlkEthOH_c1178': continue
-            plotMolMinima(m, trimE[i], thryList)
-#            plotMolMinima(m, trimE[i], thryList, selected=[0]) # zero based index
+            plot_mol_minima(m, trimE[i], thryList)
+#            plot_mol_minima(m, trimE[i], thryList, selected=[0]) # zero based index
 
