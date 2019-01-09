@@ -8,7 +8,7 @@ import os
 import openeye.oechem as oechem
 import numpy as np
 import argparse
-import procTags as pt
+import proc_tags as pt
 
 ### ------------------- Functions -------------------
 
@@ -27,7 +27,7 @@ def timeAvg(sdfRef, method, basis, steps=False):
     steps  | Bool | average number of steps instead of runtime seconds
 
     """
-    
+
     # Open reference file.
     print("Opening SDF file %s" % sdfRef)
     ifsRef = oechem.oemolistream()
@@ -44,9 +44,9 @@ def timeAvg(sdfRef, method, basis, steps=False):
     # Grab all the times.
     for rmol in molsRef:
         if not steps:
-            tmol = np.array(map(float, pt.GetSDList(rmol, "runtime", method, basis)))
+            tmol = np.array(map(float, pt.get_sd_list(rmol, "runtime", method, basis)))
         else:
-            tmol = np.array(map(float, pt.GetSDList(rmol, "step", method, basis)))
+            tmol = np.array(map(float, pt.get_sd_list(rmol, "step", method, basis)))
 
         # exclude conformers for which job did not finish (nan)
         nanIndices = np.argwhere(np.isnan(tmol))
@@ -70,10 +70,10 @@ def calcRelEne(sdfRef, method, basis, eFromOpt=False,outfn='relene.dat'):
     m1/b1| str | method/basis from sdf1. If m2/b2 is None, use same from m1/b1.
     verbose | bool | print information on each conformer
 
-    For tags, see options in GetSDList function.
+    For tags, see options in get_sd_list function.
 
     """
-    
+
     # Open file.
     print("Opening SDF file %s" % sdfRef)
     ifs1 = oechem.oemolistream()
@@ -88,17 +88,17 @@ def calcRelEne(sdfRef, method, basis, eFromOpt=False,outfn='relene.dat'):
 
     # Write description in output file.
     compF = open(os.path.join(os.path.dirname(sdfRef),outfn), 'w')
-    compF.write("# Relative energies (kcal/mol) for file:\n# %s\n" % sdfRef) 
+    compF.write("# Relative energies (kcal/mol) for file:\n# %s\n" % sdfRef)
     compF.write("# using %s energies from %s/%s\n" % (tagword, method, basis))
 
     for imol in mols1:
 
         # Get absolute energies from the SD tags
-        iabs = np.array(map(float, pt.GetSDList(imol, tagword, method, basis)))
+        iabs = np.array(map(float, pt.get_sd_list(imol, tagword, method, basis)))
 
         # Get omega conformer number of first, for reference info
         # whole list can be used for matching purposes
-        origids = pt.GetSDList(imol, "original index")
+        origids = pt.get_sd_list(imol, "original index")
         refconfid = origids[0]
 
         # For each, take relative energy to first then convert

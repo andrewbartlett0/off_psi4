@@ -3,7 +3,7 @@
 import os
 import openeye.oechem as oechem
 import numpy as np
-import procTags as pt
+import proc_tags as pt
 import collections
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -47,7 +47,7 @@ def timeAvg(titles, sdfRef, method, basis, tag):
 #    timelist = []
 #    stdlist = []
     for rmol in molsRef:
-        tmol = np.fromiter(pt.GetSDList(rmol, tag, 'Psi4',method, basis), dtype=np.float64)
+        tmol = np.fromiter(pt.get_sd_list(rmol, tag, 'Psi4',method, basis), dtype=np.float64)
 
         # exclude conformers for which job did not finish (nan)
         nanIndices = np.argwhere(np.isnan(tmol))

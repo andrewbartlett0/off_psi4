@@ -19,7 +19,7 @@ Analysis scripts are provided for comparing conformer energies from different QM
  * Consider questions such as, "What is the spread of the conformer energies for molecule _x_?", "How does method _a_ compare to method _b_ for this molecule?", etc.
 
 In concept, this example would look like:   
-`smi2confs.py` &rarr; `confs_to_psi.py` &rarr; `filterConfs.py` &rarr; \[QM jobs\] &rarr; `filterConfs.py` &rarr; analysis
+`initialize_confs.py` &rarr; `confs_to_psi.py` &rarr; `filter_confs.py` &rarr; \[QM jobs\] &rarr; `filter_confs.py` &rarr; analysis
 
 In practice, the `executor.py` code provides the interface for the various stages and components. 
 That being said, each component was written to be able to run independently of the others so variations of this pipeline can be conducted. 
@@ -45,17 +45,17 @@ Pipeline components and description:
 | `avgTimeEne.py`      | analysis      | analyze calculation stats and relative energies for a single batch of mols |
 | `confs_to_psi.py`    | setup         | generate Psi4 input files for each conformer/molecule                      |
 | `confs2turb.py`      | setup         | generate Turbomole input files for each conformer/molecule                 |
-| `diffSpeOpt.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
+| `opt_vs_spe.py`      | analysis      | compare how diff OPT energy is from pre-OPT single point energy            |
 | `executor.py`        | N/A           | main interface connecting "setup" and "results" scripts for Psi4           |
-| `filterConfs.py`     | setup/results | remover conformers of molecules that may be same structure                 |
+| `filter_confs.py`    | setup/results | remover conformers of molecules that may be same structure                 |
 | `get_psi_results.py` | results       | get job results from Psi4                                                  |
 | `getTurbResults.py`  | results       | get job results from Turbomole                                             |
-| `matchMinima.py`     | analysis      | match conformers from sets of different optimizations                      |
-| `match_plot.py`      | analysis      | additional plots that can be used from `matchMinima.py` results            |
+| `match_minima.py`    | analysis      | match conformers from sets of different optimizations                      |
+| `match_plot.py`      | analysis      | additional plots that can be used from `match_minima.py` results            |
 | `plotTimes.py`       | analysis      | plot calculation time averaged over the conformers for each molecule       |
-| `procTags.py`        | results       | store QM energies & conformer details as data tags in SDF molecule files   |
+| `proc_tags.py`       | results       | store QM energies & conformer details as data tags in SDF molecule files   |
 | `quan2modsem.py`     | analysis      | interface with modified Seminario Python code                              |
-| `smi2confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
+| `initialize_confs.py`       | setup         | generate molecular structures and conformers for input SMILES string       |
 | `stitchSpe.py`       | analysis      | calculate relative conformer energies from sets of different SPEs          |
 
 There are other scripts in this repository that are not integral to the pipeline. These are found in the `tools` directory. See the README file there.
@@ -192,8 +192,8 @@ If you try a non-SDF file, do check that the *molecule name* and the *total char
 
 This pipeline uses some preset parameters, which can be modified in the function calls of `executor.py` or in the parent code.
 Descriptions coming soon. [TODO]
- * `smi2confs.py`: resClash=True, for ...
- * `smi2confs.py`: quickOpt=True, for ...
+ * `initialize_confs.py`: `resolve_clash=True`, for resolving steric clashes
+ * `initialize_confs.py`: `do_opt=True`, for performing quick steepest descent optimization
 
 
 ## V. Some terms and references

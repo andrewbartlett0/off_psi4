@@ -1,4 +1,6 @@
-
+"""
+test_getTurbResults.py
+"""
 # local testing vs. travis testing
 try:
     from quanformer.getTurbResults import *
@@ -21,18 +23,24 @@ import helper
 #    dt = get_time(os.path.join(mydir,'data_tests','cooh','0','1'))
 #    assert dt == 52.0
 
+
 def test_process_turb_out():
-    os.chdir(os.path.join(mydir,'data_tests','cooh','0','1'))
+    os.chdir(os.path.join(mydir, 'data_tests', 'cooh', '0', '1'))
     props = process_turb_out({}, 'opt', True)
     # {'initEnergy': '-227.8160966973', 'finalEnergy': '-227.8233603490', 'numSteps': 8, 'ocEnergy': '-227.8233914412'}
-    assert float(props['initEnergy'])  == pytest.approx(-227.8160966973, 0.00000001)
-    assert float(props['finalEnergy']) == pytest.approx(-227.8233603490, 0.00000001)
-    assert float(props['ocEnergy'])    == pytest.approx(-227.8233914412, 0.00000001)
+    assert float(props['initEnergy']) == pytest.approx(-227.8160966973,
+                                                       0.00000001)
+    assert float(props['finalEnergy']) == pytest.approx(
+        -227.8233603490, 0.00000001)
+    assert float(props['ocEnergy']) == pytest.approx(-227.8233914412,
+                                                     0.00000001)
     assert props['numSteps'] == 8
+
 
 def test_getTurbResults_out_spe():
     # SPE not yet supported
     pass
+
 
 #def test_getTurbResults_out_opt():
 #    # this test is fully valid but will not pass on Travis CI because it
@@ -52,4 +60,3 @@ if 0:
     test_process_turb_out()
     test_getTurbResults_out_spe()
     test_getTurbResults_out_opt()
-

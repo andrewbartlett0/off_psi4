@@ -9,17 +9,17 @@ This file describes and guides the user through various analyses that can be con
 
 ## Comparing sets of geometry optimizations
 
-**`matchMinima.py` prerequisites**
+**`match_minima.py` prerequisites**
  * SDF files for all methods, where each SDF file has all mols and confs for one particular method
  * input text file listing these SDF files and associated level of theory
 
-**`matchMinima.py` output**
+**`match_minima.py` output**
  * .dat file with summarized RMS errors by level of theory (one dat file per reference method)
  * bar plot with conformer averaged wall times for all methods (one plot per molecule)
  * line plot with conformer relative energies for all methods (one plot per molecule)
 
 **`match_plot.py` prerequisites**
- * .dat files from `matchMinima.py` with summarized RMS errors by level of theory (one dat file per reference method)
+ * .dat files from `match_minima.py` with summarized RMS errors by level of theory (one dat file per reference method)
  * input text file listing these .dat files and associated reference level of theory
  * (optional) input file can be a single .dat file if only wanting a single scatter plot
 
@@ -29,7 +29,7 @@ This file describes and guides the user through various analyses that can be con
  * scatter plot of log ratio of relative times vs rmse (one plot per reference method)
 
 **Instructions**
-See README.md file in `examples/matchMinima/` in this repo.
+See README.md file in `examples/match_minima/` in this repo.
 
 
 --------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ This section is closely related to the one above of comparing sets of geometry o
 ## Comparing energies before and after a set of geometry optimizations
 
 **Prerequisites**
- 1. `diffSpeOpt.py` -- [TODO write instructions]
+ 1. `opt_vs_spe.py` -- [TODO write instructions]
 
 **Instructions**
  * TODO

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-
 """
-Purpose:    Generate heat plots, scatter plots, and 3D plots from output of matchMinima.py.
-            This extends analysis capabilities of matchMinima.py, which
+match_plot.py
+
+Purpose:    Generate heat plots, scatter plots, and 3D plots from output of match_minima.py.
+            This extends analysis capabilities of match_minima.py, which
             generates simple bar plots (for average compute times) and
             line plots (for relative conformer energies).
 
@@ -30,57 +31,65 @@ def shift_array(rmsArray):
 
     """
     for i, sublist in enumerate(rmsArray):
-        sublist.insert(i,sublist.pop(0))
+        sublist.insert(i, sublist.pop(0))
     return rmsArray
 
 
-def plot_heat_rmse(molName, rmsArray, ticklabels,ptitle='RMS error (kcal/mol)',fprefix='rmse', colors='PRGn_r'):
+def plot_heat_rmse(molName,
+                   rmsArray,
+                   ticklabels,
+                   ptitle='RMS error (kcal/mol)',
+                   fprefix='rmse',
+                   colors='PRGn_r'):
     """
     """
-    plttitle="%s\n%s" % (ptitle,molName)
+    plttitle = "%s\n%s" % (ptitle, molName)
     figname = "%s_%s.png" % (fprefix, molName)
     x = list(range(len(rmsArray)))
     y = list(range(len(rmsArray)))
 
-    plt.figure(figsize=(10,5))
+    plt.figure(figsize=(10, 5))
 
     ### Tranpose and plot data - imshow swaps x and y
     plt.imshow(np.asarray(rmsArray).T, cmap=colors, origin='lower')
     cbar = plt.colorbar()
 
     ### Label figure. Label xticks before plot for better spacing.
-#    plt.title(plttitle,fontsize=20)
-    plt.xticks(x,ticklabels,fontsize=12,rotation=-40, ha='left')
-    plt.yticks(y,ticklabels,fontsize=14)
-    plt.xlabel("reference",fontsize=14)
-    plt.ylabel("compared",fontsize=16)
+    #    plt.title(plttitle,fontsize=20)
+    plt.xticks(x, ticklabels, fontsize=12, rotation=-40, ha='left')
+    plt.yticks(y, ticklabels, fontsize=14)
+    plt.xlabel("reference", fontsize=14)
+    plt.ylabel("compared", fontsize=16)
     cbar.ax.tick_params(labelsize=14)
 
     ### Save/show plot.
-    plt.savefig(figname,bbox_inches='tight')
-#    plt.show()
+    plt.savefig(figname, bbox_inches='tight')
+    #    plt.show()
     plt.clf()
 
 
-def plot_rmse_time(molName, eneArray, timeArray, ticklabels,fprefix='scatter'):
+def plot_rmse_time(molName, eneArray, timeArray, ticklabels,
+                   fprefix='scatter'):
     """
     """
-    plttitle="RMS error vs. log ratio of wall time\n%s" % molName
+    plttitle = "RMS error vs. log ratio of wall time\n%s" % molName
     figname = "%s_%s.png" % (fprefix, molName)
     colors = mpl.cm.rainbow(np.linspace(0, 1, len(eneArray)))
-    markers = ["x","^","8","d","o","s","*","p","v","<","D","+",">","."]*10
+    markers = [
+        "x", "^", "8", "d", "o", "s", "*", "p", "v", "<", "D", "+", ">", "."
+    ] * 10
 
     # use plt.plot instead of scatter to label each point
-    for i, (x,y) in enumerate(zip(eneArray,timeArray)):
-        plt.scatter(x,y,c=colors[i],marker=markers[i],label=ticklabels[i])
+    for i, (x, y) in enumerate(zip(eneArray, timeArray)):
+        plt.scatter(x, y, c=colors[i], marker=markers[i], label=ticklabels[i])
 
     ### Label figure. Label xticks before plot for better spacing.
-    plt.title(plttitle,fontsize=20)
+    plt.title(plttitle, fontsize=20)
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2)
     #plt.xticks(x,ticklabels,fontsize=12,rotation=-20, ha='left')
     #plt.yticks(y,ticklabels,fontsize=12)
-    plt.xlabel("RMS error (kcal/mol)",fontsize=14)
-    plt.ylabel("log ratio of wall time",fontsize=14)
+    plt.xlabel("RMS error (kcal/mol)", fontsize=14)
+    plt.ylabel("log ratio of wall time", fontsize=14)
 
     ### Edit legend colors. All is one color since each sublist
     # colored by spectrum.
@@ -90,9 +99,9 @@ def plot_rmse_time(molName, eneArray, timeArray, ticklabels,fprefix='scatter'):
         leg.legendHandles[i].set_color(colors[i])
 
     ### Save/show plot.
-    plt.gcf().set_size_inches(8,6)
-    plt.savefig(figname,bbox_inches='tight')
-#    plt.show()
+    plt.gcf().set_size_inches(8, 6)
+    plt.savefig(figname, bbox_inches='tight')
+    #    plt.show()
     plt.clf()
 
 
@@ -120,7 +129,7 @@ def match_plot(args):
             with open(datfile) as f:
                 for line in f:
                     if "RMS error" in line:
-                        rmse = next(itertools.islice(f,1))
+                        rmse = next(itertools.islice(f, 1))
                         rmse = [float(s) for s in rmse.split()[1:]]
                         rmsArray.append(rmse)
                         break
@@ -129,7 +138,7 @@ def match_plot(args):
         # adjust data when dat files have more columns than # of method files were input, identify which index first
         #[l.pop(-1) for l in rmsArray]
 
-        plot_heat_rmse(args.title,rmsArray,thry_list)
+        plot_heat_rmse(args.title, rmsArray, thry_list)
 
     # HEAT PLOT OF TIMES
     if args.theatplot:
@@ -138,8 +147,8 @@ def match_plot(args):
             with open(datfile) as f:
                 for line in f:
                     if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # ratio line via iterator
-                        for j in ravgs:            # get last item of iterator
+                        ravgs = itertools.islice(f, 3)  # ratio line via iter
+                        for j in ravgs:  # get last item of iterator
                             pass
                         ravgs = [float(s) for s in j.split()[1:]]
                         rmsArray.append(ravgs)
@@ -150,7 +159,13 @@ def match_plot(args):
         #[l.pop(-1) for l in rmsArray]
 
         # plot log ratio of wall times
-        plot_heat_rmse(args.title,np.log10(rmsArray),thry_list, ptitle='log ratio of wall times',fprefix='times',colors='seismic')
+        plot_heat_rmse(
+            args.title,
+            np.log10(rmsArray),
+            thry_list,
+            ptitle='log ratio of wall times',
+            fprefix='times',
+            colors='seismic')
         # plot direct ratio of wall times
         #plot_heat_rmse(args.title,rmsArray,thry_list, ptitle='ratio of wall times',fprefix='times')
 
@@ -162,12 +177,12 @@ def match_plot(args):
             with open(datfile) as f:
                 for line in f:
                     if "RMS error" in line:
-                        rmse = next(itertools.islice(f,1))
+                        rmse = next(itertools.islice(f, 1))
                         rmse = [float(s) for s in rmse.split()[1:]]
                         eArray.append(rmse)
                     if "avg time" in line:
-                        ravgs = itertools.islice(f,3) # ratio line via iterator
-                        for j in ravgs:            # get last item of iterator
+                        ravgs = itertools.islice(f, 3)  # ratio line via iter
+                        for j in ravgs:  # get last item of iterator
                             pass
                         ravgs = [float(s) for s in j.split()[1:]]
                         tArray.append(ravgs)
@@ -180,8 +195,14 @@ def match_plot(args):
         #[l.pop(-1) for l in tArray]
 
         for i in range(len(dat_list)):
-#            if i<13: continue
-            plot_rmse_time(args.title,eArray[i],np.log10(tArray[i]),thry_list,fprefix='scatter'+str(i+1))
+            #            if i<13: continue
+            plot_rmse_time(
+                args.title,
+                eArray[i],
+                np.log10(tArray[i]),
+                thry_list,
+                fprefix='scatter' + str(i + 1))
+
 
 def single_scatter(args):
     # SINGLE SCATTER PLOT
@@ -199,12 +220,12 @@ def single_scatter(args):
                 read_thry_list = False
                 pass
             if "RMS error" in line:
-                rmse = next(itertools.islice(f,1))
+                rmse = next(itertools.islice(f, 1))
                 rmse = [float(s) for s in rmse.split()[1:]]
                 eArray.append(rmse)
             if "avg time" in line:
-                ravgs = itertools.islice(f,3) # ratio line via iterator
-                for j in ravgs:            # get last item of iterator
+                ravgs = itertools.islice(f, 3)  # ratio line via iterator
+                for j in ravgs:  # get last item of iterator
                     pass
                 ravgs = [float(s) for s in j.split()[1:]]
                 tArray.append(ravgs)
@@ -215,12 +236,12 @@ def single_scatter(args):
     # delete nan indices; bc must also know which methods to remove from thry_list
     # take [0] bc *Array is list of lists but only has one elem in single_scatter fx
     nanIndices = np.argwhere(np.isnan(eArray[0]))
-    eArray = np.delete(eArray[0],nanIndices)
-    tArray = np.delete(tArray[0],nanIndices)
-    thry_list = np.delete(thry_list,nanIndices)
+    eArray = np.delete(eArray[0], nanIndices)
+    tArray = np.delete(tArray[0], nanIndices)
+    thry_list = np.delete(thry_list, nanIndices)
 
-    plot_rmse_time(args.title,eArray,np.log10(tArray),thry_list,fprefix='scatter')
-
+    plot_rmse_time(
+        args.title, eArray, np.log10(tArray), thry_list, fprefix='scatter')
 
 
 ### ------------------- Parser -------------------
@@ -230,9 +251,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("-i", "--infile", required=True,
-        help=("Input text file with info on dat files (from matchMinima.py) "
+        help=("Input text file with info on dat files (from match_minima.py) "
               "and associated levels of theory. This file is analogous to the "
-              "input file from matchMinima.py except that the files should "
+              "input file from match_minima.py except that the files should "
               "point to the relative energies .dat files instead of to the "
               "molecule SDF files. Also don't need to have True/False for "
               "SPE/OPT. *** The number of entries in this input file MUST MATCH "
@@ -258,8 +279,8 @@ if __name__ == "__main__":
 
     parser.add_argument("--onescatter", action="store_true", default=False,
         help=("Generate single scatter plot from one of the .dat files of "
-              "matchMinima.py. This may be desired when a mol of some method "
-              "failed to optimize. In that case, matchMinima will have a column "
+              "match_minima.py. This may be desired when a mol of some method "
+              "failed to optimize. In that case, match_minima will have a column "
               "of nan's for the RMS errors of that method. Since that method "
               "does not have a .dat file for that mol, heat plots will not "
               "be aligned, and scatter plots will not be accurate unless that "
@@ -272,4 +293,3 @@ if __name__ == "__main__":
         single_scatter(args)
     else:
         match_plot(args)
-

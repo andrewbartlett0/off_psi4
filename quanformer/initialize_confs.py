@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 initialize_confs.py
 
@@ -12,6 +11,8 @@ This script takes a list of smiles (or multi-molecule file) and for each:
 To use this script as an imported module:
 - import initialize_confs
 - initialize_confs.initialize_confs('filename', resolve_clash=True, do_opt=True)
+
+By: Christopher I. Bayly, Victoria T. Lim
 
 """
 

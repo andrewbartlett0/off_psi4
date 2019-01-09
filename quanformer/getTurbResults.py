@@ -18,9 +18,9 @@ import subprocess as sp
 
 # local testing vs. travis testing
 try:
-    import quanformer.procTags as pt
+    import quanformer.proc_tags as pt
 except ModuleNotFoundError:
-    import procTags as pt # VTL temporary bc travis fails to import
+    import proc_tags as pt # VTL temporary bc travis fails to import
 
 ### ------------------- Functions -------------------
 
@@ -201,7 +201,7 @@ def getTurbResults(origsdf, theory, finsdf, calctype='opt', cosmo=False):
 
             # process output and get dictionary results
             props = process_turb_out(props, calctype, cosmo)
-            pt.SetSDTags(conf, props, calctype)
+            pt.set_sd_tags(conf, props, calctype)
             oechem.OEWriteConstMolecule(write_ofs, conf)
     ifs.close()
 
